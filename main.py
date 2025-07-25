@@ -1,6 +1,7 @@
 from flatlib.chart import Chart
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
+from flatlib import const
 
 # ---- User Input ----
 birth_date = '1986/06/25'
@@ -83,3 +84,9 @@ for house_num in range(1, 13):
     else:
         print("  Planets: None")
 
+mercury = chart.get(const.MERCURY)
+
+if mercury.isRetrograde():
+    print("\n⚠️ Mercury is retrograde!")
+
+print(f"Mercury: {mercury.sign} {mercury.signlon:.2f}°, Retrograde: {mercury.isRetrograde()}")
