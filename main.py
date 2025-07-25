@@ -52,6 +52,8 @@ print(f"☀️ Sun: {sun.sign}")
 print(f"🌙 Moon: {moon.sign}")
 print(f"⬆️ Ascendant: {ascendant.sign}")
 
+
+# ---- Planets in Houses ----
 print("\n🏠 HOUSES AND PLANETS:")
 house_names = {
     1: "1st House (Self/Identity)",
