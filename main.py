@@ -2,6 +2,7 @@ from flatlib.chart import Chart
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
 from flatlib import const
+from datetime import datetime
 
 # ---- User Input ----
 birth_date = '1986/06/25'
@@ -11,6 +12,11 @@ timezone_offset = '-04:00'  # e.g. '-05:00' for EST (New York standard time)
 latitude = '40n42'  # New York City (40°42'N)
 longitude = '74w00' # New York City (74°00'W)
 
+
+now = datetime.now()
+current_date = now.strftime('%Y/%m/%d') # Get current date in 'YYYY/MM/DD' format
+current_time = now.strftime('%H:%M')  # Current time in 'HH:MM' format
+
 # Filter for planets only (exclude house cusps, angles, etc.)
 PLANET_NAMES = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto']
 
@@ -18,6 +24,7 @@ PLANET_NAMES = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 
 dt = Datetime(birth_date, birth_time, timezone_offset)
 pos = GeoPos(latitude, longitude)
 chart = Chart(dt, pos)
+today_chart = Chart(Datetime(current_date, current_time, timezone_offset), pos)  # Today's chart for comparison
 
 # ---- Calculate Positions ----
 sun = chart.get('Sun')
@@ -84,7 +91,9 @@ for house_num in range(1, 13):
     else:
         print("  Planets: None")
 
-mercury = chart.get(const.MERCURY)
+
+
+mercury = today_chart.get(const.MERCURY)
 
 if mercury.isRetrograde():
     print("\n⚠️ Mercury is retrograde!")
