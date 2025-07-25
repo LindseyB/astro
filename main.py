@@ -18,7 +18,7 @@ current_date = now.strftime('%Y/%m/%d') # Get current date in 'YYYY/MM/DD' forma
 current_time = now.strftime('%H:%M')  # Current time in 'HH:MM' format
 
 # Filter for planets only (exclude house cusps, angles, etc.)
-PLANET_NAMES = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto']
+PLANET_NAMES = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Chiron']
 
 # ---- Setup ----
 dt = Datetime(birth_date, birth_time, timezone_offset)
