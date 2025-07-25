@@ -3,11 +3,15 @@ from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
 
 # ---- User Input ----
-birth_date = '1990/01/01'
+birth_date = '1986/06/25'
 birth_time = '8:00'  # in 'HH:MM' 24h format
-timezone_offset = '-05:00'  # e.g. '-05:00' for EST (New York standard time)
+# daylight savings time :sob:
+timezone_offset = '-04:00'  # e.g. '-05:00' for EST (New York standard time)
 latitude = '40n42'  # New York City (40°42'N)
 longitude = '74w00' # New York City (74°00'W)
+
+# Filter for planets only (exclude house cusps, angles, etc.)
+PLANET_NAMES = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto']
 
 # ---- Setup ----
 dt = Datetime(birth_date, birth_time, timezone_offset)
@@ -17,25 +21,63 @@ chart = Chart(dt, pos)
 # ---- Calculate Positions ----
 sun = chart.get('Sun')
 moon = chart.get('Moon')
-ascendant = chart.get('Asc')
+ascendant = chart.get('House1')  # Ascendant is the first house
 
-house2 = chart.get('House2')  # Example of getting a house, if needed
+# Get all houses and their objects
+houses = chart.houses
+planets_in_houses = {}
+
+for house in houses:
+    house_number = int(house.id.replace('House', ''))
+    planets_in_houses[house_number] = {
+        'house_obj': house,
+        'planets': []
+    }
+
+    # Get all objects in this house
+    objects_in_house = chart.objects.getObjectsInHouse(house)
+
+    for obj in objects_in_house:
+        if obj.id in PLANET_NAMES:
+            planets_in_houses[house_number]['planets'].append({
+                'name': obj.id,
+                'sign': obj.sign,
+                'object': obj
+            })
 
 
 # ---- Output Results ----
-print (f"☀️ {sun.sign}")
-print (f"🌙 {moon.sign}")
-print (f"⬆️ {ascendant.sign}")
-print (f"🏠 {house2.sign}")
+print("🌟 MAIN SIGNS:")
+print(f"☀️ Sun: {sun.sign}")
+print(f"🌙 Moon: {moon.sign}")
+print(f"⬆️ Ascendant: {ascendant.sign}")
 
-# ---- List Planets in Houses ----
-for house in chart.houses:
-    chart.objects.getObjectsInHouse(house)
-    planets = ""
-    for obj in chart.objects.getObjectsInHouse(house):
-        # I tried (isPlanet, and it counts things like Fortuna, which I don't want)
-        if obj.id in ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto']:
-            planets += f"{obj.id} "
-    if planets:
-        print(f"{house.id}: {house.sign}, {planets.strip()}")
+print("\n🏠 HOUSES AND PLANETS:")
+house_names = {
+    1: "1st House (Self/Identity)",
+    2: "2nd House (Money/Values)",
+    3: "3rd House (Communication)",
+    4: "4th House (Home/Family)",
+    5: "5th House (Creativity/Romance)",
+    6: "6th House (Health/Work)",
+    7: "7th House (Partnerships)",
+    8: "8th House (Transformation)",
+    9: "9th House (Philosophy/Travel)",
+    10: "10th House (Career/Reputation)",
+    11: "11th House (Friends/Hopes)",
+    12: "12th House (Spirituality/Subconscious)"
+}
+
+for house_num in range(1, 13):
+    house_data = planets_in_houses[house_num]
+    house = house_data['house_obj']
+    print(f"\n{house_names[house_num]}:")
+    print(f"  Sign: {house.sign}")
+
+    if house_data['planets']:
+        print("  Planets:")
+        for planet_info in house_data['planets']:
+            print(f"    • {planet_info['name']}: {planet_info['sign']}")
+    else:
+        print("  Planets: None")
 
