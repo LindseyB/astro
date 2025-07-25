@@ -56,18 +56,18 @@ print(f"⬆️ Ascendant: {ascendant.sign}")
 # ---- Planets in Houses ----
 print("\n🏠 HOUSES AND PLANETS:")
 house_names = {
-    1: "1st House (Self/Identity)",
-    2: "2nd House (Money/Values)",
-    3: "3rd House (Communication)",
-    4: "4th House (Home/Family)",
-    5: "5th House (Creativity/Romance)",
-    6: "6th House (Health/Work)",
-    7: "7th House (Partnerships)",
-    8: "8th House (Transformation)",
-    9: "9th House (Philosophy/Travel)",
-    10: "10th House (Career/Reputation)",
-    11: "11th House (Friends/Hopes)",
-    12: "12th House (Spirituality/Subconscious)"
+    1: "1st House (Self/Identity) 🪞",
+    2: "2nd House (Money/Values) 💰",
+    3: "3rd House (Communication) 💬",
+    4: "4th House (Home/Family) 🏡",
+    5: "5th House (Creativity/Romance) 🎨",
+    6: "6th House (Health/Work) 🧑‍💼",
+    7: "7th House (Partnerships) 🤝",
+    8: "8th House (Transformation) 🔄",
+    9: "9th House (Philosophy/Travel) 🌍",
+    10: "10th House (Career/Reputation) 🏆",
+    11: "11th House (Friends/Hopes) 👥",
+    12: "12th House (Spirituality/Subconscious) 🔮"
 }
 
 for house_num in range(1, 13):
