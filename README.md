@@ -66,4 +66,5 @@
     • Mercury: Cancer
 
 ⚠️ Mercury is retrograde!
+Mercury in Leo 13.42°, Retrograde: True
 ```
