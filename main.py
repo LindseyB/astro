@@ -98,4 +98,4 @@ mercury = today_chart.get(const.MERCURY)
 if mercury.isRetrograde():
     print("\n⚠️ Mercury is retrograde!")
 
-print(f"Mercury: {mercury.sign} {mercury.signlon:.2f}°, Retrograde: {mercury.isRetrograde()}")
+print(f"Mercury in {mercury.sign} {mercury.signlon:.2f}°, Retrograde: {mercury.isRetrograde()}")
