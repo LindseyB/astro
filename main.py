@@ -154,28 +154,38 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
         12: "12th House (Spirituality/Subconscious) 🔮"
     }
 
-    response = client.chat.completions.create(
-    messages=[
-        {
-            "role": "system",
-            "content": "You are a zoomer astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly.",
-        },
-        {
-            "role": "user",
-            "content": "Only respond in a few sentences. Based on the following astrological chart data  please recommend some activities to do or not to do ideally in bullet format:\n\n" +
-                      f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n" +
-                      "Planets in Houses:\n" +
-                      "\n".join([f"{house_names[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" +
-                      "Current Planets status:\n" +
-                      format_planets_for_api(current_planets)
-        }
-    ],
-        temperature=1.0,
-        top_p=1.0,
-        model=model
-    )
-
-    astrology_analysis = response.choices[0].message.content
+    # Generate AI analysis with error handling
+    try:
+        response = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a zoomer astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly.",
+                },
+                {
+                    "role": "user",
+                    "content": "Only respond in a few sentences. Based on the following astrological chart data please recommend some activities to do or not to do ideally in bullet format the first sentence in your response should be what today's vibe will be like:\n\n" +
+                              f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n" +
+                              "Planets in Houses:\n" +
+                              "\n".join([f"{house_names[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" +
+                              "Current Planets status:\n" +
+                              format_planets_for_api(current_planets)
+                }
+            ],
+            temperature=1.0,
+            top_p=1.0,
+            model=model,
+            timeout=30  # 30 second timeout
+        )
+        
+        astrology_analysis = response.choices[0].message.content
+        
+    except Exception as e:
+        # Handle various API errors gracefully
+        error_type = type(e).__name__
+        print(f"AI Analysis Error ({error_type}): {str(e)}")
+    
+        astrology_analysis = f"**Cosmic Note:** The AI astrologer is taking a cosmic coffee break. ☕ Trust your intuition today! 🔮"
 
 
     return {
