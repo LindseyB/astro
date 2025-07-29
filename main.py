@@ -4,11 +4,51 @@ from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
 from flatlib import const
 from datetime import datetime
+import os
+from openai import OpenAI
 
 app = Flask(__name__)
 
+# Client setup for OpenAI API
+token = os.environ["GITHUB_TOKEN"]
+endpoint = "https://models.github.ai/inference"
+model = "openai/gpt-4.1"
+client = OpenAI(
+    base_url=endpoint,
+    api_key=token,
+)
+
 # Filter for planets only (exclude house cusps, angles, etc.)
 PLANET_NAMES = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Chiron']
+
+def format_planets_for_api(current_planets):
+    """Format current planetary positions as a string for LLM analysis"""
+    planet_strings = []
+    retrograde_planets = []
+    
+    for planet_name, planet_data in current_planets.items():
+        # Format basic position
+        position_str = f"{planet_name} in {planet_data['sign']} at {planet_data['degree']:.2f} degrees"
+        
+        # Add retrograde status
+        if planet_data['retrograde']:
+            position_str += " (RETROGRADE)"
+            retrograde_planets.append(planet_name)
+        else:
+            position_str += " (direct)"
+            
+        planet_strings.append(position_str)
+    
+    # Create the complete string
+    result = "CURRENT PLANETARY POSITIONS:\n"
+    result += "\n".join(planet_strings)
+    
+    if retrograde_planets:
+        result += f"\n\nRETROGRADE PLANETS: {', '.join(retrograde_planets)}"
+    else:
+        result += "\n\nNo planets are currently retrograde."
+    
+    return result
 
 def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude):
     """Calculate astrological chart data"""
@@ -105,13 +145,38 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
         12: "12th House (Spirituality/Subconscious) 🔮"
     }
 
+    response = client.chat.completions.create(
+    messages=[
+        {
+            "role": "system",
+            "content": "You are a zoomer astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly.",
+        },
+        {
+            "role": "user",
+            "content": "Only respond in a few sentences. Based on the following astrological chart data  please recommend some activities to do or not to do:\n\n" +
+                      f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n" +
+                      "Planets in Houses:\n" +
+                      "\n".join([f"{house_names[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" +
+                      "Current Planets status:\n" +
+                      format_planets_for_api(current_planets)
+        }
+    ],
+        temperature=1.0,
+        top_p=1.0,
+        model=model
+    )
+
+    astrology_analysis = response.choices[0].message.content
+
+
     return {
         'sun': sun.sign,
         'moon': moon.sign,
         'ascendant': ascendant.sign,
         'planets_in_houses': planets_in_houses,
         'house_names': house_names,
-        'current_planets': current_planets
+        'mercury_retrograde': current_planets.get('Mercury', {}).get('retrograde', False),
+        'astrology_analysis': astrology_analysis
     }
 
 @app.route('/')

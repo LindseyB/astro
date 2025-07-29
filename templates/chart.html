@@ -3,6 +3,14 @@
 {% block content %}
 <h1>🌟 Your Astrological Chart</h1>
 
+<!-- AI Astrology Analysis Section -->
+<div class="analysis-section">
+    <h2>🔮 Your Cosmic Vibe Check</h2>
+    <div class="analysis-content">
+        {{ chart_data.astrology_analysis | replace('\n', '<br>') | safe }}
+    </div>
+</div>
+
 <div class="chart-section">
     <h2>Main Signs</h2>
     <div class="main-signs">
@@ -47,32 +55,10 @@
 </div>
 
 <div class="chart-section">
-    <h2>📡 Current Planetary Positions</h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-        {% for planet_name, planet_data in chart_data.current_planets.items() %}
-            <div class="planet-status {{ 'planet-retrograde' if planet_data.retrograde else 'planet-direct' }}">
-                <h4>{{ planet_name }}</h4>
-                <div><strong>{{ planet_data.sign }}</strong> {{ "%.2f"|format(planet_data.degree) }}°</div>
-                {% if planet_data.retrograde %}
-                    <div class="retrograde-indicator">⚠️ Retrograde</div>
-                {% else %}
-                    <div class="direct-indicator">✅ Direct</div>
-                {% endif %}
-            </div>
-        {% endfor %}
-    </div>
-    
-    {% set retrograde_planets = chart_data.current_planets.items() | selectattr('1.retrograde') | list %}
-    {% if retrograde_planets %}
-        <div class="retrograde-summary">
-            <h4>⚠️ Currently Retrograde Planets:</h4>
-            {% for planet_name, planet_data in retrograde_planets %}
-                <span class="retrograde-tag">{{ planet_name }}</span>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="no-retrograde">
-            <h4>✅ No planets are currently retrograde!</h4>
+    <!-- Mercury Retrograde Warning (if applicable) -->
+    {% if chart_data.mercury_retrograde %}
+        <div class="mercury-status mercury-retrograde">
+            ⚠️ Mercury is currently retrograde!
         </div>
     {% endif %}
 </div>
