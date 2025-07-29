@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>❌ Error</h1>
+
+<div class="error">
+    <h3>Something went wrong while calculating your chart:</h3>
+    <p><strong>{{ error }}</strong></p>
+    
+    <h4>Common issues:</h4>
+    <ul>
+        <li>Check your date format (should be YYYY-MM-DD)</li>
+        <li>Verify timezone format (+/-HH:MM, e.g., -05:00)</li>
+        <li>Confirm latitude format (e.g., 40n42 for North, 40s42 for South)</li>
+        <li>Confirm longitude format (e.g., 74w00 for West, 74e00 for East)</li>
+    </ul>
+</div>
+
+<a href="/" class="back-link">← Try Again</a>
+{% endblock %}

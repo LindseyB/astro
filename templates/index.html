@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>🌟 Astrology Chart Calculator</h1>
+<p style="text-align: center; color: #666;">Enter your birth information to generate your natal chart</p>
+
+<form action="/chart" method="POST">
+    <div class="form-group">
+        <label for="birth_date">Birth Date:</label>
+        <input type="date" id="birth_date" name="birth_date" required 
+               value="1986-06-25">
+    </div>
+    
+    <div class="form-group">
+        <label for="birth_time">Birth Time (24-hour format):</label>
+        <input type="time" id="birth_time" name="birth_time" required 
+               value="08:00">
+    </div>
+    
+    <div class="form-group">
+        <label for="timezone_offset">Timezone Offset (e.g., -04:00 for EDT, -05:00 for EST):</label>
+        <input type="text" id="timezone_offset" name="timezone_offset" required 
+               placeholder="-04:00" value="-04:00" pattern="[+-]\d{2}:\d{2}">
+        <small style="color: #666;">Format: +/-HH:MM (include daylight savings adjustment)</small>
+    </div>
+    
+    <div class="form-group">
+        <label for="latitude">Latitude (e.g., 40n42 for 40°42'N):</label>
+        <input type="text" id="latitude" name="latitude" required 
+               placeholder="40n42" value="40n42">
+        <small style="color: #666;">Format: DDnMM for North, DDsM for South</small>
+    </div>
+    
+    <div class="form-group">
+        <label for="longitude">Longitude (e.g., 74w00 for 74°00'W):</label>
+        <input type="text" id="longitude" name="longitude" required 
+               placeholder="74w00" value="74w00">
+        <small style="color: #666;">Format: DDwMM for West, DDeMM for East</small>
+    </div>
+    
+    <button type="submit">Generate Chart 🔮</button>
+</form>
+
+<div style="margin-top: 30px; padding: 20px; background: #f7fafc; border-radius: 10px;">
+    <h3>📍 Location Help</h3>
+    <p><strong>Common Cities:</strong></p>
+    <ul>
+        <li><strong>New York City:</strong> 40n42, 74w00, -05:00 (EST) / -04:00 (EDT)</li>
+        <li><strong>Los Angeles:</strong> 34n03, 118w15, -08:00 (PST) / -07:00 (PDT)</li>
+        <li><strong>London:</strong> 51n30, 0w10, +00:00 (GMT) / +01:00 (BST)</li>
+        <li><strong>Paris:</strong> 48n52, 2e20, +01:00 (CET) / +02:00 (CEST)</li>
+    </ul>
+    <p><small>💡 You can find your exact coordinates and timezone on Google Maps or timeanddate.com</small></p>
+</div>
+{% endblock %}
