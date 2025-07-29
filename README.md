@@ -1,14 +1,14 @@
 # Astro Chart Calculator
 
-A web-based astrological chart calculator built with Flask and Flatlib.
+A web-based astrological horoscope for only the chillest of humans
 
 ## Features
 
 - 🌟 Calculate natal charts with Sun, Moon, and Ascendant signs
-- � Display planets in all 12 houses
 - 📡 Check current Mercury retrograde status
 - 🌐 Web interface for easy input and viewing
 - 📱 Responsive design
+- 🔮 Gives you an amazing horoscope
 
 ## Installation
 
@@ -22,21 +22,7 @@ pip install -r requirements.txt
 python run.py
 ```
 
-3. Open your browser to: http://localhost:5000
-
-## Usage
-
-1. Enter your birth information:
-   - Birth date and time
-   - Timezone offset (include daylight savings)
-   - Latitude and longitude of birth location
-
-2. Click "Generate Chart" to see your natal chart
-
-3. View your:
-   - Main signs (Sun, Moon, Ascendant)
-   - Planets in houses
-   - Current Mercury retrograde status
+3. Open your browser to: http://localhost:8080
 
 ## Location Format Examples
 
