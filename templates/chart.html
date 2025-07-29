@@ -4,18 +4,18 @@
 <!-- Sparkle Animation Container -->
 <div class="sparkle-container" id="sparkleContainer"></div>
 
-<h1>🌟 <i>Your Astrological Chart</i></h1>
+<h1>🌟 <i>Astro Horoscope</i></h1>
 
 <!-- AI Astrology Analysis Section -->
 <div class="analysis-section">
     <h2>🔮 <i>Your Cosmic Vibe Check</i></h2>
     <div class="analysis-content">
-        {{ chart_data.astrology_analysis | replace('\n', '<br>') | safe }}
+        {{ chart_data.astrology_analysis | markdown | safe }}
     </div>
 </div>
 
 <div class="chart-section">
-    <h2>Main Signs</h2>
+    <h2><i>Your Main Signs</i></h2>
     <div class="main-signs">
         <div class="sign-card">
             <h3>☀️ Sun Sign</h3>
@@ -44,5 +44,5 @@
     {% endif %}
 </div>
 
-<a href="/" class="back-link">← Calculate Another Chart</a>
+<a href="/" class="back-link">← Get another horoscope</a>
 {% endblock %}

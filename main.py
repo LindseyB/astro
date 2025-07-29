@@ -6,8 +6,17 @@ from flatlib import const
 from datetime import datetime
 import os
 from openai import OpenAI
+import markdown
 
 app = Flask(__name__)
+
+# Add markdown filter to convert markdown to HTML
+@app.template_filter('markdown')
+def markdown_filter(text):
+    """Convert markdown text to HTML"""
+    if not text:
+        return ""
+    return markdown.markdown(text, extensions=['nl2br'])
 
 # Client setup for OpenAI API
 token = os.environ["GITHUB_TOKEN"]
@@ -153,7 +162,7 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
         },
         {
             "role": "user",
-            "content": "Only respond in a few sentences. Based on the following astrological chart data  please recommend some activities to do or not to do:\n\n" +
+            "content": "Only respond in a few sentences. Based on the following astrological chart data  please recommend some activities to do or not to do ideally in bullet format:\n\n" +
                       f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n" +
                       "Planets in Houses:\n" +
                       "\n".join([f"{house_names[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" +
