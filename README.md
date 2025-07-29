@@ -36,3 +36,22 @@ python run.py
 - **Los Angeles:** 34n03, 118w15, -08:00 (PST) / -07:00 (PDT)
 - **London:** 51n30, 0w10, +00:00 (GMT) / +01:00 (BST)
 - **Paris:** 48n52, 2e20, +01:00 (CET) / +02:00 (CEST)
+
+## Example horoscope response 
+
+```
+Today's vibe: A little moody but social—balance between wanting cozy Cancer comfort and craving fresh Aquarius perspectives. 🌊🌬️
+
+Do:
+- Reconnect with old friends or join an online community 💻👯
+- Declutter your space for emotional reset 🧹
+- Journal your feelings and future dreams 📓✨
+- Try creative self-expression (art, writing, music, etc.) 🎨🎶
+
+Don't:
+- Avoid starting big new projects (Mercury retrograde = confusion) 🚫⚙️
+- Don't ignore intuition—trust your inner voice 🧠💡
+- Don't get stuck obsessing over past mistakes or home drama 🚩
+
+Chill, reflect, and socialize—just don't overthink it! 😊
+```
