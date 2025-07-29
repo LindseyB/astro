@@ -19,8 +19,8 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
     # Setup chart
     dt = Datetime(birth_date, birth_time, timezone_offset)
     pos = GeoPos(latitude, longitude)
-    chart = Chart(dt, pos)
-    today_chart = Chart(Datetime(current_date, current_time, timezone_offset), pos)
+    chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
+    today_chart = Chart(Datetime(current_date, current_time, timezone_offset), pos, IDs=const.LIST_OBJECTS)
 
     # Calculate main positions
     sun = chart.get('Sun')
@@ -49,9 +49,46 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
                     'object': obj
                 })
 
-    # Mercury retrograde check
-    mercury = today_chart.get(const.MERCURY)
-    mercury_retrograde = mercury.isRetrograde()
+    # Get all current planet statuses
+    current_planets = {}
+    planet_constants = {
+        'Sun': const.SUN,
+        'Moon': const.MOON,
+        'Mercury': const.MERCURY,
+        'Venus': const.VENUS,
+        'Mars': const.MARS,
+        'Jupiter': const.JUPITER,
+        'Saturn': const.SATURN,
+        'Uranus': const.URANUS,
+        'Neptune': const.NEPTUNE,
+        'Pluto': const.PLUTO,
+        'Chiron': const.CHIRON
+    }
+    
+    for planet_name, planet_const in planet_constants.items():
+        try:
+            planet_obj = today_chart.get(planet_const)
+            # Check if planet object exists and has the required attributes
+            if planet_obj and hasattr(planet_obj, 'sign') and hasattr(planet_obj, 'signlon'):
+                retrograde = False
+                
+                # Sun and Moon don't go retrograde
+                if planet_name not in ['Sun', 'Moon']:
+                    if hasattr(planet_obj, 'isRetrograde'):
+                        try:
+                            retrograde = planet_obj.isRetrograde()
+                        except:
+                            retrograde = False
+                
+                current_planets[planet_name] = {
+                    'sign': planet_obj.sign,
+                    'degree': float(planet_obj.signlon),
+                    'retrograde': retrograde
+                }
+        except Exception as e:
+            # Skip planets that cause errors but continue with others
+            print(f"Warning: Could not get data for {planet_name}: {e}")
+            continue
 
     house_names = {
         1: "1st House (Self/Identity) 🪞",
@@ -74,11 +111,7 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
         'ascendant': ascendant.sign,
         'planets_in_houses': planets_in_houses,
         'house_names': house_names,
-        'mercury': {
-            'sign': mercury.sign,
-            'degree': mercury.signlon,
-            'retrograde': mercury_retrograde
-        }
+        'current_planets': current_planets
     }
 
 @app.route('/')
