@@ -55,3 +55,9 @@ Don't:
 
 Chill, reflect, and socialize—just don't overthink it! 😊
 ```
+
+## Screenshot
+
+<div align="center">
+  <img src="images/screenshot.png" alt="Astro Horoscope Screenshot showing an example horoscope with the three main signs" width="200">
+</div>
