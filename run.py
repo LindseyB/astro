@@ -6,7 +6,11 @@ Run this script to start the web server
 
 if __name__ == '__main__':
     from main import app
+    import os
+
+    port = int(os.environ.get("PORT", 3001))
+
     print("🌟 Starting Astro Chart Calculator...")
-    print("📍 Open your browser to: http://localhost:8080")
+    print(f"📍 Open your browser to: http://localhost:{port}")
     print("⏹️  Press Ctrl+C to stop the server")
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=True)

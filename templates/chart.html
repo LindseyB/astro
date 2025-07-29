@@ -33,28 +33,6 @@
 </div>
 
 <div class="chart-section">
-    <h2>🏠 Houses and Planets</h2>
-    {% for house_num in range(1, 13) %}
-        {% set house_data = chart_data.planets_in_houses[house_num] %}
-        <div class="house-item">
-            <div class="house-title">{{ chart_data.house_names[house_num] }}</div>
-            <div style="margin: 8px 0;"><strong>Sign:</strong> {{ house_data.house_obj.sign }}</div>
-            
-            {% if house_data.planets %}
-                <div><strong>Planets:</strong></div>
-                <div class="planet-list">
-                    {% for planet in house_data.planets %}
-                        <div class="planet-item">• {{ planet.name }}: {{ planet.sign }}</div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div style="color: #666; font-style: italic;">No planets in this house</div>
-            {% endif %}
-        </div>
-    {% endfor %}
-</div>
-
-<div class="chart-section">
     <!-- Mercury Retrograde Warning (if applicable) -->
     {% if chart_data.mercury_retrograde %}
         <div class="mercury-status mercury-retrograde">

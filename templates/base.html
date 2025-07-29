@@ -94,24 +94,6 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .house-item {
-            margin: 15px 0;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
-        
-        .house-title {
-            font-weight: bold;
-            color: #2d3748;
-            margin-bottom: 8px;
-        }
-        
-        .planet-list {
-            margin-left: 20px;
-        }
-        
         .planet-item {
             margin: 5px 0;
             color: #4a5568;
@@ -123,107 +105,6 @@
             border-radius: 8px;
             text-align: center;
             font-weight: bold;
-        }
-        
-        .planet-status {
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            border: 2px solid;
-        }
-        
-        .planet-direct {
-            background: #c6f6d5;
-            color: #22543d;
-            border-color: #68d391;
-        }
-        
-        .planet-retrograde {
-            background: #fed7d7;
-            color: #c53030;
-            border-color: #fc8181;
-        }
-        
-        .retrograde-summary {
-            margin-top: 20px;
-            padding: 15px;
-            background: #fed7d7;
-            border-radius: 8px;
-            border: 2px solid #fc8181;
-            text-align: center;
-        }
-        
-        .retrograde-tag {
-            display: inline-block;
-            background: #c53030;
-            color: white;
-            padding: 5px 10px;
-            margin: 5px;
-            border-radius: 15px;
-            font-size: 14px;
-        }
-        
-        .no-retrograde {
-            margin-top: 20px;
-            padding: 15px;
-            background: #c6f6d5;
-            border-radius: 8px;
-            border: 2px solid #68d391;
-            text-align: center;
-            color: #22543d;
-        }
-        
-        .retrograde-indicator {
-            color: #c53030;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-        
-        .direct-indicator {
-            color: #22543d;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-        
-        .llm-string-section {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f7fafc;
-            border-radius: 10px;
-            border-left: 5px solid #667eea;
-        }
-        
-        .llm-string-display {
-            width: 100%;
-            height: 200px;
-            padding: 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            background: white;
-            color: #2d3748;
-            resize: vertical;
-            margin: 10px 0;
-        }
-        
-        .copy-button {
-            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            width: auto;
-            margin-top: 0;
-        }
-        
-        .copy-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
         }
         
         .mercury-retrograde {
@@ -309,25 +190,6 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
     </style>
-    <script>
-        function copyToClipboard() {
-            const textarea = document.querySelector('.llm-string-display');
-            textarea.select();
-            textarea.setSelectionRange(0, 99999); // For mobile devices
-            
-            try {
-                document.execCommand('copy');
-                const button = document.querySelector('.copy-button');
-                const originalText = button.textContent;
-                button.textContent = '✅ Copied!';
-                setTimeout(() => {
-                    button.textContent = originalText;
-                }, 2000);
-            } catch (err) {
-                console.error('Failed to copy text: ', err);
-            }
-        }
-    </script>
 </head>
 <body>
     <div class="container">

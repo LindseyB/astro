@@ -173,8 +173,6 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
         'sun': sun.sign,
         'moon': moon.sign,
         'ascendant': ascendant.sign,
-        'planets_in_houses': planets_in_houses,
-        'house_names': house_names,
         'mercury_retrograde': current_planets.get('Mercury', {}).get('retrograde', False),
         'astrology_analysis': astrology_analysis
     }
