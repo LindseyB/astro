@@ -1,4 +1,10 @@
-# Astro Chart Calculator
+# Astro Horoscope
+
+<div align="center">
+  <img src="images/logo.png" alt="Astro Horoscope Logo" width="200">
+</div>
+
+## Your cosmic vibe check
 
 A web-based astrological horoscope for only the chillest of humans
 
