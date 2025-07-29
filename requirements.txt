@@ -1,4 +1,5 @@
-flatlib
+flatlib==0.5.2
 flask
 openai
 gunicorn
+markdown
