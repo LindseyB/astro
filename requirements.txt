@@ -1,3 +1,4 @@
+pyswisseph
 flatlib
 flask
 openai
