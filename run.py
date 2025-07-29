@@ -8,7 +8,7 @@ if __name__ == '__main__':
     from main import app
     import os
 
-    port = int(os.environ.get("PORT", 3001))
+    port = int(os.environ.get("PORT", 8080))
 
     print("🌟 Starting Astro Chart Calculator...")
     print(f"📍 Open your browser to: http://localhost:{port}")

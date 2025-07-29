@@ -1,11 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>🌟 Your Astrological Chart</h1>
+<!-- Sparkle Animation Container -->
+<div class="sparkle-container" id="sparkleContainer"></div>
+
+<h1>🌟 <i>Your Astrological Chart</i></h1>
 
 <!-- AI Astrology Analysis Section -->
 <div class="analysis-section">
-    <h2>🔮 Your Cosmic Vibe Check</h2>
+    <h2>🔮 <i>Your Cosmic Vibe Check</i></h2>
     <div class="analysis-content">
         {{ chart_data.astrology_analysis | replace('\n', '<br>') | safe }}
     </div>
