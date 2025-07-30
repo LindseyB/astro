@@ -156,6 +156,19 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
 
     # Generate AI analysis with error handling
     try:
+        # Build the user prompt
+        user_prompt = "Only respond in a few sentences. Based on the following astrological chart data please recommend some activities to do or not to do ideally in bullet format the first sentence in your response should be what today's vibe will be like please also recommend a single song to listen to:\n\n" + \
+                      f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n" + \
+                      "Planets in Houses:\n" + \
+                      "\n".join([f"{house_names[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" + \
+                      "Current Planets status:\n" + \
+                      format_planets_for_api(current_planets)
+        
+        # Log the prompt to console
+        print("=== USER PROMPT ===")
+        print(user_prompt)
+        print("=== END PROMPT ===")
+        
         response = client.chat.completions.create(
             messages=[
                 {
@@ -164,12 +177,7 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
                 },
                 {
                     "role": "user",
-                    "content": "Only respond in a few sentences. Based on the following astrological chart data please recommend some activities to do or not to do ideally in bullet format the first sentence in your response should be what today's vibe will be like:\n\n" +
-                              f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n" +
-                              "Planets in Houses:\n" +
-                              "\n".join([f"{house_names[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" +
-                              "Current Planets status:\n" +
-                              format_planets_for_api(current_planets)
+                    "content": user_prompt
                 }
             ],
             temperature=1.0,
