@@ -13,7 +13,6 @@ app = Flask(__name__)
 # Add markdown filter to convert markdown to HTML
 @app.template_filter('markdown')
 def markdown_filter(text):
-    """Convert markdown text to HTML"""
     if not text:
         return ""
     return markdown.markdown(text, extensions=['nl2br'])
@@ -31,7 +30,6 @@ client = OpenAI(
 PLANET_NAMES = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Chiron']
 
 def format_planets_for_api(current_planets):
-    """Format current planetary positions as a string for LLM analysis"""
     planet_strings = []
     retrograde_planets = []
     
@@ -60,7 +58,6 @@ def format_planets_for_api(current_planets):
     return result
 
 def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude):
-    """Calculate astrological chart data"""
     now = datetime.now()
     current_date = now.strftime('%Y/%m/%d')
     current_time = now.strftime('%H:%M')

@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     port = int(os.environ.get("PORT", 8080))
 
-    print("🌟 Starting Astro Chart Calculator...")
+    print("🌟 Starting Astro Horoscope...")
     print(f"📍 Open your browser to: http://localhost:{port}")
     print("⏹️  Press Ctrl+C to stop the server")
     app.run(host='0.0.0.0', port=port, debug=True)
