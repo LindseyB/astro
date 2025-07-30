@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Your Complete Natal Chart - Astro Horoscope{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
+{% endblock %}
+
+{% block og_title %}{{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆ - Complete Natal Chart{% endblock %}
+{% block og_description %}Comprehensive astrological natal chart with all planets, houses, and aspects for {{ chart_data.sun }} sun, {{ chart_data.moon }} moon, and {{ chart_data.ascendant }} rising. ✨🌟{% endblock %}
+
+{% block twitter_title %}My Complete Natal Chart: {{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆{% endblock %}
+{% block twitter_description %}Check out my complete astrological natal chart with all planets, houses, and aspects! ✨🌟⭐{% endblock %}
+
+{% block meta_description %}Complete natal chart showing all planets, houses, and aspects for {{ chart_data.sun }} sun sign, {{ chart_data.moon }} moon sign, and {{ chart_data.ascendant }} rising sign.{% endblock %}
+
+{% block content %}
+<!-- Sparkle Animation Container -->
+<div class="sparkle-container" id="sparkleContainer"></div>
+
+<h1>🌟 <i>Your Complete Natal Chart</i></h1>
+
+<!-- AI Astrology Analysis Section -->
+<div class="analysis-section" 
+     data-sun="{{ chart_data.sun }}" 
+     data-moon="{{ chart_data.moon }}" 
+     data-ascendant="{{ chart_data.ascendant }}">
+    <h2>🔮 <i>Your Complete Chart Analysis</i></h2>
+    <div class="analysis-content" id="analysisContent">
+        {{ chart_data.astrology_analysis | markdown | safe }}
+    </div>
+    <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()" title="Copy your chart analysis">
+        📋
+    </button>
+</div>
+
+<!-- Main Signs -->
+<div class="chart-section">
+    <h2><i>Your Main Signs</i></h2>
+    <div class="main-signs">
+        <div class="sign-card">
+            <h3>☀️ Sun Sign</h3>
+            <p><strong>{{ chart_data.sun }}</strong></p>
+            <small>Your core identity</small>
+        </div>
+        <div class="sign-card">
+            <h3>🌙 Moon Sign</h3>
+            <p><strong>{{ chart_data.moon }}</strong></p>
+            <small>Your emotional nature</small>
+        </div>
+        <div class="sign-card">
+            <h3>⬆️ Ascendant</h3>
+            <p><strong>{{ chart_data.ascendant }}</strong></p>
+            <small>Your outer personality</small>
+        </div>
+    </div>
+</div>
+
+<!-- All Planets -->
+<div class="chart-section">
+    <h2>🪐 <i>All Planets</i></h2>
+    <div class="planets-grid">
+        {% for planet_name, planet_data in chart_data.planets.items() %}
+        <div class="planet-card">
+            <h4>
+                {% if planet_name == 'Sun' %}☀️
+                {% elif planet_name == 'Moon' %}🌙
+                {% elif planet_name == 'Mercury' %}☿️
+                {% elif planet_name == 'Venus' %}♀️
+                {% elif planet_name == 'Mars' %}♂️
+                {% elif planet_name == 'Jupiter' %}♃
+                {% elif planet_name == 'Saturn' %}♄
+                {% elif planet_name == 'Uranus' %}♅
+                {% elif planet_name == 'Neptune' %}♆
+                {% elif planet_name == 'Pluto' %}♇
+                {% elif planet_name == 'Chiron' %}⚷
+                {% endif %}
+                {{ planet_name }}
+            </h4>
+            <p><strong>{{ planet_data.sign }}</strong></p>
+            <small>{{ planet_data.degree|round(2) }}°</small>
+            {% if planet_data.house %}
+            <small class="house-info">House {{ planet_data.house }}</small>
+            {% endif %}
+            <div class="planet-description">
+                {% if planet_name == 'Sun' %}Your core identity, ego, and life purpose. Represents your conscious will and vitality.
+                {% elif planet_name == 'Moon' %}Your emotions, instincts, and subconscious patterns. How you nurture and need to be nurtured.
+                {% elif planet_name == 'Mercury' %}Communication, thinking, and learning style. How you process and share information.
+                {% elif planet_name == 'Venus' %}Love, beauty, relationships, and values. What you find attractive and how you show affection.
+                {% elif planet_name == 'Mars' %}Energy, passion, drive, and how you take action. Your assertiveness and sexual energy.
+                {% elif planet_name == 'Jupiter' %}Growth, expansion, luck, and wisdom. Your beliefs, optimism, and opportunities for abundance.
+                {% elif planet_name == 'Saturn' %}Discipline, responsibility, and life lessons. Challenges that lead to mastery and maturity.
+                {% elif planet_name == 'Uranus' %}Innovation, rebellion, and sudden changes. Your uniqueness and desire for freedom.
+                {% elif planet_name == 'Neptune' %}Dreams, intuition, and spirituality. Your imagination, compassion, and connection to the divine.
+                {% elif planet_name == 'Pluto' %}Transformation, power, and regeneration. Deep psychological changes and hidden resources.
+                {% elif planet_name == 'Chiron' %}The wounded healer. Past wounds that become sources of wisdom and healing for others.
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Houses -->
+<div class="chart-section">
+    <h2>🏠 <i>Houses</i></h2>
+    <div class="houses-grid">
+        {% for house_number in range(1, 13) %}
+        {% set house_data = chart_data.houses[house_number] %}
+        <div class="house-card">
+            <h4>
+                {% if house_number == 1 %}🪞
+                {% elif house_number == 2 %}💰
+                {% elif house_number == 3 %}💬
+                {% elif house_number == 4 %}🏡
+                {% elif house_number == 5 %}🎨
+                {% elif house_number == 6 %}🧑‍💼
+                {% elif house_number == 7 %}🤝
+                {% elif house_number == 8 %}🔄
+                {% elif house_number == 9 %}🌍
+                {% elif house_number == 10 %}🏆
+                {% elif house_number == 11 %}👥
+                {% elif house_number == 12 %}🔮
+                {% endif %}
+                {{ house_number }}{{ 'st' if house_number == 1 else 'nd' if house_number == 2 else 'rd' if house_number == 3 else 'th' }} House
+            </h4>
+            <div class="house-title">
+                {% if house_number == 1 %}<strong>Self & Identity</strong>
+                {% elif house_number == 2 %}<strong>Money & Values</strong>
+                {% elif house_number == 3 %}<strong>Communication</strong>
+                {% elif house_number == 4 %}<strong>Home & Family</strong>
+                {% elif house_number == 5 %}<strong>Creativity & Romance</strong>
+                {% elif house_number == 6 %}<strong>Health & Work</strong>
+                {% elif house_number == 7 %}<strong>Partnerships</strong>
+                {% elif house_number == 8 %}<strong>Transformation</strong>
+                {% elif house_number == 9 %}<strong>Philosophy & Travel</strong>
+                {% elif house_number == 10 %}<strong>Career & Reputation</strong>
+                {% elif house_number == 11 %}<strong>Friends & Hopes</strong>
+                {% elif house_number == 12 %}<strong>Spirituality & Subconscious</strong>
+                {% endif %}
+            </div>
+
+            <p><strong>{{ house_data.sign }}</strong></p>
+            <small>{{ house_data.degree|round(2) }}°</small>
+            {% if house_data.planets %}
+            <div class="house-planets">
+                {% for planet in house_data.planets %}
+                <span class="planet-badge">{{ planet.name }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="house-description">
+                {% if house_number == 1 %}Your outer personality, first impressions, and how you present yourself to the world
+                {% elif house_number == 2 %}Your relationship with money, possessions, self-worth, and personal values
+                {% elif house_number == 3 %}Communication style, siblings, short trips, and day-to-day interactions
+                {% elif house_number == 4 %}Family roots, home environment, emotional foundation, and inner security
+                {% elif house_number == 5 %}Creative expression, romance, children, fun, and personal joy
+                {% elif house_number == 6 %}Daily routines, health habits, work environment, and service to others
+                {% elif house_number == 7 %}Romantic partnerships, business relationships, and one-on-one connections
+                {% elif house_number == 8 %}Shared resources, transformation, psychology, and life's mysteries
+                {% elif house_number == 9 %}Higher education, philosophy, long-distance travel, and spiritual beliefs
+                {% elif house_number == 10 %}Career path, public image, reputation, and life direction
+                {% elif house_number == 11 %}Friendships, group activities, hopes, dreams, and social causes
+                {% elif house_number == 12 %}Subconscious mind, spirituality, hidden strengths, and inner healing
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="navigation-links">
+    <a href="#" onclick="history.back()" class="back-link">← Back to main</a>
+</div>
+{% endblock %}
