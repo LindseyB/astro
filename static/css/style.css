@@ -51,18 +51,22 @@ button {
     font-family: 'Space Mono', monospace; 
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 12px 30px;
+    padding: 15px 30px;
     border: none;
-    border-radius: 8px;
-    font-size: 16px;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: bold;
     cursor: pointer;
     width: 100%;
     margin-top: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
 }
 
 .chart-section {
@@ -326,6 +330,42 @@ input[readonly] {
     cursor: not-allowed;
 }
 
+/* Button Group Styles */
+.button-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.button-group button {
+    flex: 1;
+    min-width: 180px;
+}
+
+.secondary-btn {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%) !important;
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+}
+
+.secondary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+    background: linear-gradient(135deg, #38a169 0%, #2f855a 100%) !important;
+}
+
 /* Responsive design for location search */
 @media (max-width: 600px) {
     .location-search {
@@ -340,5 +380,175 @@ input[readonly] {
     
     .location-search button {
         width: 100%;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .button-group button {
+        width: 100%;
+    }
+}
+
+/* Full Chart Styles */
+.planets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.planet-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.planet-card:hover {
+    transform: translateY(-5px);
+}
+
+.planet-card h4 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+}
+
+.planet-card p {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+.planet-card small {
+    display: block;
+    margin: 5px 0;
+    opacity: 0.8;
+}
+
+.planet-description {
+    margin: 10px 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: left;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    backdrop-filter: blur(5px);
+}
+
+.house-info {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px !important;
+}
+
+.houses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.house-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.house-card:hover {
+    transform: translateY(-5px);
+}
+
+.house-card h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+}
+
+.house-title {
+    margin: 10px 0;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.house-description {
+    margin: 10px 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: left;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    backdrop-filter: blur(5px);
+}
+
+.house-planets {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+}
+
+.planet-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    backdrop-filter: blur(10px);
+}
+
+.navigation-links {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin: 40px 0 20px 0;
+    flex-wrap: wrap;
+}
+
+.chart-link-btn {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%) !important;
+    border: none;
+    color: white;
+    padding: 12px 25px;
+    font-size: 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+    width: auto;
+    min-width: auto;
+}
+
+.chart-link-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+    background: linear-gradient(135deg, #38a169 0%, #2f855a 100%) !important;
+}
+
+@media (max-width: 768px) {
+    .planets-grid,
+    .houses-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .navigation-links {
+        flex-direction: column;
+        align-items: center;
     }
 }

@@ -64,5 +64,15 @@
     {% endif %}
 </div>
 
-<a href="/" class="back-link">← Get another horoscope</a>
+<div class="navigation-links">
+    <a href="/" class="back-link">← Get another horoscope</a>
+    <form action="/full-chart" method="POST" style="display: inline;">
+        <input type="hidden" name="birth_date" value="{{ form_data.birth_date }}">
+        <input type="hidden" name="birth_time" value="{{ form_data.birth_time }}">
+        <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
+        <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
+        <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
+        <button type="submit">View Full Chart 📊</button>
+    </form>
+</div>
 {% endblock %}

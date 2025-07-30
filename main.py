@@ -205,6 +205,79 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
 def index():
     return render_template('index.html')
 
+def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude):
+    """Calculate comprehensive natal chart data"""
+    # Setup chart
+    dt = Datetime(birth_date, birth_time, timezone_offset)
+    pos = GeoPos(latitude, longitude)
+    chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
+
+    # Calculate main positions
+    sun = chart.get('Sun')
+    moon = chart.get('Moon')
+    ascendant = chart.get('House1')
+
+    # Get all planets with detailed information
+    planets = {}
+    planet_constants = {
+        'Sun': const.SUN,
+        'Moon': const.MOON,
+        'Mercury': const.MERCURY,
+        'Venus': const.VENUS,
+        'Mars': const.MARS,
+        'Jupiter': const.JUPITER,
+        'Saturn': const.SATURN,
+        'Uranus': const.URANUS,
+        'Neptune': const.NEPTUNE,
+        'Pluto': const.PLUTO,
+        'Chiron': const.CHIRON
+    }
+    
+    for planet_name, planet_const in planet_constants.items():
+        try:
+            planet_obj = chart.get(planet_const)
+            if planet_obj and hasattr(planet_obj, 'sign') and hasattr(planet_obj, 'signlon'):
+                planets[planet_name] = {
+                    'sign': planet_obj.sign,
+                    'degree': float(planet_obj.signlon),
+                    'house': None  # Will be filled below
+                }
+        except Exception as e:
+            print(f"Warning: Could not get data for {planet_name}: {e}")
+            continue
+
+    # Get all houses and their objects
+    houses = chart.houses
+    house_data = {}
+    
+    for house in houses:
+        house_number = int(house.id.replace('House', ''))
+        house_data[house_number] = {
+            'sign': house.sign,
+            'degree': float(house.signlon),
+            'planets': []
+        }
+
+        # Get all objects in this house
+        objects_in_house = chart.objects.getObjectsInHouse(house)
+
+        for obj in objects_in_house:
+            if obj.id in planets:
+                planets[obj.id]['house'] = house_number
+                house_data[house_number]['planets'].append({
+                    'name': obj.id,
+                    'sign': obj.sign,
+                    'degree': float(obj.signlon)
+                })
+
+    return {
+        'sun': sun.sign,
+        'moon': moon.sign,
+        'ascendant': ascendant.sign,
+        'planets': planets,
+        'houses': house_data
+    }
+
 @app.route('/chart', methods=['POST'])
 def chart():
     # Get form data
@@ -220,7 +293,26 @@ def chart():
     try:
         # Calculate chart
         chart_data = calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude)
-        return render_template('chart.html', chart_data=chart_data)
+        return render_template('chart.html', chart_data=chart_data, form_data=request.form)
+    except Exception as e:
+        return render_template('error.html', error=str(e))
+
+@app.route('/full-chart', methods=['POST'])
+def full_chart():
+    # Get form data
+    birth_date_html = request.form['birth_date']  # HTML date format: YYYY-MM-DD
+    birth_time = request.form['birth_time']
+    timezone_offset = request.form['timezone_offset']
+    latitude = request.form['latitude']
+    longitude = request.form['longitude']
+    
+    # Convert date format from YYYY-MM-DD to YYYY/MM/DD
+    birth_date = birth_date_html.replace('-', '/')
+    
+    try:
+        # Calculate full chart
+        full_chart_data = calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude)
+        return render_template('full_chart.html', chart_data=full_chart_data)
     except Exception as e:
         return render_template('error.html', error=str(e))
 
