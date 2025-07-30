@@ -61,3 +61,27 @@ Chill, reflect, and socialize—just don't overthink it! 😊
 <div align="center">
   <img src="images/screenshot.png" alt="Astro Horoscope Screenshot showing an example horoscope with the three main signs" width="400">
 </div>
+
+## Development 
+
+### Run all tests
+
+```bash
+make test
+```
+
+### Run with coverage
+
+```bash
+make test-coverage
+```
+
+### Run specific test types
+
+```bash
+make test-unit
+make test-frontend
+```
+
+
+

@@ -4,3 +4,6 @@ flask
 openai
 gunicorn
 markdown
+pytest
+pytest-flask
+pytest-cov
