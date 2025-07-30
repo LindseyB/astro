@@ -116,6 +116,22 @@ class TestErrorHandling(unittest.TestCase):
         
         response = self.app.post('/chart', data=form_data)
         self.assertIn(response.status_code, [400, 500])
+    
+    def test_chart_with_invalid_coordinates(self):
+        """Test chart generation with invalid latitude/longitude"""
+        form_data = {
+            'birth_date': '1990-01-01',
+            'birth_time': '12:00',
+            'timezone_offset': '0',
+            'latitude': '103w52',
+            'longitude': '103w52'
+        }
+
+        response = self.app.post('/chart', data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'error', response.data)
+        self.assertIn(b'Confirm latitude format', response.data)
+        self.assertIn(b'Confirm longitude format', response.data)
 
 
 class TestJavaScriptFunctionality(unittest.TestCase):
