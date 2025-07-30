@@ -264,3 +264,81 @@ button:hover {
     width: auto;
     min-width: auto;
 }
+
+/* Location Map Styles */
+.location-selector {
+    margin: 10px 0;
+}
+
+.location-search {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.location-search input {
+    flex: 1;
+    min-width: 200px;
+    margin-right: 0;
+}
+
+.location-search button {
+    padding: 8px 15px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    width: auto;
+    min-width: auto;
+}
+
+.location-search button:hover {
+    background: #5a67d8;
+    transform: none;
+}
+
+#locationMap {
+    height: 300px;
+    width: 100%;
+    border-radius: 8px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+#locationDisplay {
+    padding: 10px;
+    background: #f7fafc;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #666;
+    border: 1px solid #e2e8f0;
+}
+
+/* Make latitude/longitude inputs readonly-styled */
+input[readonly] {
+    background-color: #f7fafc;
+    color: #4a5568;
+    cursor: not-allowed;
+}
+
+/* Responsive design for location search */
+@media (max-width: 600px) {
+    .location-search {
+        flex-direction: column;
+    }
+    
+    .location-search input {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .location-search button {
+        width: 100%;
+    }
+}
