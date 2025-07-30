@@ -18,7 +18,7 @@ def markdown_filter(text):
     return markdown.markdown(text, extensions=['nl2br'])
 
 # Client setup for OpenAI API
-token = os.environ.get("GITHUB_TOKEN")
+token = os.environ.get("GITHUB_TOKEN") or "default_token"
 endpoint = "https://models.github.ai/inference"
 model = "openai/gpt-4.1"
 client = OpenAI(
