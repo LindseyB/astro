@@ -270,12 +270,59 @@ def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, long
                     'degree': float(obj.signlon)
                 })
 
+    # Build the user prompt for the full chart
+    user_prompt = (
+        "Only respond in a few sentences. Based on the following natal chart data, "
+        "please give a concise, emoji-filled summary of this person's personality and life themes. "
+        "Highlight any unique planetary placements or house patterns. "
+        "Format your response in bullet points. Recommend a single song that fits this chart:\n\n"
+        f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
+        "Planets:\n" +
+        "\n".join([
+            f"- {name}: {data['sign']} at {data['degree']:.2f}° in House {data['house'] or 'N/A'}"
+            for name, data in planets.items()
+        ]) +
+        "\n\nHouses:\n" +
+        "\n".join([
+            f"- House {num} ({house_data[num]['sign']} {house_data[num]['degree']:.2f}°): " +
+            ", ".join([f"{p['name']} in {p['sign']} ({p['degree']:.2f}°)" for p in house_data[num]['planets']]) or "No major planets"
+            for num in sorted(house_data.keys())
+        ])
+    )
+
+    try:
+        response = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a zoomer astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly.",
+                },
+                {
+                    "role": "user",
+                    "content": user_prompt
+                }
+            ],
+            temperature=1.0,
+            top_p=1.0,
+            model=model,
+            timeout=30  # 30 second timeout
+        )
+
+        astrology_analysis = response.choices[0].message.content
+    except Exception as e:
+        # Handle various API errors gracefully
+        error_type = type(e).__name__
+        print(f"AI Analysis Error ({error_type}): {str(e)}")
+
+        astrology_analysis = f"**Cosmic Note:** The AI astrologer is taking a cosmic coffee break. ☕ You're as special and unique as the stars! 🔮"
+
     return {
         'sun': sun.sign,
         'moon': moon.sign,
         'ascendant': ascendant.sign,
         'planets': planets,
-        'houses': house_data
+        'houses': house_data,
+        'astrology_analysis': astrology_analysis
     }
 
 @app.route('/chart', methods=['POST'])

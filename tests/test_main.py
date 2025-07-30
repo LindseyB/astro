@@ -419,7 +419,8 @@ class TestFullChartTemplateData(unittest.TestCase):
                     'degree': 15.0 + i,
                     'planets': []
                 } for i in range(1, 13)
-            }
+            },
+            'astrology_analysis': '✨ **Your Chart Vibes:** This is a powerful and transformative chart! 🔥\n\n• Do: Embrace your intensity\n• Don\'t: Ignore your intuition\n• Song: "Bohemian Rhapsody" by Queen 🎵'
         }
         
         app_client = app.test_client()
@@ -445,6 +446,11 @@ class TestFullChartTemplateData(unittest.TestCase):
         for i in range(1, 13):
             house_text = f"{i}{'st' if i == 1 else 'nd' if i == 2 else 'rd' if i == 3 else 'th'} House"
             self.assertIn(house_text.encode(), response.data)
+        
+        # Check that astrology analysis is present
+        self.assertIn(b'Your Chart Vibes', response.data)
+        self.assertIn(b'Complete Chart Analysis', response.data)
+        self.assertIn(b'copy-analysis.js', response.data)
         
         mock_calc.assert_called_once_with(
             '1988/11/05', '09:45', '+1', '48.8566', '2.3522'
@@ -513,7 +519,8 @@ class TestIntegration(unittest.TestCase):
                 10: {'sign': 'Pisces', 'degree': 60.0, 'planets': []},
                 11: {'sign': 'Aries', 'degree': 65.0, 'planets': []},
                 12: {'sign': 'Taurus', 'degree': 70.0, 'planets': []}
-            }
+            },
+            'astrology_analysis': '🌟 **Your Vibe:** Air sign energy with water moon = dreamy innovator! ✨\n\n• Do: Trust your intuition\n• Don\'t: Overthink everything\n• Song: "Imagine" by John Lennon 🎵'
         }
         
         form_data = {
@@ -539,6 +546,10 @@ class TestIntegration(unittest.TestCase):
         # Check for house descriptions
         self.assertIn(b'1st House', response.data)
         self.assertIn(b'Self & Identity', response.data)
+        
+        # Check for astrology analysis
+        self.assertIn(b'Complete Chart Analysis', response.data)
+        self.assertIn(b'dreamy innovator', response.data)
         
         mock_calc.assert_called_once_with(
             '1995/02/10', '14:30', '-8', '34.0522', '-118.2437'

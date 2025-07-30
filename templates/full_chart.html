@@ -2,6 +2,10 @@
 
 {% block title %}Your Complete Natal Chart - Astro Horoscope{% endblock %}
 
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
+{% endblock %}
+
 {% block og_title %}{{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆ - Complete Natal Chart{% endblock %}
 {% block og_description %}Comprehensive astrological natal chart with all planets, houses, and aspects for {{ chart_data.sun }} sun, {{ chart_data.moon }} moon, and {{ chart_data.ascendant }} rising. ✨🌟{% endblock %}
 
@@ -15,6 +19,20 @@
 <div class="sparkle-container" id="sparkleContainer"></div>
 
 <h1>🌟 <i>Your Complete Natal Chart</i></h1>
+
+<!-- AI Astrology Analysis Section -->
+<div class="analysis-section" 
+     data-sun="{{ chart_data.sun }}" 
+     data-moon="{{ chart_data.moon }}" 
+     data-ascendant="{{ chart_data.ascendant }}">
+    <h2>🔮 <i>Your Complete Chart Analysis</i></h2>
+    <div class="analysis-content" id="analysisContent">
+        {{ chart_data.astrology_analysis | markdown | safe }}
+    </div>
+    <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()" title="Copy your chart analysis">
+        📋
+    </button>
+</div>
 
 <!-- Main Signs -->
 <div class="chart-section">
@@ -152,6 +170,6 @@
 </div>
 
 <div class="navigation-links">
-    <a href="#" onclick="history.back()" class="back-link">← Back to horoscope</a>
+    <a href="#" onclick="history.back()" class="back-link">← Back to main</a>
 </div>
 {% endblock %}
