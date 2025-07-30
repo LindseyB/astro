@@ -6,7 +6,7 @@ import os
 # Add the parent directory to the path to import our app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main import app, calculate_chart, format_planets_for_api, markdown_filter
+from main import app, calculate_chart, calculate_full_chart, format_planets_for_api, markdown_filter
 
 
 class TestAstroApp(unittest.TestCase):
@@ -48,6 +48,42 @@ class TestAstroApp(unittest.TestCase):
             }
             
             response = self.app.post('/chart', data=form_data)
+            self.assertEqual(response.status_code, 200)
+            mock_calc.assert_called_once()
+    
+    def test_full_chart_route_missing_data(self):
+        """Test full chart route with missing form data"""
+        response = self.app.post('/full-chart', data={})
+        # Should return 400 or redirect to error page
+        self.assertIn(response.status_code, [400, 500])
+    
+    def test_full_chart_route_valid_data(self):
+        """Test full chart route with valid form data"""
+        form_data = {
+            'birth_date': '1990-01-15',
+            'birth_time': '12:00',
+            'timezone_offset': '-5',
+            'latitude': '40.7128',
+            'longitude': '-74.0060'
+        }
+        
+        with patch('main.calculate_full_chart') as mock_calc:
+            mock_calc.return_value = {
+                'sun': 'Capricorn',
+                'moon': 'Leo',
+                'ascendant': 'Virgo',
+                'planets': {
+                    'Sun': {'sign': 'Capricorn', 'degree': 25.5, 'house': 4},
+                    'Moon': {'sign': 'Leo', 'degree': 12.3, 'house': 11},
+                    'Mercury': {'sign': 'Sagittarius', 'degree': 8.7, 'house': 3}
+                },
+                'houses': {
+                    1: {'sign': 'Virgo', 'degree': 15.0, 'planets': []},
+                    2: {'sign': 'Libra', 'degree': 20.5, 'planets': []}
+                }
+            }
+            
+            response = self.app.post('/full-chart', data=form_data)
             self.assertEqual(response.status_code, 200)
             mock_calc.assert_called_once()
 
@@ -191,6 +227,230 @@ class TestChartCalculation(unittest.TestCase):
         self.assertIn('cosmic coffee break', result['astrology_analysis'])
 
 
+class TestFullChartCalculation(unittest.TestCase):
+    
+    @patch('main.Chart')
+    @patch('main.Datetime')
+    @patch('main.GeoPos')
+    def test_calculate_full_chart_basic(self, mock_geopos, mock_datetime, mock_chart):
+        """Test basic full chart calculation with mocked dependencies"""
+        # Mock chart objects
+        mock_sun = MagicMock()
+        mock_sun.sign = 'Capricorn'
+        mock_sun.signlon = 25.5
+        
+        mock_moon = MagicMock()
+        mock_moon.sign = 'Leo'
+        mock_moon.signlon = 12.3
+        
+        mock_ascendant = MagicMock()
+        mock_ascendant.sign = 'Virgo'
+        
+        # Mock planet objects
+        mock_mercury = MagicMock()
+        mock_mercury.sign = 'Sagittarius'
+        mock_mercury.signlon = 8.7
+        mock_mercury.id = 'Mercury'
+        
+        mock_venus = MagicMock()
+        mock_venus.sign = 'Aquarius'
+        mock_venus.signlon = 18.2
+        mock_venus.id = 'Venus'
+        
+        # Mock house objects
+        mock_house1 = MagicMock()
+        mock_house1.id = 'House1'
+        mock_house1.sign = 'Virgo'
+        mock_house1.signlon = 15.0
+        
+        mock_house2 = MagicMock()
+        mock_house2.id = 'House2'
+        mock_house2.sign = 'Libra'
+        mock_house2.signlon = 20.5
+        
+        # Mock chart instance
+        mock_chart_instance = MagicMock()
+        mock_chart_instance.get.side_effect = lambda x: {
+            'Sun': mock_sun,
+            'Moon': mock_moon,
+            'House1': mock_ascendant,
+            'Mercury': mock_mercury,
+            'Venus': mock_venus
+        }.get(x)
+        
+        mock_chart_instance.houses = [mock_house1, mock_house2]
+        
+        # Mock objects in house
+        mock_objects_in_house = MagicMock()
+        mock_objects_in_house.getObjectsInHouse.return_value = [mock_mercury]
+        mock_chart_instance.objects = mock_objects_in_house
+        
+        mock_chart.return_value = mock_chart_instance
+        
+        result = calculate_full_chart(
+            '1990/01/15', '12:00', '-5', 40.7128, -74.0060
+        )
+        
+        # Test basic structure
+        self.assertEqual(result['sun'], 'Capricorn')
+        self.assertEqual(result['moon'], 'Leo')
+        self.assertEqual(result['ascendant'], 'Virgo')
+        self.assertIn('planets', result)
+        self.assertIn('houses', result)
+        
+        # Test planets data
+        self.assertIn('Sun', result['planets'])
+        self.assertEqual(result['planets']['Sun']['sign'], 'Capricorn')
+        self.assertEqual(result['planets']['Sun']['degree'], 25.5)
+        
+        # Test houses data
+        self.assertIn(1, result['houses'])
+        self.assertEqual(result['houses'][1]['sign'], 'Virgo')
+        self.assertEqual(result['houses'][1]['degree'], 15.0)
+    
+    @patch('main.Chart')
+    @patch('main.Datetime')
+    @patch('main.GeoPos')
+    def test_calculate_full_chart_with_planets_in_houses(self, mock_geopos, mock_datetime, mock_chart):
+        """Test full chart calculation with planets placed in houses"""
+        # Mock basic chart objects
+        mock_sun = MagicMock()
+        mock_sun.sign = 'Leo'
+        mock_moon = MagicMock()
+        mock_moon.sign = 'Scorpio'
+        mock_ascendant = MagicMock()
+        mock_ascendant.sign = 'Gemini'
+        
+        # Mock planet in house
+        mock_jupiter = MagicMock()
+        mock_jupiter.sign = 'Pisces'
+        mock_jupiter.signlon = 14.8
+        mock_jupiter.id = 'Jupiter'
+        
+        # Mock house
+        mock_house5 = MagicMock()
+        mock_house5.id = 'House5'
+        mock_house5.sign = 'Libra'
+        mock_house5.signlon = 10.0
+        
+        mock_chart_instance = MagicMock()
+        mock_chart_instance.get.side_effect = lambda x: {
+            'Sun': mock_sun,
+            'Moon': mock_moon,
+            'House1': mock_ascendant,
+            'Jupiter': mock_jupiter
+        }.get(x)
+        
+        mock_chart_instance.houses = [mock_house5]
+        
+        # Mock planet placement in house
+        mock_objects_in_house = MagicMock()
+        mock_objects_in_house.getObjectsInHouse.return_value = [mock_jupiter]
+        mock_chart_instance.objects = mock_objects_in_house
+        
+        mock_chart.return_value = mock_chart_instance
+        
+        result = calculate_full_chart(
+            '1985/06/20', '18:30', '+2', 51.5074, -0.1278
+        )
+        
+        # Test that Jupiter is in the houses data
+        self.assertIn(5, result['houses'])
+        self.assertEqual(len(result['houses'][5]['planets']), 1)
+        self.assertEqual(result['houses'][5]['planets'][0]['name'], 'Jupiter')
+        self.assertEqual(result['houses'][5]['planets'][0]['sign'], 'Pisces')
+        
+        # Test that Jupiter has house information
+        self.assertIn('Jupiter', result['planets'])
+        self.assertEqual(result['planets']['Jupiter']['house'], 5)
+    
+    @patch('main.Chart')
+    def test_calculate_full_chart_error_handling(self, mock_chart):
+        """Test full chart calculation handles errors gracefully"""
+        # Mock chart that raises an exception for some planets
+        mock_chart_instance = MagicMock()
+        mock_chart_instance.get.side_effect = lambda x: {
+            'Sun': MagicMock(sign='Leo'),
+            'Moon': MagicMock(sign='Cancer'),
+            'House1': MagicMock(sign='Virgo')
+        }.get(x) if x in ['Sun', 'Moon', 'House1'] else None
+        
+        mock_chart_instance.houses = []
+        mock_chart.return_value = mock_chart_instance
+        
+        # Should not raise an exception
+        result = calculate_full_chart(
+            '1990/01/01', '00:00', '0', 0, 0
+        )
+        
+        self.assertEqual(result['sun'], 'Leo')
+        self.assertEqual(result['moon'], 'Cancer')
+        self.assertEqual(result['ascendant'], 'Virgo')
+
+
+class TestFullChartTemplateData(unittest.TestCase):
+    """Test that full chart returns properly structured data for templates"""
+    
+    @patch('main.calculate_full_chart')
+    def test_full_chart_template_data_structure(self, mock_calc):
+        """Test that full chart route provides correct data structure for template"""
+        # Mock comprehensive chart data
+        mock_calc.return_value = {
+            'sun': 'Scorpio',
+            'moon': 'Taurus',
+            'ascendant': 'Cancer',
+            'planets': {
+                'Sun': {'sign': 'Scorpio', 'degree': 15.5, 'house': 5},
+                'Moon': {'sign': 'Taurus', 'degree': 22.3, 'house': 11},
+                'Mercury': {'sign': 'Libra', 'degree': 8.7, 'house': 4},
+                'Venus': {'sign': 'Virgo', 'degree': 29.1, 'house': 3},
+                'Mars': {'sign': 'Capricorn', 'degree': 12.8, 'house': 7},
+                'Jupiter': {'sign': 'Pisces', 'degree': 5.4, 'house': 9},
+                'Saturn': {'sign': 'Aquarius', 'degree': 18.9, 'house': 8},
+                'Uranus': {'sign': 'Taurus', 'degree': 11.2, 'house': 11},
+                'Neptune': {'sign': 'Pisces', 'degree': 24.6, 'house': 9},
+                'Pluto': {'sign': 'Capricorn', 'degree': 26.3, 'house': 7},
+                'Chiron': {'sign': 'Aries', 'degree': 9.7, 'house': 10}
+            },
+            'houses': {
+                i: {
+                    'sign': ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+                            'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'][i-1],
+                    'degree': 15.0 + i,
+                    'planets': []
+                } for i in range(1, 13)
+            }
+        }
+        
+        app_client = app.test_client()
+        form_data = {
+            'birth_date': '1988-11-05',
+            'birth_time': '09:45',
+            'timezone_offset': '+1',
+            'latitude': '48.8566',
+            'longitude': '2.3522'
+        }
+        
+        response = app_client.post('/full-chart', data=form_data)
+        
+        self.assertEqual(response.status_code, 200)
+        
+        # Check that response contains all expected planets
+        planet_names = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 
+                       'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Chiron']
+        for planet in planet_names:
+            self.assertIn(planet.encode(), response.data)
+        
+        # Check that all houses are represented
+        for i in range(1, 13):
+            house_text = f"{i}{'st' if i == 1 else 'nd' if i == 2 else 'rd' if i == 3 else 'th'} House"
+            self.assertIn(house_text.encode(), response.data)
+        
+        mock_calc.assert_called_once_with(
+            '1988/11/05', '09:45', '+1', '48.8566', '2.3522'
+        )
+
+
 class TestIntegration(unittest.TestCase):
     """Integration tests that test the full flow"""
     
@@ -227,6 +487,62 @@ class TestIntegration(unittest.TestCase):
         mock_calc.assert_called_once_with(
             '1995/02/10', '14:30', '-8', '34.0522', '-118.2437'
         )
+    
+    @patch('main.calculate_full_chart')
+    def test_full_chart_generation_flow(self, mock_calc):
+        """Test the complete flow from form submission to full chart display"""
+        mock_calc.return_value = {
+            'sun': 'Aquarius',
+            'moon': 'Pisces', 
+            'ascendant': 'Gemini',
+            'planets': {
+                'Sun': {'sign': 'Aquarius', 'degree': 20.5, 'house': 9},
+                'Moon': {'sign': 'Pisces', 'degree': 15.3, 'house': 10},
+                'Mercury': {'sign': 'Capricorn', 'degree': 8.7, 'house': 8}
+            },
+            'houses': {
+                1: {'sign': 'Gemini', 'degree': 15.0, 'planets': []},
+                2: {'sign': 'Cancer', 'degree': 20.5, 'planets': []},
+                3: {'sign': 'Leo', 'degree': 25.0, 'planets': []},
+                4: {'sign': 'Virgo', 'degree': 30.0, 'planets': []},
+                5: {'sign': 'Libra', 'degree': 35.0, 'planets': []},
+                6: {'sign': 'Scorpio', 'degree': 40.0, 'planets': []},
+                7: {'sign': 'Sagittarius', 'degree': 45.0, 'planets': []},
+                8: {'sign': 'Capricorn', 'degree': 50.0, 'planets': []},
+                9: {'sign': 'Aquarius', 'degree': 55.0, 'planets': []},
+                10: {'sign': 'Pisces', 'degree': 60.0, 'planets': []},
+                11: {'sign': 'Aries', 'degree': 65.0, 'planets': []},
+                12: {'sign': 'Taurus', 'degree': 70.0, 'planets': []}
+            }
+        }
+        
+        form_data = {
+            'birth_date': '1995-02-10',
+            'birth_time': '14:30',
+            'timezone_offset': '-8',
+            'latitude': '34.0522',
+            'longitude': '-118.2437'
+        }
+        
+        response = self.app.post('/full-chart', data=form_data)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Complete Natal Chart', response.data)
+        self.assertIn(b'Aquarius', response.data)
+        self.assertIn(b'Pisces', response.data)
+        self.assertIn(b'Gemini', response.data)
+        
+        # Check for planet descriptions
+        self.assertIn(b'Your core identity', response.data)
+        self.assertIn(b'Your emotions', response.data)
+        
+        # Check for house descriptions
+        self.assertIn(b'1st House', response.data)
+        self.assertIn(b'Self & Identity', response.data)
+        
+        mock_calc.assert_called_once_with(
+            '1995/02/10', '14:30', '-8', '34.0522', '-118.2437'
+        )
 
 
 if __name__ == '__main__':
@@ -238,6 +554,8 @@ if __name__ == '__main__':
         TestAstroApp,
         TestUtilityFunctions, 
         TestChartCalculation,
+        TestFullChartCalculation,
+        TestFullChartTemplateData,
         TestIntegration
     ]
     
