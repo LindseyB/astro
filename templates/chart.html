@@ -2,6 +2,10 @@
 
 {% block title %}Your Cosmic Chart - Astro Horoscope{% endblock %}
 
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
+{% endblock %}
+
 {% block og_title %}{{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆ - Astro Horoscope{% endblock %}
 {% block og_description %}Your personalized astrological chart reveals {{ chart_data.sun }} sun, {{ chart_data.moon }} moon, and {{ chart_data.ascendant }} rising. Discover your cosmic vibes with AI-powered insights! ✨{% endblock %}
 
@@ -17,11 +21,17 @@
 <h1>🌟 <i>Astro Horoscope</i></h1>
 
 <!-- AI Astrology Analysis Section -->
-<div class="analysis-section">
+<div class="analysis-section" 
+     data-sun="{{ chart_data.sun }}" 
+     data-moon="{{ chart_data.moon }}" 
+     data-ascendant="{{ chart_data.ascendant }}">
     <h2>🔮 <i>Your Cosmic Vibe Check</i></h2>
-    <div class="analysis-content">
+    <div class="analysis-content" id="analysisContent">
         {{ chart_data.astrology_analysis | markdown | safe }}
     </div>
+    <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()" title="Copy your horoscope">
+        📋
+    </button>
 </div>
 
 <div class="chart-section">

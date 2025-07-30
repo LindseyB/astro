@@ -40,6 +40,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/sparkles.js') }}"></script>
     <script src="{{ url_for('static', filename='js/star-trail.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
 </head>
 <body>
     <div class="container">
