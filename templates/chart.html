@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 
+{% block title %}Your Cosmic Chart - Astro Horoscope{% endblock %}
+
+{% block og_title %}{{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆ - Astro Horoscope{% endblock %}
+{% block og_description %}Your personalized astrological chart reveals {{ chart_data.sun }} sun, {{ chart_data.moon }} moon, and {{ chart_data.ascendant }} rising. Discover your cosmic vibes with AI-powered insights! ✨{% endblock %}
+
+{% block twitter_title %}My Astrological Chart: {{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆{% endblock %}
+{% block twitter_description %}Just got my cosmic vibe check! {{ chart_data.sun }} sun, {{ chart_data.moon }} moon, {{ chart_data.ascendant }} rising. Check yours out too! ✨🌙⭐{% endblock %}
+
+{% block meta_description %}Personalized astrological chart showing {{ chart_data.sun }} sun sign, {{ chart_data.moon }} moon sign, and {{ chart_data.ascendant }} rising sign with AI-powered cosmic insights.{% endblock %}
+
 {% block content %}
 <!-- Sparkle Animation Container -->
 <div class="sparkle-container" id="sparkleContainer"></div>
