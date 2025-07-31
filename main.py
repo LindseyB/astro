@@ -29,6 +29,21 @@ client = OpenAI(
 # Filter for planets only (exclude house cusps, angles, etc.)
 PLANET_NAMES = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Chiron']
 
+# Planet constants mapping for Flatlib
+PLANET_CONSTANTS = {
+    'Sun': const.SUN,
+    'Moon': const.MOON,
+    'Mercury': const.MERCURY,
+    'Venus': const.VENUS,
+    'Mars': const.MARS,
+    'Jupiter': const.JUPITER,
+    'Saturn': const.SATURN,
+    'Uranus': const.URANUS,
+    'Neptune': const.NEPTUNE,
+    'Pluto': const.PLUTO,
+    'Chiron': const.CHIRON
+}
+
 def prepare_music_genre_text(music_genre, chart_type="daily"):
     """
     Prepare music genre preference text for AI prompts
@@ -50,6 +65,133 @@ def prepare_music_genre_text(music_genre, chart_type="daily"):
             return " (Please suggest songs from any genre that fits the vibe)"
     else:
         return f" (Please prioritize {music_genre} genre if possible)"
+
+def extract_form_data(request_form):
+    """
+    Extract and process form data from Flask request
+    
+    Args:
+        request_form: Flask request.form object
+        
+    Returns:
+        dict: Processed form data with proper formatting
+    """
+    # Get form data
+    birth_date_html = request_form['birth_date']  # HTML date format: YYYY-MM-DD
+    birth_time = request_form['birth_time']
+    timezone_offset = request_form['timezone_offset']
+    latitude = request_form['latitude']
+    longitude = request_form['longitude']
+    music_genre = request_form.get('music_genre', 'any')
+    
+    # Handle "other" genre option
+    if music_genre == 'other':
+        other_genre = request_form.get('other_genre', '').strip()
+        if other_genre:
+            music_genre = other_genre
+        else:
+            music_genre = 'any'
+    
+    # Convert date format from YYYY-MM-DD to YYYY/MM/DD
+    birth_date = birth_date_html.replace('-', '/')
+    
+    return {
+        'birth_date': birth_date,
+        'birth_time': birth_time,
+        'timezone_offset': timezone_offset,
+        'latitude': latitude,
+        'longitude': longitude,
+        'music_genre': music_genre
+    }
+
+def create_chart(birth_date, birth_time, timezone_offset, latitude, longitude):
+    """
+    Create a natal chart from birth data
+    
+    Args:
+        birth_date (str): Birth date in YYYY/MM/DD format
+        birth_time (str): Birth time in HH:MM format
+        timezone_offset (str): Timezone offset (e.g., '-5')
+        latitude (str): Latitude 
+        longitude (str): Longitude
+        
+    Returns:
+        Chart: Flatlib Chart object
+    """
+    dt = Datetime(birth_date, birth_time, timezone_offset)
+    pos = GeoPos(latitude, longitude)
+    return Chart(dt, pos, IDs=const.LIST_OBJECTS)
+
+def get_planet_data(chart, include_houses=False):
+    """
+    Extract planet data from a chart
+    
+    Args:
+        chart: Flatlib Chart object
+        include_houses (bool): Whether to include house information
+        
+    Returns:
+        dict: Planet data with signs, degrees, and optionally houses
+    """
+    planets = {}
+    
+    for planet_name, planet_const in PLANET_CONSTANTS.items():
+        try:
+            planet_obj = chart.get(planet_const)
+            if planet_obj and hasattr(planet_obj, 'sign') and hasattr(planet_obj, 'signlon'):
+                planet_data = {
+                    'sign': planet_obj.sign,
+                    'degree': float(planet_obj.signlon)
+                }
+                if include_houses:
+                    planet_data['house'] = None  # Will be filled by caller
+                planets[planet_name] = planet_data
+        except Exception as e:
+            print(f"Warning: Could not get data for {planet_name}: {e}")
+            continue
+    
+    return planets
+
+def get_ai_analysis(user_prompt, chart_type="daily"):
+    """
+    Get AI analysis with error handling
+    
+    Args:
+        user_prompt (str): The prompt to send to the AI
+        chart_type (str): Type of chart analysis
+        
+    Returns:
+        str: AI analysis response or fallback message
+    """
+    try:
+        response = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a zoomer astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly.",
+                },
+                {
+                    "role": "user",
+                    "content": user_prompt
+                }
+            ],
+            temperature=1.0,
+            top_p=1.0,
+            model=model,
+            timeout=30  # 30 second timeout
+        )
+        
+        return response.choices[0].message.content
+        
+    except Exception as e:
+        # Handle various API errors gracefully
+        error_type = type(e).__name__
+        print(f"AI Analysis Error ({error_type}): {str(e)}")
+        
+        if chart_type == "natal":
+            return f"**Cosmic Note:** The AI astrologer is taking a cosmic coffee break. ☕ You're as special and unique as the stars! 🔮"
+        else:
+            return f"**Cosmic Note:** The AI astrologer is taking a cosmic coffee break. ☕ Trust your intuition today! 🔮"
 
 def format_planets_for_api(current_planets):
     planet_strings = []
@@ -84,11 +226,9 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
     current_date = now.strftime('%Y/%m/%d')
     current_time = now.strftime('%H:%M')
 
-    # Setup chart
-    dt = Datetime(birth_date, birth_time, timezone_offset)
-    pos = GeoPos(latitude, longitude)
-    chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
-    today_chart = Chart(Datetime(current_date, current_time, timezone_offset), pos, IDs=const.LIST_OBJECTS)
+    # Setup charts
+    chart = create_chart(birth_date, birth_time, timezone_offset, latitude, longitude)
+    today_chart = create_chart(current_date, current_time, timezone_offset, latitude, longitude)
 
     # Calculate main positions
     sun = chart.get('Sun')
@@ -119,21 +259,8 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
 
     # Get all current planet statuses
     current_planets = {}
-    planet_constants = {
-        'Sun': const.SUN,
-        'Moon': const.MOON,
-        'Mercury': const.MERCURY,
-        'Venus': const.VENUS,
-        'Mars': const.MARS,
-        'Jupiter': const.JUPITER,
-        'Saturn': const.SATURN,
-        'Uranus': const.URANUS,
-        'Neptune': const.NEPTUNE,
-        'Pluto': const.PLUTO,
-        'Chiron': const.CHIRON
-    }
     
-    for planet_name, planet_const in planet_constants.items():
+    for planet_name, planet_const in PLANET_CONSTANTS.items():
         try:
             planet_obj = today_chart.get(planet_const)
             # Check if planet object exists and has the required attributes
@@ -174,50 +301,24 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
     }
 
     # Generate AI analysis with error handling
-    try:
-        # Prepare music genre preference text
-        genre_text = prepare_music_genre_text(music_genre, "daily")
-        
-        # Build the user prompt
-        user_prompt = "Only respond in a few sentences. Based on the following astrological chart data please recommend some activities to do or not to do ideally in bullet format the first sentence in your response should be what today's vibe will be like please also recommend a single song to listen to and recommend a beverage to drink given today's vibe:\n\n" + \
-                      f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n" + \
-                      "Planets in Houses:\n" + \
-                      "\n".join([f"{house_names[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" + \
-                      "Current Planets status:\n" + \
-                      format_planets_for_api(current_planets) + \
-                      f"\n\nMusic Preference: {genre_text}" if genre_text else ""
-        
-        # Log the prompt to console
-        print("=== USER PROMPT ===")
-        print(user_prompt)
-        print("=== END PROMPT ===")
-        
-        response = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a zoomer astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly.",
-                },
-                {
-                    "role": "user",
-                    "content": user_prompt
-                }
-            ],
-            temperature=1.0,
-            top_p=1.0,
-            model=model,
-            timeout=30  # 30 second timeout
-        )
-        
-        astrology_analysis = response.choices[0].message.content
-        
-    except Exception as e:
-        # Handle various API errors gracefully
-        error_type = type(e).__name__
-        print(f"AI Analysis Error ({error_type}): {str(e)}")
+    # Prepare music genre preference text
+    genre_text = prepare_music_genre_text(music_genre, "daily")
     
-        astrology_analysis = f"**Cosmic Note:** The AI astrologer is taking a cosmic coffee break. ☕ Trust your intuition today! 🔮"
-
+    # Build the user prompt
+    user_prompt = "Only respond in a few sentences. Based on the following astrological chart data please recommend some activities to do or not to do ideally in bullet format the first sentence in your response should be what today's vibe will be like please also recommend a single song to listen to and recommend a beverage to drink given today's vibe:\n\n" + \
+                  f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n" + \
+                  "Planets in Houses:\n" + \
+                  "\n".join([f"{house_names[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" + \
+                  "Current Planets status:\n" + \
+                  format_planets_for_api(current_planets) + \
+                  f"\n\nMusic Preference: {genre_text}" if genre_text else ""
+    
+    # Log the prompt to console
+    print("=== USER PROMPT ===")
+    print(user_prompt)
+    print("=== END PROMPT ===")
+    
+    astrology_analysis = get_ai_analysis(user_prompt, "daily")
 
     return {
         'sun': sun.sign,
@@ -234,9 +335,7 @@ def index():
 def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre="any"):
     """Calculate comprehensive natal chart data"""
     # Setup chart
-    dt = Datetime(birth_date, birth_time, timezone_offset)
-    pos = GeoPos(latitude, longitude)
-    chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
+    chart = create_chart(birth_date, birth_time, timezone_offset, latitude, longitude)
 
     # Calculate main positions
     sun = chart.get('Sun')
@@ -244,33 +343,7 @@ def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, long
     ascendant = chart.get('House1')
 
     # Get all planets with detailed information
-    planets = {}
-    planet_constants = {
-        'Sun': const.SUN,
-        'Moon': const.MOON,
-        'Mercury': const.MERCURY,
-        'Venus': const.VENUS,
-        'Mars': const.MARS,
-        'Jupiter': const.JUPITER,
-        'Saturn': const.SATURN,
-        'Uranus': const.URANUS,
-        'Neptune': const.NEPTUNE,
-        'Pluto': const.PLUTO,
-        'Chiron': const.CHIRON
-    }
-    
-    for planet_name, planet_const in planet_constants.items():
-        try:
-            planet_obj = chart.get(planet_const)
-            if planet_obj and hasattr(planet_obj, 'sign') and hasattr(planet_obj, 'signlon'):
-                planets[planet_name] = {
-                    'sign': planet_obj.sign,
-                    'degree': float(planet_obj.signlon),
-                    'house': None  # Will be filled below
-                }
-        except Exception as e:
-            print(f"Warning: Could not get data for {planet_name}: {e}")
-            continue
+    planets = get_planet_data(chart, include_houses=True)
 
     # Get all houses and their objects
     houses = chart.houses
@@ -319,31 +392,7 @@ def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, long
         ])
     )
 
-    try:
-        response = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a zoomer astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly.",
-                },
-                {
-                    "role": "user",
-                    "content": user_prompt
-                }
-            ],
-            temperature=1.0,
-            top_p=1.0,
-            model=model,
-            timeout=30  # 30 second timeout
-        )
-
-        astrology_analysis = response.choices[0].message.content
-    except Exception as e:
-        # Handle various API errors gracefully
-        error_type = type(e).__name__
-        print(f"AI Analysis Error ({error_type}): {str(e)}")
-
-        astrology_analysis = f"**Cosmic Note:** The AI astrologer is taking a cosmic coffee break. ☕ You're as special and unique as the stars! 🔮"
+    astrology_analysis = get_ai_analysis(user_prompt, "natal")
 
     return {
         'sun': sun.sign,
@@ -356,56 +405,38 @@ def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, long
 
 @app.route('/chart', methods=['POST'])
 def chart():
-    # Get form data
-    birth_date_html = request.form['birth_date']  # HTML date format: YYYY-MM-DD
-    birth_time = request.form['birth_time']
-    timezone_offset = request.form['timezone_offset']
-    latitude = request.form['latitude']
-    longitude = request.form['longitude']
-    music_genre = request.form.get('music_genre', 'any')
-    
-    # Handle "other" genre option
-    if music_genre == 'other':
-        other_genre = request.form.get('other_genre', '').strip()
-        if other_genre:
-            music_genre = other_genre
-        else:
-            music_genre = 'any'
-    
-    # Convert date format from YYYY-MM-DD to YYYY/MM/DD
-    birth_date = birth_date_html.replace('-', '/')
-    
     try:
+        # Extract and process form data
+        form_data = extract_form_data(request.form)
+        
         # Calculate chart
-        chart_data = calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre)
+        chart_data = calculate_chart(
+            form_data['birth_date'], 
+            form_data['birth_time'], 
+            form_data['timezone_offset'], 
+            form_data['latitude'], 
+            form_data['longitude'], 
+            form_data['music_genre']
+        )
         return render_template('chart.html', chart_data=chart_data, form_data=request.form)
     except Exception as e:
         return render_template('error.html', error=str(e))
 
 @app.route('/full-chart', methods=['POST'])
 def full_chart():
-    # Get form data
-    birth_date_html = request.form['birth_date']  # HTML date format: YYYY-MM-DD
-    birth_time = request.form['birth_time']
-    timezone_offset = request.form['timezone_offset']
-    latitude = request.form['latitude']
-    longitude = request.form['longitude']
-    music_genre = request.form.get('music_genre', 'any')
-    
-    # Handle "other" genre option
-    if music_genre == 'other':
-        other_genre = request.form.get('other_genre', '').strip()
-        if other_genre:
-            music_genre = other_genre
-        else:
-            music_genre = 'any'
-    
-    # Convert date format from YYYY-MM-DD to YYYY/MM/DD
-    birth_date = birth_date_html.replace('-', '/')
-    
     try:
+        # Extract and process form data
+        form_data = extract_form_data(request.form)
+        
         # Calculate full chart
-        full_chart_data = calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre)
+        full_chart_data = calculate_full_chart(
+            form_data['birth_date'], 
+            form_data['birth_time'], 
+            form_data['timezone_offset'], 
+            form_data['latitude'], 
+            form_data['longitude'], 
+            form_data['music_genre']
+        )
         return render_template('full_chart.html', chart_data=full_chart_data)
     except Exception as e:
         return render_template('error.html', error=str(e))

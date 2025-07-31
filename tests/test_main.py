@@ -6,7 +6,7 @@ import os
 # Add the parent directory to the path to import our app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main import app, calculate_chart, calculate_full_chart, format_planets_for_api, markdown_filter, prepare_music_genre_text
+from main import app, calculate_chart, calculate_full_chart, format_planets_for_api, markdown_filter, prepare_music_genre_text, extract_form_data, create_chart, get_planet_data, get_ai_analysis
 
 
 class TestAstroApp(unittest.TestCase):
@@ -25,8 +25,9 @@ class TestAstroApp(unittest.TestCase):
     def test_chart_route_missing_data(self):
         """Test chart route with missing form data"""
         response = self.app.post('/chart', data={})
-        # Should return 400 or redirect to error page
-        self.assertIn(response.status_code, [400, 500])
+        # Should return 200 with error in response body
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Error', response.data)
     
     def test_chart_route_valid_data(self):
         """Test chart route with valid form data"""
@@ -54,8 +55,9 @@ class TestAstroApp(unittest.TestCase):
     def test_full_chart_route_missing_data(self):
         """Test full chart route with missing form data"""
         response = self.app.post('/full-chart', data={})
-        # Should return 400 or redirect to error page
-        self.assertIn(response.status_code, [400, 500])
+        # Should return 200 with error in response body
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Error', response.data)
     
     def test_full_chart_route_valid_data(self):
         """Test full chart route with valid form data"""
