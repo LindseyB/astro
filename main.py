@@ -76,8 +76,7 @@ def extract_form_data(request_form):
     Returns:
         dict: Processed form data with proper formatting
     """
-    # Get form data
-    birth_date_html = request_form['birth_date']  # HTML date format: YYYY-MM-DD
+    birth_date_html = request_form['birth_date']
     birth_time = request_form['birth_time']
     timezone_offset = request_form['timezone_offset']
     latitude = request_form['latitude']
@@ -300,7 +299,6 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
         12: "12th House (Spirituality/Subconscious) 🔮"
     }
 
-    # Generate AI analysis with error handling
     # Prepare music genre preference text
     genre_text = prepare_music_genre_text(music_genre, "daily")
     
@@ -312,11 +310,6 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
                   "Current Planets status:\n" + \
                   format_planets_for_api(current_planets) + \
                   f"\n\nMusic Preference: {genre_text}" if genre_text else ""
-    
-    # Log the prompt to console
-    print("=== USER PROMPT ===")
-    print(user_prompt)
-    print("=== END PROMPT ===")
     
     astrology_analysis = get_ai_analysis(user_prompt, "daily")
 
@@ -334,15 +327,12 @@ def index():
 
 def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre="any"):
     """Calculate comprehensive natal chart data"""
-    # Setup chart
     chart = create_chart(birth_date, birth_time, timezone_offset, latitude, longitude)
 
-    # Calculate main positions
     sun = chart.get('Sun')
     moon = chart.get('Moon')
     ascendant = chart.get('House1')
 
-    # Get all planets with detailed information
     planets = get_planet_data(chart, include_houses=True)
 
     # Get all houses and their objects
@@ -368,9 +358,6 @@ def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, long
                     'sign': obj.sign,
                     'degree': float(obj.signlon)
                 })
-
-    # Build the user prompt for the full chart
-    # Prepare music genre preference text
     genre_text = prepare_music_genre_text(music_genre, "natal")
     
     user_prompt = (
