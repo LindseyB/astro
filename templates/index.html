@@ -2,6 +2,7 @@
 
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/location-map.js') }}"></script>
+<script src="{{ url_for('static', filename='js/music-genre.js') }}"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 {% endblock %}
@@ -28,6 +29,35 @@
         <input type="text" id="timezone_offset" name="timezone_offset" required 
                placeholder="-04:00" value="-04:00" pattern="[+-]\d{2}:\d{2}">
         <small style="color: #666;">Format: +/-HH:MM (include daylight savings adjustment)</small>
+    </div>
+    
+    <div class="form-group">
+        <label for="music_genre">🎵 Preferred Music Genre for Recommendations:</label>
+        <select id="music_genre" name="music_genre" onchange="toggleOtherGenre()">
+            <option value="any">Any Genre (Surprise Me!)</option>
+            <option value="pop">Pop</option>
+            <option value="rock">Rock</option>
+            <option value="hip-hop">Hip-Hop/Rap</option>
+            <option value="r&b">R&B/Soul</option>
+            <option value="indie">Indie</option>
+            <option value="electronic">Electronic/EDM</option>
+            <option value="folk">Folk/Acoustic</option>
+            <option value="jazz">Jazz</option>
+            <option value="classical">Classical</option>
+            <option value="country">Country</option>
+            <option value="reggae">Reggae</option>
+            <option value="metal">Metal</option>
+            <option value="punk">Punk</option>
+            <option value="alternative">Alternative</option>
+            <option value="latin">Latin</option>
+            <option value="k-pop">K-Pop</option>
+            <option value="other">Other (specify below)</option>
+        </select>
+        <div id="other_genre_div" style="display: none; margin-top: 10px;">
+            <input type="text" id="other_genre" name="other_genre" placeholder="Specify your preferred genre..." 
+                   style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <small style="color: #666;">This helps customize song recommendations in your horoscope</small>
     </div>
     
     <!-- Interactive Location Selector -->
