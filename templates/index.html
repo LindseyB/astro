@@ -3,6 +3,7 @@
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/location-map.js') }}"></script>
 <script src="{{ url_for('static', filename='js/music-genre.js') }}"></script>
+<script src="{{ url_for('static', filename='js/form-persistence.js') }}"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 {% endblock %}
@@ -11,23 +12,26 @@
 <h1>🌟 <i>Astro Horoscope</i></h1>
 <p style="text-align: center; color: #666;">Enter your birth information to generate your natal chart to get a super chill super accurate horoscope</p>
 
+<!-- Form data status indicator -->
+<div id="formDataStatus" style="display: none; text-align: center; background: #e6fffa; color: #234e52; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #81e6d9;">
+    📂 <strong>Restored your previous form data!</strong> Feel free to make any changes.
+</div>
+
 <form action="/chart" method="POST">
     <div class="form-group">
         <label for="birth_date">Birth Date:</label>
-        <input type="date" id="birth_date" name="birth_date" required 
-               value="1990-01-01">
+        <input type="date" id="birth_date" name="birth_date" required>
     </div>
     
     <div class="form-group">
         <label for="birth_time">Birth Time:</label>
-        <input type="time" id="birth_time" name="birth_time" required 
-               value="09:00">
+        <input type="time" id="birth_time" name="birth_time" required>
     </div>
     
     <div class="form-group">
         <label for="timezone_offset">Timezone Offset (e.g., -04:00 for EDT, -05:00 for EST):</label>
         <input type="text" id="timezone_offset" name="timezone_offset" required 
-               placeholder="-04:00" value="-04:00" pattern="[+-]\d{2}:\d{2}">
+               placeholder="-04:00" pattern="[+\-]\d{2}:\d{2}">
         <small style="color: #666;">Format: +/-HH:MM (include daylight savings adjustment)</small>
     </div>
     
@@ -82,14 +86,14 @@
     <div class="form-group">
         <label for="latitude">Latitude (auto-filled from map):</label>
         <input type="text" id="latitude" name="latitude" required 
-               placeholder="40n42" value="40n42" readonly>
+               placeholder="40n42" readonly>
         <small style="color: #666;">Format: DDnMM for North, DDsM for South</small>
     </div>
     
     <div class="form-group">
         <label for="longitude">Longitude (auto-filled from map):</label>
         <input type="text" id="longitude" name="longitude" required 
-               placeholder="74w00" value="74w00" readonly>
+               placeholder="74w00" readonly>
         <small style="color: #666;">Format: DDwMM for West, DDeMM for East</small>
     </div>
     
@@ -97,6 +101,14 @@
         <button type="submit" formaction="/chart">Get Horoscope 🔮</button>
         <button type="submit" formaction="/full-chart">Full Chart 📊</button>
         <button type="submit" formaction="/live-mas">Live Más 🔔</button>
+    </div>
+    
+    <div style="text-align: center; margin-top: 15px;">
+        <button type="button" id="resetFormBtn" 
+                style="background: #e2e8f0; color: #4a5568; border: 1px solid #cbd5e0; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                title="Clear all saved form data">
+            🗑️ Clear Saved Data
+        </button>
     </div>
 </form>
 
