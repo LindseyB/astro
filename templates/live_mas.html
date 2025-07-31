@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Your Cosmic Taco Bell Order - Astro Horoscope{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
+{% endblock %}
+
+{% block og_title %}{{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆ - Cosmic Taco Bell Order{% endblock %}
+{% block og_description %}Personalized Taco Bell order based on astrological chart for {{ chart_data.sun }} sun, {{ chart_data.moon }} moon, and {{ chart_data.ascendant }} rising. 🌮🔔✨{% endblock %}
+
+{% block twitter_title %}My Cosmic Taco Bell Order: {{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆{% endblock %}
+{% block twitter_description %}Check out my personalized Taco Bell order based on my astrological chart! 🌮🔔✨{% endblock %}
+
+{% block meta_description %}Personalized Taco Bell order based on astrological chart for {{ chart_data.sun }} sun sign, {{ chart_data.moon }} moon sign, and {{ chart_data.ascendant }} rising sign.{% endblock %}
+
+{% block content %}
+<!-- Sparkle Animation Container -->
+<div class="sparkle-container" id="sparkleContainer"></div>
+
+<h1>🔔 <i>Your Cosmic Taco Bell Order</i></h1>
+
+<!-- Taco Bell Order Analysis Section -->
+<div class="analysis-section" 
+     data-sun="{{ chart_data.sun }}" 
+     data-moon="{{ chart_data.moon }}" 
+     data-ascendant="{{ chart_data.ascendant }}">
+    <h2>🌮 <i>Your Personalized Taco Bell Order</i></h2>
+    <div class="analysis-content" id="analysisContent">
+        {{ chart_data.taco_bell_order | markdown | safe }}
+    </div>
+    <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()" title="Copy your Taco Bell order">
+        📋
+    </button>
+</div>
+
+<!-- Main Signs -->
+<div class="chart-section">
+    <h2><i>Your Cosmic Trinity</i></h2>
+    <div class="main-signs">
+        <div class="sign-card">
+            <h3>☀️ Sun Sign</h3>
+            <p><strong>{{ chart_data.sun }}</strong></p>
+            <small>Your core identity</small>
+        </div>
+        <div class="sign-card">
+            <h3>🌙 Moon Sign</h3>
+            <p><strong>{{ chart_data.moon }}</strong></p>
+            <small>Your emotional nature</small>
+        </div>
+        <div class="sign-card">
+            <h3>⬆️ Rising Sign</h3>
+            <p><strong>{{ chart_data.ascendant }}</strong></p>
+            <small>Your outer personality</small>
+        </div>
+    </div>
+</div>
+
+<!-- Mercury Retrograde Status -->
+{% if chart_data.mercury_retrograde %}
+<div class="mercury-warning">
+    ⚠️ <strong>Mercury is in retrograde!</strong> Double-check your Taco Bell order before placing it!
+</div>
+{% endif %}
+<div class="navigation-links">
+    <a href="#" onclick="history.back()" class="back-link">← Back</a>
+</div>
+{% endblock %}
+
+
