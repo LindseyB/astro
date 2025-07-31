@@ -6,7 +6,7 @@ import os
 # Add the parent directory to the path to import our app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main import app, calculate_chart, calculate_full_chart, format_planets_for_api, markdown_filter, prepare_music_genre_text
+from main import app, calculate_chart, calculate_full_chart, format_planets_for_api, markdown_filter, prepare_music_genre_text, calculate_live_mas
 
 
 class TestAstroApp(unittest.TestCase):
@@ -84,6 +84,37 @@ class TestAstroApp(unittest.TestCase):
             }
             
             response = self.app.post('/full-chart', data=form_data)
+            self.assertEqual(response.status_code, 200)
+            mock_calc.assert_called_once()
+    
+    def test_live_mas_route_missing_data(self):
+        """Test live-mas route with missing form data"""
+        response = self.app.post('/live-mas', data={})
+        # Should return 400 or 500 for missing data, or 200 with error in response body
+        self.assertIn(response.status_code, [200, 400, 500])
+        if response.status_code == 200:
+            self.assertIn(b'Error', response.data)
+    
+    def test_live_mas_route_valid_data(self):
+        """Test live-mas route with valid form data"""
+        form_data = {
+            'birth_date': '1990-01-15',
+            'birth_time': '12:00',
+            'timezone_offset': '-5',
+            'latitude': '40.7128',
+            'longitude': '-74.0060'
+        }
+        
+        with patch('main.calculate_live_mas') as mock_calc:
+            mock_calc.return_value = {
+                'sun': 'Capricorn',
+                'moon': 'Leo',
+                'ascendant': 'Virgo',
+                'mercury_retrograde': False,
+                'taco_bell_order': '🌮 Test Taco Bell order based on cosmic energy!'
+            }
+            
+            response = self.app.post('/live-mas', data=form_data)
             self.assertEqual(response.status_code, 200)
             mock_calc.assert_called_once()
 
