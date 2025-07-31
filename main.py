@@ -29,6 +29,28 @@ client = OpenAI(
 # Filter for planets only (exclude house cusps, angles, etc.)
 PLANET_NAMES = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Chiron']
 
+def prepare_music_genre_text(music_genre, chart_type="daily"):
+    """
+    Prepare music genre preference text for AI prompts
+    
+    Args:
+        music_genre (str): The music genre preference
+        chart_type (str): Either "daily" for daily horoscope or "natal" for full chart
+    
+    Returns:
+        str: Formatted genre preference text for AI prompt
+    """
+    if not music_genre or music_genre.lower() == "any":
+        return ""
+    
+    if music_genre.lower() == "other":
+        if chart_type == "natal":
+            return " (Please suggest a song from any genre that fits the chart)"
+        else:
+            return " (Please suggest songs from any genre that fits the vibe)"
+    else:
+        return f" (Please prioritize {music_genre} genre if possible)"
+
 def format_planets_for_api(current_planets):
     planet_strings = []
     retrograde_planets = []
@@ -57,7 +79,7 @@ def format_planets_for_api(current_planets):
     
     return result
 
-def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude):
+def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre="any"):
     now = datetime.now()
     current_date = now.strftime('%Y/%m/%d')
     current_time = now.strftime('%H:%M')
@@ -153,13 +175,17 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
 
     # Generate AI analysis with error handling
     try:
+        # Prepare music genre preference text
+        genre_text = prepare_music_genre_text(music_genre, "daily")
+        
         # Build the user prompt
         user_prompt = "Only respond in a few sentences. Based on the following astrological chart data please recommend some activities to do or not to do ideally in bullet format the first sentence in your response should be what today's vibe will be like please also recommend a single song to listen to and recommend a beverage to drink given today's vibe:\n\n" + \
                       f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n" + \
                       "Planets in Houses:\n" + \
                       "\n".join([f"{house_names[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" + \
                       "Current Planets status:\n" + \
-                      format_planets_for_api(current_planets)
+                      format_planets_for_api(current_planets) + \
+                      f"\n\nMusic Preference: {genre_text}" if genre_text else ""
         
         # Log the prompt to console
         print("=== USER PROMPT ===")
@@ -205,7 +231,7 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
 def index():
     return render_template('index.html')
 
-def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude):
+def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre="any"):
     """Calculate comprehensive natal chart data"""
     # Setup chart
     dt = Datetime(birth_date, birth_time, timezone_offset)
@@ -271,11 +297,14 @@ def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, long
                 })
 
     # Build the user prompt for the full chart
+    # Prepare music genre preference text
+    genre_text = prepare_music_genre_text(music_genre, "natal")
+    
     user_prompt = (
         "Only respond in a few sentences. Based on the following natal chart data, "
         "please give a concise, emoji-filled summary of this person's personality and life themes. "
         "Highlight any unique planetary placements or house patterns. "
-        "Format your response in bullet points. Recommend a single song that fits this chart:\n\n"
+        f"Format your response in bullet points. Recommend a single song that fits this chart{genre_text}:\n\n"
         f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
         "Planets:\n" +
         "\n".join([
@@ -333,13 +362,22 @@ def chart():
     timezone_offset = request.form['timezone_offset']
     latitude = request.form['latitude']
     longitude = request.form['longitude']
+    music_genre = request.form.get('music_genre', 'any')
+    
+    # Handle "other" genre option
+    if music_genre == 'other':
+        other_genre = request.form.get('other_genre', '').strip()
+        if other_genre:
+            music_genre = other_genre
+        else:
+            music_genre = 'any'
     
     # Convert date format from YYYY-MM-DD to YYYY/MM/DD
     birth_date = birth_date_html.replace('-', '/')
     
     try:
         # Calculate chart
-        chart_data = calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude)
+        chart_data = calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre)
         return render_template('chart.html', chart_data=chart_data, form_data=request.form)
     except Exception as e:
         return render_template('error.html', error=str(e))
@@ -352,13 +390,22 @@ def full_chart():
     timezone_offset = request.form['timezone_offset']
     latitude = request.form['latitude']
     longitude = request.form['longitude']
+    music_genre = request.form.get('music_genre', 'any')
+    
+    # Handle "other" genre option
+    if music_genre == 'other':
+        other_genre = request.form.get('other_genre', '').strip()
+        if other_genre:
+            music_genre = other_genre
+        else:
+            music_genre = 'any'
     
     # Convert date format from YYYY-MM-DD to YYYY/MM/DD
     birth_date = birth_date_html.replace('-', '/')
     
     try:
         # Calculate full chart
-        full_chart_data = calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude)
+        full_chart_data = calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre)
         return render_template('full_chart.html', chart_data=full_chart_data)
     except Exception as e:
         return render_template('error.html', error=str(e))

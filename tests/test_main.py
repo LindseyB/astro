@@ -6,7 +6,7 @@ import os
 # Add the parent directory to the path to import our app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main import app, calculate_chart, calculate_full_chart, format_planets_for_api, markdown_filter
+from main import app, calculate_chart, calculate_full_chart, format_planets_for_api, markdown_filter, prepare_music_genre_text
 
 
 class TestAstroApp(unittest.TestCase):
@@ -139,6 +139,41 @@ class TestUtilityFunctions(unittest.TestCase):
         
         result = format_planets_for_api(test_planets)
         self.assertIn('No planets are currently retrograde.', result)
+
+    def test_prepare_music_genre_text_daily_rock(self):
+        """Test music genre text preparation for daily horoscope with rock genre"""
+        result = prepare_music_genre_text('rock', 'daily')
+        self.assertEqual(result, ' (Please prioritize rock genre if possible)')
+
+    def test_prepare_music_genre_text_natal_jazz(self):
+        """Test music genre text preparation for natal chart with jazz genre"""
+        result = prepare_music_genre_text('jazz', 'natal')
+        self.assertEqual(result, ' (Please prioritize jazz genre if possible)')
+
+    def test_prepare_music_genre_text_other_daily(self):
+        """Test music genre text preparation for daily horoscope with 'other' option"""
+        result = prepare_music_genre_text('other', 'daily')
+        self.assertEqual(result, ' (Please suggest songs from any genre that fits the vibe)')
+
+    def test_prepare_music_genre_text_other_natal(self):
+        """Test music genre text preparation for natal chart with 'other' option"""
+        result = prepare_music_genre_text('other', 'natal')
+        self.assertEqual(result, ' (Please suggest a song from any genre that fits the chart)')
+
+    def test_prepare_music_genre_text_any_genre(self):
+        """Test music genre text preparation with 'any' genre returns empty string"""
+        result = prepare_music_genre_text('any', 'daily')
+        self.assertEqual(result, '')
+
+    def test_prepare_music_genre_text_empty_genre(self):
+        """Test music genre text preparation with empty genre returns empty string"""
+        result = prepare_music_genre_text('', 'daily')
+        self.assertEqual(result, '')
+
+    def test_prepare_music_genre_text_none_genre(self):
+        """Test music genre text preparation with None genre returns empty string"""
+        result = prepare_music_genre_text(None, 'daily')
+        self.assertEqual(result, '')
 
 
 class TestChartCalculation(unittest.TestCase):
@@ -453,7 +488,127 @@ class TestFullChartTemplateData(unittest.TestCase):
         self.assertIn(b'copy-analysis.js', response.data)
         
         mock_calc.assert_called_once_with(
-            '1988/11/05', '09:45', '+1', '48.8566', '2.3522'
+            '1988/11/05', '09:45', '+1', '48.8566', '2.3522', 'any'
+        )
+
+
+class TestMusicGenreFeature(unittest.TestCase):
+    """Test the music genre preference functionality"""
+    
+    def setUp(self):
+        """Set up test client"""
+        self.app = app.test_client()
+        self.app.testing = True
+
+    @patch('main.calculate_chart')
+    def test_music_genre_rock_preference(self, mock_calc):
+        """Test that rock genre preference is passed correctly"""
+        mock_calc.return_value = {
+            'sun': 'Leo',
+            'moon': 'Virgo',
+            'ascendant': 'Scorpio',
+            'mercury_retrograde': False,
+            'astrology_analysis': '🎸 Rock on! Your Leo sun loves the spotlight like a rockstar! 🌟'
+        }
+        
+        form_data = {
+            'birth_date': '1990-08-15',
+            'birth_time': '12:00',
+            'timezone_offset': '-05:00',
+            'latitude': '40n42',
+            'longitude': '74w00',
+            'music_genre': 'rock'
+        }
+        
+        response = self.app.post('/chart', data=form_data)
+        
+        self.assertEqual(response.status_code, 200)
+        mock_calc.assert_called_once_with(
+            '1990/08/15', '12:00', '-05:00', '40n42', '74w00', 'rock'
+        )
+
+    @patch('main.calculate_chart')
+    def test_music_genre_other_custom_preference(self, mock_calc):
+        """Test that custom 'other' genre preference is handled correctly"""
+        mock_calc.return_value = {
+            'sun': 'Aquarius',
+            'moon': 'Pisces',
+            'ascendant': 'Gemini',
+            'mercury_retrograde': True,
+            'astrology_analysis': '🎵 Synthwave vibes for your futuristic Aquarius energy! ✨'
+        }
+        
+        form_data = {
+            'birth_date': '1985-02-10',
+            'birth_time': '18:30',
+            'timezone_offset': '+01:00',
+            'latitude': '51n30',
+            'longitude': '0w10',
+            'music_genre': 'other',
+            'other_genre': 'synthwave'
+        }
+        
+        response = self.app.post('/chart', data=form_data)
+        
+        self.assertEqual(response.status_code, 200)
+        mock_calc.assert_called_once_with(
+            '1985/02/10', '18:30', '+01:00', '51n30', '0w10', 'synthwave'
+        )
+
+    @patch('main.calculate_chart')
+    def test_music_genre_other_empty_fallback(self, mock_calc):
+        """Test that empty 'other' genre falls back to 'any'"""
+        mock_calc.return_value = {
+            'sun': 'Taurus',
+            'moon': 'Cancer',
+            'ascendant': 'Virgo',
+            'mercury_retrograde': False,
+            'astrology_analysis': '🌟 Any genre works for your versatile chart! 🎶'
+        }
+        
+        form_data = {
+            'birth_date': '1992-05-20',
+            'birth_time': '14:15',
+            'timezone_offset': '-07:00',
+            'latitude': '34n03',
+            'longitude': '118w15',
+            'music_genre': 'other',
+            'other_genre': ''  # Empty custom genre
+        }
+        
+        response = self.app.post('/chart', data=form_data)
+        
+        self.assertEqual(response.status_code, 200)
+        mock_calc.assert_called_once_with(
+            '1992/05/20', '14:15', '-07:00', '34n03', '118w15', 'any'
+        )
+
+    @patch('main.calculate_full_chart')
+    def test_full_chart_music_genre_integration(self, mock_calc):
+        """Test that full chart route also handles music genre correctly"""
+        mock_calc.return_value = {
+            'sun': 'Gemini',
+            'moon': 'Sagittarius',
+            'ascendant': 'Pisces',
+            'planets': {'Sun': {'sign': 'Gemini', 'degree': 15.5, 'house': 4}},
+            'houses': {1: {'sign': 'Pisces', 'degree': 0.0, 'planets': []}},
+            'astrology_analysis': '🎺 Jazz rhythms match your complex Gemini-Sagittarius energy! 🎷'
+        }
+        
+        form_data = {
+            'birth_date': '1987-06-12',
+            'birth_time': '11:45',
+            'timezone_offset': '-04:00',
+            'latitude': '42n21',
+            'longitude': '71w03',
+            'music_genre': 'jazz'
+        }
+        
+        response = self.app.post('/full-chart', data=form_data)
+        
+        self.assertEqual(response.status_code, 200)
+        mock_calc.assert_called_once_with(
+            '1987/06/12', '11:45', '-04:00', '42n21', '71w03', 'jazz'
         )
 
 
@@ -552,7 +707,7 @@ class TestIntegration(unittest.TestCase):
         self.assertIn(b'dreamy innovator', response.data)
         
         mock_calc.assert_called_once_with(
-            '1995/02/10', '14:30', '-8', '34.0522', '-118.2437'
+            '1995/02/10', '14:30', '-8', '34.0522', '-118.2437', 'any'
         )
 
 
