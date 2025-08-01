@@ -32,6 +32,9 @@ function initMap() {
     // Initialize map
     map = L.map('locationMap').setView(defaultLocation, 4);
     
+    // Make map globally available for form persistence
+    window.map = map;
+    
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
@@ -42,7 +45,17 @@ function initMap() {
         setLocationFromMap(e.latlng);
     });
     
-    // Try to get user's current location
+    // Check if form already has saved location data (from localStorage)
+    const latField = document.getElementById('latitude');
+    const lngField = document.getElementById('longitude');
+    const hasExistingLocation = latField && lngField && latField.value && lngField.value;
+    
+    if (hasExistingLocation) {
+        // Don't override existing saved location - form persistence will handle map restoration
+        return;
+    }
+    
+    // Only try to get user's current location if no saved location exists
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function(position) {
@@ -72,6 +85,9 @@ function setLocationFromMap(location) {
     
     // Add new marker
     marker = L.marker([lat, lng]).addTo(map);
+    
+    // Make marker globally available for form persistence
+    window.marker = marker;
     
     // Convert to astrology format and update form fields
     const astroLat = convertToAstroFormat(lat, 'lat');
@@ -121,7 +137,8 @@ function getTimezoneForLocation(lat, lng) {
                         timezoneOffset.toString().padStart(2, '0') + ':00';
     
     const timezoneField = document.getElementById('timezone_offset');
-    if (timezoneField && !timezoneField.dataset.userModified) {
+    // Only update timezone if field is empty or hasn't been manually modified by user
+    if (timezoneField && !timezoneField.value && !timezoneField.dataset.userModified) {
         timezoneField.value = offsetString;
     }
 }
