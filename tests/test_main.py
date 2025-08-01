@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 import sys
 import os
+import json
 
 # Add the parent directory to the path to import our app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -742,6 +743,176 @@ class TestIntegration(unittest.TestCase):
         )
 
 
+class TestFormPersistenceIntegration(unittest.TestCase):
+    """Integration tests for form persistence and location map functionality"""
+    
+    def setUp(self):
+        """Set up test client"""
+        self.app = app.test_client()
+        self.app.testing = True
+    
+    def test_index_route_includes_form_persistence_script(self):
+        """Test that index page includes form persistence JavaScript"""
+        response = self.app.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'form-persistence.js', response.data)
+        self.assertIn(b'location-map.js', response.data)
+    
+    def test_form_data_validation_with_persistence_fields(self):
+        """Test form validation works with all persistence-tracked fields"""
+        form_data = {
+            'birth_date': '1990-06-15',
+            'birth_time': '14:30',
+            'timezone_offset': '-07:00',
+            'latitude': '37n46',
+            'longitude': '122w25',
+            'music_genre': 'rock'
+        }
+        
+        with patch('main.calculate_chart') as mock_calc:
+            mock_calc.return_value = {
+                'sun': 'Gemini',
+                'moon': 'Pisces',
+                'ascendant': 'Leo',
+                'mercury_retrograde': False,
+                'astrology_analysis': 'Test analysis'
+            }
+            
+            response = self.app.post('/chart', data=form_data)
+            self.assertEqual(response.status_code, 200)
+            mock_calc.assert_called_once()
+    
+    def test_timezone_offset_regex_pattern(self):
+        """Test that the timezone offset pattern validation works correctly"""
+        valid_timezones = ['+05:30', '-04:00', '+00:00', '-11:00']
+        
+        for tz in valid_timezones:
+            form_data = {
+                'birth_date': '1990-01-01',
+                'birth_time': '12:00',
+                'timezone_offset': tz,
+                'latitude': '40n42',
+                'longitude': '74w00'
+            }
+            
+            with patch('main.calculate_chart') as mock_calc:
+                mock_calc.return_value = {
+                    'sun': 'Capricorn', 'moon': 'Leo', 'ascendant': 'Virgo',
+                    'mercury_retrograde': False, 'astrology_analysis': 'Test'
+                }
+                
+                response = self.app.post('/chart', data=form_data)
+                self.assertNotEqual(response.status_code, 400, 
+                                  f"Valid timezone {tz} was rejected")
+    
+    def test_coordinate_format_handling(self):
+        """Test that various coordinate formats are handled correctly"""
+        coordinate_test_cases = [
+            ('40n42', '74w00'),   # New York
+            ('51n30', '00w07'),   # London
+            ('35s12', '138e36'),  # Adelaide
+        ]
+        
+        for lat, lng in coordinate_test_cases:
+            form_data = {
+                'birth_date': '1990-01-01',
+                'birth_time': '12:00',
+                'timezone_offset': '+00:00',
+                'latitude': lat,
+                'longitude': lng
+            }
+            
+            with patch('main.calculate_chart') as mock_calc:
+                mock_calc.return_value = {
+                    'sun': 'Capricorn', 'moon': 'Leo', 'ascendant': 'Virgo',
+                    'mercury_retrograde': False, 'astrology_analysis': 'Test'
+                }
+                
+                response = self.app.post('/chart', data=form_data)
+                self.assertNotEqual(response.status_code, 500,
+                                  f"Coordinates {lat}, {lng} caused server error")
+    
+    def test_music_genre_other_field_handling(self):
+        """Test handling of 'other' music genre selection"""
+        form_data = {
+            'birth_date': '1990-01-01',
+            'birth_time': '12:00',
+            'timezone_offset': '+00:00',
+            'latitude': '40n42',
+            'longitude': '74w00',
+            'music_genre': 'other',
+            'other_genre': 'Ambient Techno'
+        }
+        
+        with patch('main.calculate_chart') as mock_calc:
+            mock_calc.return_value = {
+                'sun': 'Capricorn', 'moon': 'Leo', 'ascendant': 'Virgo',
+                'mercury_retrograde': False, 'astrology_analysis': 'Test with Ambient Techno'
+            }
+            
+            response = self.app.post('/chart', data=form_data)
+            self.assertEqual(response.status_code, 200)
+            
+            # The custom genre should be passed to the calculation
+            args, kwargs = mock_calc.call_args
+            self.assertEqual(kwargs.get('music_genre') or args[5], 'Ambient Techno')
+    
+    def test_form_persistence_elements_exist(self):
+        """Test that form persistence related elements exist in HTML"""
+        response = self.app.get('/')
+        self.assertEqual(response.status_code, 200)
+        
+        # Check for form persistence elements
+        self.assertIn(b'id="formDataStatus"', response.data)
+        self.assertIn(b'id="resetFormBtn"', response.data)
+        self.assertIn(b'Clear Saved Data', response.data)
+        
+        # Check for location map elements
+        self.assertIn(b'id="locationMap"', response.data)
+        self.assertIn(b'id="locationDisplay"', response.data)
+        self.assertIn(b'id="locationSearch"', response.data)
+
+
+class TestCoordinateConversionLogic(unittest.TestCase):
+    """Tests for coordinate conversion logic expectations"""
+    
+    def test_astrology_coordinate_format_validation(self):
+        """Test understanding of astrology coordinate format"""
+        test_cases = [
+            # (astro_format, expected_positive, expected_decimal_range)
+            ('40n42', True, (40.0, 41.0)),    # New York latitude
+            ('74w00', False, (-75.0, -73.0)),  # New York longitude (fixed range)
+            ('51n30', True, (51.0, 52.0)),    # London latitude
+            ('00w07', False, (-1.0, 0.1)),    # London longitude (fixed range)
+        ]
+        
+        for astro_format, should_be_positive, decimal_range in test_cases:
+            # Extract components
+            if 'n' in astro_format or 's' in astro_format:
+                direction = 'n' if 'n' in astro_format else 's'
+                parts = astro_format.replace(direction, ' ').split()
+            else:
+                direction = 'e' if 'e' in astro_format else 'w'
+                parts = astro_format.replace(direction, ' ').split()
+            
+            degrees = int(parts[0])
+            minutes = int(parts[1]) if len(parts) > 1 else 0
+            
+            # Calculate expected decimal
+            decimal = degrees + (minutes / 60.0)
+            if direction in ['s', 'w']:
+                decimal = -decimal
+            
+            # Validate expectations
+            if should_be_positive:
+                self.assertGreater(decimal, 0, f"{astro_format} should be positive")
+            else:
+                self.assertLessEqual(decimal, 0, f"{astro_format} should be negative or zero")
+            
+            self.assertGreaterEqual(decimal, decimal_range[0])
+            self.assertLess(decimal, decimal_range[1])
+
+
 if __name__ == '__main__':
     # Create test suite
     test_suite = unittest.TestSuite()
@@ -753,7 +924,10 @@ if __name__ == '__main__':
         TestChartCalculation,
         TestFullChartCalculation,
         TestFullChartTemplateData,
-        TestIntegration
+        TestMusicGenreFeature,
+        TestIntegration,
+        TestFormPersistenceIntegration,  # New test class
+        TestCoordinateConversionLogic    # New test class
     ]
     
     for test_class in test_classes:
