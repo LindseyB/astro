@@ -167,37 +167,39 @@ class FormPersistence {
     
     // Restore location on map from saved coordinates
     restoreLocationOnMap(astroLat, astroLng) {
-        if (typeof window.map === 'undefined' || !window.map) {
-            // Map not ready yet, try again in a moment
-            setTimeout(() => {
-                this.restoreLocationOnMap(astroLat, astroLng);
-            }, 500);
-            return;
-        }
-        
-        try {
-            // Convert astrology format back to decimal
-            const decimalCoords = this.astroToDecimal(astroLat, astroLng);
-            if (decimalCoords) {
-                const { lat, lng } = decimalCoords;
-                
-                // Update map view and marker
-                map.setView([lat, lng], 10);
-                
-                // Add/update marker
-                if (window.marker) {
-                    map.removeLayer(window.marker);
-                }
-                window.marker = L.marker([lat, lng]).addTo(map);
-                
-                // Update location display
-                if (typeof updateLocationDisplay === 'function') {
-                    updateLocationDisplay(lat, lng, astroLat, astroLng);
-                }
+        // Wait for map to be initialized
+        const waitForMap = () => {
+            if (typeof window.map === 'undefined' || !window.map) {
+                setTimeout(waitForMap, 100);
+                return;
             }
-        } catch (e) {
-            console.warn('Failed to restore location on map:', e);
-        }
+            
+            try {
+                // Convert astrology format back to decimal
+                const decimalCoords = this.astroToDecimal(astroLat, astroLng);
+                if (decimalCoords) {
+                    const { lat, lng } = decimalCoords;
+                    
+                    // Update map view and marker
+                    map.setView([lat, lng], 10);
+                    
+                    // Add/update marker
+                    if (window.marker) {
+                        map.removeLayer(window.marker);
+                    }
+                    window.marker = L.marker([lat, lng]).addTo(map);
+                    
+                    // Update location display
+                    if (typeof updateLocationDisplay === 'function') {
+                        updateLocationDisplay(lat, lng, astroLat, astroLng);
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed to restore location on map:', e);
+            }
+        };
+        
+        waitForMap();
     }
     
     // Convert astrology format coordinates back to decimal
@@ -289,7 +291,10 @@ class FormPersistence {
 
 // Initialize form persistence when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    window.formPersistence = new FormPersistence();
+    // Small delay to ensure other scripts have initialized first
+    setTimeout(() => {
+        window.formPersistence = new FormPersistence();
+    }, 100);
 });
 
 // Optional: Add a reset button handler if one exists
