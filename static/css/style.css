@@ -1,3 +1,14 @@
+/* Custom text selection colors */
+::selection {
+    background: #ea66cd;
+    color: #2d3748; 
+}
+
+::-moz-selection {
+    background: #ea66cd; 
+    color: #2d3748; 
+}
+
 body {
     font-family: 'Space Mono', monospace;
     line-height: 1.6;
