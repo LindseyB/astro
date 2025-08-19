@@ -6,13 +6,18 @@
 <script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
 {% endblock %}
 
-{% block og_title %}{{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆ - Astro Horoscope{% endblock %}
-{% block og_description %}Your personalized astrological chart reveals {{ chart_data.sun }} sun, {{ chart_data.moon }} moon, and {{ chart_data.ascendant }} rising. Discover your cosmic vibes with AI-powered insights! ✨{% endblock %}
+{% block og_title %}{{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆ - Astro Horoscope{%
+endblock %}
+{% block og_description %}Your personalized astrological chart reveals {{ chart_data.sun }} sun, {{ chart_data.moon }}
+moon, and {{ chart_data.ascendant }} rising. Discover your cosmic vibes with AI-powered insights! ✨{% endblock %}
 
-{% block twitter_title %}My Astrological Chart: {{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆{% endblock %}
-{% block twitter_description %}Just got my cosmic vibe check! {{ chart_data.sun }} sun, {{ chart_data.moon }} moon, {{ chart_data.ascendant }} rising. Check yours out too! ✨🌙⭐{% endblock %}
+{% block twitter_title %}My Astrological Chart: {{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant
+}} ⬆{% endblock %}
+{% block twitter_description %}Just got my cosmic vibe check! {{ chart_data.sun }} sun, {{ chart_data.moon }} moon, {{
+chart_data.ascendant }} rising. Check yours out too! ✨🌙⭐{% endblock %}
 
-{% block meta_description %}Personalized astrological chart showing {{ chart_data.sun }} sun sign, {{ chart_data.moon }} moon sign, and {{ chart_data.ascendant }} rising sign with AI-powered cosmic insights.{% endblock %}
+{% block meta_description %}Personalized astrological chart showing {{ chart_data.sun }} sun sign, {{ chart_data.moon }}
+moon sign, and {{ chart_data.ascendant }} rising sign with AI-powered cosmic insights.{% endblock %}
 
 {% block content %}
 <!-- Sparkle Animation Container -->
@@ -21,15 +26,14 @@
 <h1>🌟 <i>Astro Horoscope</i></h1>
 
 <!-- AI Astrology Analysis Section -->
-<div class="analysis-section" 
-     data-sun="{{ chart_data.sun }}" 
-     data-moon="{{ chart_data.moon }}" 
-     data-ascendant="{{ chart_data.ascendant }}">
+<div class="analysis-section" data-sun="{{ chart_data.sun }}" data-moon="{{ chart_data.moon }}"
+    data-ascendant="{{ chart_data.ascendant }}">
     <h2>🔮 <i>Your Cosmic Vibe Check</i></h2>
     <div class="analysis-content" id="analysisContent">
         {{ chart_data.astrology_analysis | markdown | safe }}
     </div>
-    <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()" title="Copy your horoscope">
+    <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()"
+        title="Copy your horoscope">
         📋
     </button>
 </div>
@@ -55,14 +59,14 @@
     </div>
 </div>
 
+<!-- Mercury Retrograde Warning (if applicable) -->
+{% if chart_data.mercury_retrograde %}
 <div class="chart-section">
-    <!-- Mercury Retrograde Warning (if applicable) -->
-    {% if chart_data.mercury_retrograde %}
-        <div class="mercury-status mercury-retrograde">
-            ⚠️ Mercury is currently retrograde!
-        </div>
-    {% endif %}
+    <div class="mercury-status mercury-retrograde">
+        ⚠️ Mercury is currently retrograde!
+    </div>
 </div>
+{% endif %}
 
 <div class="navigation-links">
     <a href="/" class="back-link">← Get another horoscope</a>
