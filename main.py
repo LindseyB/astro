@@ -76,11 +76,11 @@ def prepare_music_genre_text(music_genre, chart_type="daily"):
     
     if music_genre.lower() == "other":
         if chart_type == "natal":
-            return " (Please suggest a song from any genre that fits the chart)"
+            return "(Please suggest a song from any genre that fits the chart)"
         else:
-            return " (Please suggest songs from any genre that fits the vibe)"
+            return "(Please suggest songs from any genre that fits the vibe)"
     else:
-        return f" (Please prioritize {music_genre} genre if possible)"
+        return f"(Please prioritize {music_genre} genre if possible)"
 
 def format_planets_for_api(current_planets):
     planet_strings = []
@@ -228,7 +228,11 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
 
     # Generate AI analysis with error handling
     # Prepare music genre preference text
-    genre_text = prepare_music_genre_text(music_genre, "daily") or "any"
+    genre_text = prepare_music_genre_text(music_genre, "daily")
+    if genre_text:
+        music_preference = f" {genre_text}"
+    else:
+        music_preference = " any"
     
     # Build the user prompt
     user_prompt = "Only respond in a few sentences. Based on the following astrological chart data please recommend some activities to do or not to do ideally in bullet format the first sentence in your response should be what today's vibe will be like please also recommend a single song to listen to and recommend a beverage to drink given today's vibe:\n\n" + \
@@ -237,7 +241,7 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
                   "\n".join([f"{HOUSE_NAMES[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" + \
                   "Current Planets status:\n" + \
                   format_planets_for_api(current_planets) + \
-                  f"\n\nMusic Preference: {genre_text}"
+                  f"\n\nMusic Preference:{music_preference}"
     
     # Log the prompt to console
     print("=== USER PROMPT ===")
@@ -358,12 +362,16 @@ def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, long
     # Build the user prompt for the full chart
     # Prepare music genre preference text
     genre_text = prepare_music_genre_text(music_genre, "natal")
+    if genre_text:
+        song_request = f" {genre_text}"
+    else:
+        song_request = ""
 
     user_prompt = (
         "Only respond in a few sentences. Based on the following natal chart data, "
         "please give a concise, emoji-filled summary of this person's personality and life themes. "
         "Highlight any unique planetary placements or house patterns. "
-        f"Format your response in bullet points. Recommend a single song that fits this chart{genre_text}:\n\n"
+        f"Format your response in bullet points. Recommend a single song that fits this chart{song_request}:\n\n"
         f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
         "Planets:\n" +
         "\n".join([

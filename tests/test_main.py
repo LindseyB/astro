@@ -175,22 +175,22 @@ class TestUtilityFunctions(unittest.TestCase):
     def test_prepare_music_genre_text_daily_rock(self):
         """Test music genre text preparation for daily horoscope with rock genre"""
         result = prepare_music_genre_text('rock', 'daily')
-        self.assertEqual(result, ' (Please prioritize rock genre if possible)')
+        self.assertEqual(result, '(Please prioritize rock genre if possible)')
 
     def test_prepare_music_genre_text_natal_jazz(self):
         """Test music genre text preparation for natal chart with jazz genre"""
         result = prepare_music_genre_text('jazz', 'natal')
-        self.assertEqual(result, ' (Please prioritize jazz genre if possible)')
+        self.assertEqual(result, '(Please prioritize jazz genre if possible)')
 
     def test_prepare_music_genre_text_other_daily(self):
         """Test music genre text preparation for daily horoscope with 'other' option"""
         result = prepare_music_genre_text('other', 'daily')
-        self.assertEqual(result, ' (Please suggest songs from any genre that fits the vibe)')
+        self.assertEqual(result, '(Please suggest songs from any genre that fits the vibe)')
 
     def test_prepare_music_genre_text_other_natal(self):
         """Test music genre text preparation for natal chart with 'other' option"""
         result = prepare_music_genre_text('other', 'natal')
-        self.assertEqual(result, ' (Please suggest a song from any genre that fits the chart)')
+        self.assertEqual(result, '(Please suggest a song from any genre that fits the chart)')
 
     def test_prepare_music_genre_text_any_genre(self):
         """Test music genre text preparation with 'any' genre returns empty string"""
@@ -292,6 +292,249 @@ class TestChartCalculation(unittest.TestCase):
         )
         
         self.assertIn('cosmic coffee break', result['astrology_analysis'])
+
+    @patch('main.datetime')
+    @patch('main.Chart')
+    @patch('main.client')
+    def test_calculate_chart_music_genre_default_any(self, mock_client, mock_chart, mock_dt):
+        """Test that calculate_chart defaults to 'any' when no music_genre is specified"""
+        # Mock datetime
+        mock_dt.now.return_value.strftime.side_effect = lambda fmt: {
+            '%Y/%m/%d': '2024/01/15',
+            '%H:%M': '12:00'
+        }[fmt]
+        
+        # Mock chart objects
+        mock_sun = MagicMock()
+        mock_sun.sign = 'Capricorn'
+        mock_moon = MagicMock()
+        mock_moon.sign = 'Leo'
+        mock_ascendant = MagicMock()
+        mock_ascendant.sign = 'Virgo'
+        
+        mock_chart_instance = MagicMock()
+        mock_chart_instance.get.side_effect = lambda x: {
+            'Sun': mock_sun,
+            'Moon': mock_moon,
+            'House1': mock_ascendant
+        }[x]
+        mock_chart_instance.houses = []
+        
+        mock_chart.return_value = mock_chart_instance
+        
+        # Mock OpenAI client to capture the prompt
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = "Test astrology analysis"
+        mock_client.chat.completions.create.return_value = mock_response
+        
+        # Call without music_genre parameter (should default to "any")
+        result = calculate_chart(
+            '1990/01/15', '12:00', '-5', 40.7128, -74.0060
+        )
+        
+        # Verify the API was called
+        self.assertTrue(mock_client.chat.completions.create.called)
+        
+        # Get the actual prompt that was sent to the API
+        call_args = mock_client.chat.completions.create.call_args
+        messages = call_args[1]['messages']
+        user_message = next(msg['content'] for msg in messages if msg['role'] == 'user')
+        
+        # Verify the user prompt contains "Music Preference: any"
+        self.assertIn('Music Preference: any', user_message)
+        
+        # Verify result structure
+        self.assertEqual(result['sun'], 'Capricorn')
+        self.assertEqual(result['moon'], 'Leo')
+        self.assertEqual(result['ascendant'], 'Virgo')
+
+    @patch('main.datetime')
+    @patch('main.Chart')
+    @patch('main.client')
+    def test_calculate_chart_music_genre_explicit_any(self, mock_client, mock_chart, mock_dt):
+        """Test that calculate_chart handles explicit 'any' music_genre correctly"""
+        # Mock datetime
+        mock_dt.now.return_value.strftime.side_effect = lambda fmt: {
+            '%Y/%m/%d': '2024/01/15',
+            '%H:%M': '12:00'
+        }[fmt]
+        
+        # Setup mock chart
+        mock_sun = MagicMock()
+        mock_sun.sign = 'Capricorn'
+        mock_moon = MagicMock()
+        mock_moon.sign = 'Leo'
+        mock_ascendant = MagicMock()
+        mock_ascendant.sign = 'Virgo'
+        
+        mock_chart_instance = MagicMock()
+        mock_chart_instance.get.side_effect = lambda x: {
+            'Sun': mock_sun,
+            'Moon': mock_moon,
+            'House1': mock_ascendant
+        }[x]
+        mock_chart_instance.houses = []
+        
+        mock_chart.return_value = mock_chart_instance
+        
+        # Mock OpenAI client
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = "Test astrology analysis"
+        mock_client.chat.completions.create.return_value = mock_response
+        
+        # Call with explicit "any" music_genre
+        result = calculate_chart(
+            '1990/01/15', '12:00', '-5', 40.7128, -74.0060, music_genre="any"
+        )
+        
+        # Get the actual prompt that was sent to the API
+        call_args = mock_client.chat.completions.create.call_args
+        messages = call_args[1]['messages']
+        user_message = next(msg['content'] for msg in messages if msg['role'] == 'user')
+        
+        # Verify the user prompt contains "Music Preference: any"
+        self.assertIn('Music Preference: any', user_message)
+
+    @patch('main.datetime')
+    @patch('main.Chart')
+    @patch('main.client')
+    def test_calculate_chart_music_genre_specific_genre(self, mock_client, mock_chart, mock_dt):
+        """Test that calculate_chart handles specific music genres correctly"""
+        # Mock datetime
+        mock_dt.now.return_value.strftime.side_effect = lambda fmt: {
+            '%Y/%m/%d': '2024/01/15',
+            '%H:%M': '12:00'
+        }[fmt]
+        
+        # Setup mock chart
+        mock_sun = MagicMock()
+        mock_sun.sign = 'Capricorn'
+        mock_moon = MagicMock()
+        mock_moon.sign = 'Leo'
+        mock_ascendant = MagicMock()
+        mock_ascendant.sign = 'Virgo'
+        
+        mock_chart_instance = MagicMock()
+        mock_chart_instance.get.side_effect = lambda x: {
+            'Sun': mock_sun,
+            'Moon': mock_moon,
+            'House1': mock_ascendant
+        }[x]
+        mock_chart_instance.houses = []
+        
+        mock_chart.return_value = mock_chart_instance
+        
+        # Mock OpenAI client
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = "Test astrology analysis"
+        mock_client.chat.completions.create.return_value = mock_response
+        
+        # Call with specific music genre
+        result = calculate_chart(
+            '1990/01/15', '12:00', '-5', 40.7128, -74.0060, music_genre="jazz"
+        )
+        
+        # Get the actual prompt that was sent to the API
+        call_args = mock_client.chat.completions.create.call_args
+        messages = call_args[1]['messages']
+        user_message = next(msg['content'] for msg in messages if msg['role'] == 'user')
+        
+        # Verify the user prompt contains the jazz preference text
+        self.assertIn('Music Preference: (Please prioritize jazz genre if possible)', user_message)
+
+    @patch('main.datetime')
+    @patch('main.Chart')
+    @patch('main.client')
+    def test_calculate_chart_music_genre_empty_string(self, mock_client, mock_chart, mock_dt):
+        """Test that calculate_chart handles empty string music_genre correctly by falling back to 'any'"""
+        # Mock datetime
+        mock_dt.now.return_value.strftime.side_effect = lambda fmt: {
+            '%Y/%m/%d': '2024/01/15',
+            '%H:%M': '12:00'
+        }[fmt]
+        
+        # Setup mock chart
+        mock_sun = MagicMock()
+        mock_sun.sign = 'Capricorn'
+        mock_moon = MagicMock()
+        mock_moon.sign = 'Leo'
+        mock_ascendant = MagicMock()
+        mock_ascendant.sign = 'Virgo'
+        
+        mock_chart_instance = MagicMock()
+        mock_chart_instance.get.side_effect = lambda x: {
+            'Sun': mock_sun,
+            'Moon': mock_moon,
+            'House1': mock_ascendant
+        }[x]
+        mock_chart_instance.houses = []
+        
+        mock_chart.return_value = mock_chart_instance
+        
+        # Mock OpenAI client
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = "Test astrology analysis"
+        mock_client.chat.completions.create.return_value = mock_response
+        
+        # Call with empty string music_genre
+        result = calculate_chart(
+            '1990/01/15', '12:00', '-5', 40.7128, -74.0060, music_genre=""
+        )
+        
+        # Get the actual prompt that was sent to the API
+        call_args = mock_client.chat.completions.create.call_args
+        messages = call_args[1]['messages']
+        user_message = next(msg['content'] for msg in messages if msg['role'] == 'user')
+        
+        # Verify the user prompt contains "Music Preference: any" (fallback)
+        self.assertIn('Music Preference: any', user_message)
+
+    @patch('main.datetime')
+    @patch('main.Chart')  
+    @patch('main.client')
+    def test_calculate_chart_music_genre_other(self, mock_client, mock_chart, mock_dt):
+        """Test that calculate_chart handles 'other' music_genre correctly"""
+        # Mock datetime
+        mock_dt.now.return_value.strftime.side_effect = lambda fmt: {
+            '%Y/%m/%d': '2024/01/15',
+            '%H:%M': '12:00'
+        }[fmt]
+        
+        # Setup mock chart
+        mock_sun = MagicMock()
+        mock_sun.sign = 'Capricorn'
+        mock_moon = MagicMock()
+        mock_moon.sign = 'Leo'
+        mock_ascendant = MagicMock()
+        mock_ascendant.sign = 'Virgo'
+        
+        mock_chart_instance = MagicMock()
+        mock_chart_instance.get.side_effect = lambda x: {
+            'Sun': mock_sun,
+            'Moon': mock_moon,
+            'House1': mock_ascendant
+        }[x]
+        mock_chart_instance.houses = []
+        
+        mock_chart.return_value = mock_chart_instance
+        
+        # Mock OpenAI client
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = "Test astrology analysis"
+        mock_client.chat.completions.create.return_value = mock_response
+        
+        # Call with "other" music_genre
+        result = calculate_chart(
+            '1990/01/15', '12:00', '-5', 40.7128, -74.0060, music_genre="other"
+        )
+        
+        # Get the actual prompt that was sent to the API
+        call_args = mock_client.chat.completions.create.call_args
+        messages = call_args[1]['messages']
+        user_message = next(msg['content'] for msg in messages if msg['role'] == 'user')
+        
+        # Verify the user prompt contains the "other" preference text
+        self.assertIn('Music Preference: (Please suggest songs from any genre that fits the vibe)', user_message)
 
 
 class TestFullChartCalculation(unittest.TestCase):
