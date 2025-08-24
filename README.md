@@ -1,8 +1,6 @@
 # Astro Horoscope
 
-<div align="center">
-  <img src="images/logo.png" alt="Astro Horoscope Logo" width="200">
-</div>
+# 🔮
 
 ## Your cosmic vibe check
 
