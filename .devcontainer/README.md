@@ -21,7 +21,7 @@ The app uses Swiss Ephemeris for astrological calculations. The ephemeris data f
 ./download_ephemeris.sh
 ```
 
-This will download the required ephemeris files to `/workspace/swisseph`.
+This will download the required ephemeris files to `/workspaces/astro/swisseph`.
 
 ## Running the App
 
