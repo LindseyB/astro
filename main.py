@@ -1,24 +1,42 @@
+import os
+from datetime import datetime
+
+
+# Problem child pyswisseph logic hack here #
+
+# Set Swiss Ephemeris path BEFORE any other imports
+if os.environ.get('SE_EPHE_PATH'):
+    ephe_path = os.environ.get('SE_EPHE_PATH')
+else:
+    # Fallback for local development
+    ephe_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'swisseph')
+
+# Verify path exists
+if os.path.exists(ephe_path):
+    # Set BOTH environment variables that might be checked
+    os.environ['EPHE_PATH'] = ephe_path
+    os.environ['SE_EPHE_PATH'] = ephe_path
+    print(f"Setting ephemeris path to: {ephe_path}")
+    print(f"Files in directory: {os.listdir(ephe_path)}")
+else:
+    print(f"ERROR: Ephemeris path not found: {ephe_path}")
+
+# Import pyswisseph and set path with absolute path
+import swisseph as swe
+abs_ephe_path = os.path.abspath(ephe_path)
+swe.set_ephe_path(abs_ephe_path)
+print(f"pyswisseph configured with absolute path: {abs_ephe_path}")
+
+# End problem child pyuswisseph logic hack #
+
+
 from flask import Flask, render_template, request
 from flatlib.chart import Chart
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
 from flatlib import const
-from datetime import datetime
-import os
 from anthropic import Anthropic
 import markdown
-import swisseph as swe
-
-
-# Set Swiss Ephemeris path only in development (e.g., Codespaces)
-# In production, use the default system paths
-if os.environ.get('SE_EPHE_PATH'):
-    ephe_path = os.environ.get('SE_EPHE_PATH')
-    if os.path.exists(ephe_path):
-        swe.set_ephe_path(ephe_path)
-        print(f"Swiss Ephemeris path set to: {ephe_path}")
-    else:
-        print(f"Warning: Swiss Ephemeris path not found: {ephe_path}")
 
 app = Flask(__name__)
 
