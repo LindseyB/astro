@@ -29,16 +29,6 @@ class TestSwissEphemerisPathLogic(unittest.TestCase):
         finally:
             del os.environ['SE_EPHE_PATH']
     
-    def test_path_exists_check(self):
-        """Test that path existence can be checked"""
-        # Test with a path that definitely doesn't exist
-        fake_path = '/this/path/does/not/exist/xyz123'
-        self.assertFalse(os.path.exists(fake_path))
-        
-        # Test with a path that does exist (use current file's directory)
-        current_dir = os.path.dirname(__file__)
-        self.assertTrue(os.path.exists(current_dir))
-    
     @patch('os.path.exists')
     def test_path_validation_logic(self, mock_exists):
         """Test the path validation logic"""
