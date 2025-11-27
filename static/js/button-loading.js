@@ -6,8 +6,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (form) {
         form.addEventListener('submit', function(e) {
-            // Find which button was clicked
-            const clickedButton = document.activeElement;
+            // Use event.submitter to find which button was clicked
+            const clickedButton = e.submitter;
             
             if (clickedButton && clickedButton.type === 'submit') {
                 // Disable all submit buttons
