@@ -1,6 +1,0 @@
-messages:
-  - role: system
-    content: Talk like a pirate
-  - role: user
-    content: What is the biggest star in the known universe?
-model: openai/gpt-4o

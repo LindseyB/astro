@@ -13,6 +13,16 @@ The environment will automatically:
 - Install all dependencies from requirements.txt
 - Set up the Flask development environment
 
+## Swiss Ephemeris Setup
+
+The app uses Swiss Ephemeris for astrological calculations. The ephemeris data files are automatically downloaded during Codespace creation. If you encounter an error like "SwissEph file 'seas_18.se1' not found", run:
+
+```bash
+./download_ephemeris.sh
+```
+
+This will download the required ephemeris files to `/workspace/swisseph`.
+
 ## Running the App
 
 Once the Codespace is ready:

@@ -7,7 +7,18 @@ from datetime import datetime
 import os
 from anthropic import Anthropic
 import markdown
+import swisseph as swe
 
+
+# Set Swiss Ephemeris path only in development (e.g., Codespaces)
+# In production, use the default system paths
+if os.environ.get('SE_EPHE_PATH'):
+    ephe_path = os.environ.get('SE_EPHE_PATH')
+    if os.path.exists(ephe_path):
+        swe.set_ephe_path(ephe_path)
+        print(f"Swiss Ephemeris path set to: {ephe_path}")
+    else:
+        print(f"Warning: Swiss Ephemeris path not found: {ephe_path}")
 
 app = Flask(__name__)
 
@@ -21,7 +32,6 @@ def markdown_filter(text):
 # Client setup for Anthropic API
 token = os.environ.get("ANTHROPIC_TOKEN") or "default_token"
 model = "claude-haiku-4-5"
-print(f"Using Anthropic model: {model}")
 client = Anthropic(
     api_key=token,
     timeout=60.0  # 60 second timeout
