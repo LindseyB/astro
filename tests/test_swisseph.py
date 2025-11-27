@@ -1,7 +1,6 @@
 # Tests for Swiss Ephemeris configuration
 
 import os
-import sys
 import unittest
 from unittest.mock import patch
 import swisseph as swe
