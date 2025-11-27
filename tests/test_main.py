@@ -240,11 +240,11 @@ class TestChartCalculation(unittest.TestCase):
         
         mock_chart.return_value = mock_chart_instance
         
-        # Mock OpenAI client
+        # Mock Anthropic client
         with patch('main.client') as mock_client:
             mock_response = MagicMock()
-            mock_response.choices[0].message.content = "Test astrology analysis"
-            mock_client.chat.completions.create.return_value = mock_response
+            mock_response.content = [MagicMock(text="Test astrology analysis")]
+            mock_client.messages.create.return_value = mock_response
             
             result = calculate_chart(
                 '1990/01/15', '12:00', '-5', 40.7128, -74.0060
@@ -285,7 +285,7 @@ class TestChartCalculation(unittest.TestCase):
         mock_chart.return_value = mock_chart_instance
         
         # Mock API failure
-        mock_client.chat.completions.create.side_effect = Exception("API Error")
+        mock_client.messages.create.side_effect = Exception("API Error")
         
         result = calculate_chart(
             '1990/01/15', '12:00', '-5', 40.7128, -74.0060
@@ -322,10 +322,10 @@ class TestChartCalculation(unittest.TestCase):
         
         mock_chart.return_value = mock_chart_instance
         
-        # Mock OpenAI client to capture the prompt
+        # Mock Anthropic client to capture the prompt
         mock_response = MagicMock()
-        mock_response.choices[0].message.content = "Test astrology analysis"
-        mock_client.chat.completions.create.return_value = mock_response
+        mock_response.content = [MagicMock(text="Test astrology analysis")]
+        mock_client.messages.create.return_value = mock_response
         
         # Call without music_genre parameter (should default to "any")
         result = calculate_chart(
@@ -333,12 +333,12 @@ class TestChartCalculation(unittest.TestCase):
         )
         
         # Verify the API was called
-        self.assertTrue(mock_client.chat.completions.create.called)
+        self.assertTrue(mock_client.messages.create.called)
         
         # Get the actual prompt that was sent to the API
-        call_args = mock_client.chat.completions.create.call_args
+        call_args = mock_client.messages.create.call_args
         messages = call_args[1]['messages']
-        user_message = next(msg['content'] for msg in messages if msg['role'] == 'user')
+        user_message = messages[0]['content']
         
         # Verify the user prompt contains "Music Preference: any"
         self.assertIn('Music Preference: any', user_message)
@@ -377,10 +377,10 @@ class TestChartCalculation(unittest.TestCase):
         
         mock_chart.return_value = mock_chart_instance
         
-        # Mock OpenAI client
+        # Mock Anthropic client
         mock_response = MagicMock()
-        mock_response.choices[0].message.content = "Test astrology analysis"
-        mock_client.chat.completions.create.return_value = mock_response
+        mock_response.content = [MagicMock(text="Test astrology analysis")]
+        mock_client.messages.create.return_value = mock_response
         
         # Call with explicit "any" music_genre
         result = calculate_chart(
@@ -388,9 +388,9 @@ class TestChartCalculation(unittest.TestCase):
         )
         
         # Get the actual prompt that was sent to the API
-        call_args = mock_client.chat.completions.create.call_args
+        call_args = mock_client.messages.create.call_args
         messages = call_args[1]['messages']
-        user_message = next(msg['content'] for msg in messages if msg['role'] == 'user')
+        user_message = messages[0]['content']
         
         # Verify the user prompt contains "Music Preference: any"
         self.assertIn('Music Preference: any', user_message)
@@ -424,10 +424,10 @@ class TestChartCalculation(unittest.TestCase):
         
         mock_chart.return_value = mock_chart_instance
         
-        # Mock OpenAI client
+        # Mock Anthropic client
         mock_response = MagicMock()
-        mock_response.choices[0].message.content = "Test astrology analysis"
-        mock_client.chat.completions.create.return_value = mock_response
+        mock_response.content = [MagicMock(text="Test astrology analysis")]
+        mock_client.messages.create.return_value = mock_response
         
         # Call with specific music genre
         result = calculate_chart(
@@ -435,9 +435,9 @@ class TestChartCalculation(unittest.TestCase):
         )
         
         # Get the actual prompt that was sent to the API
-        call_args = mock_client.chat.completions.create.call_args
+        call_args = mock_client.messages.create.call_args
         messages = call_args[1]['messages']
-        user_message = next(msg['content'] for msg in messages if msg['role'] == 'user')
+        user_message = messages[0]['content']
         
         # Verify the user prompt contains the jazz preference text
         self.assertIn('Music Preference: (Please prioritize jazz genre if possible)', user_message)
@@ -471,10 +471,10 @@ class TestChartCalculation(unittest.TestCase):
         
         mock_chart.return_value = mock_chart_instance
         
-        # Mock OpenAI client
+        # Mock Anthropic client
         mock_response = MagicMock()
-        mock_response.choices[0].message.content = "Test astrology analysis"
-        mock_client.chat.completions.create.return_value = mock_response
+        mock_response.content = [MagicMock(text="Test astrology analysis")]
+        mock_client.messages.create.return_value = mock_response
         
         # Call with empty string music_genre
         result = calculate_chart(
@@ -482,9 +482,9 @@ class TestChartCalculation(unittest.TestCase):
         )
         
         # Get the actual prompt that was sent to the API
-        call_args = mock_client.chat.completions.create.call_args
+        call_args = mock_client.messages.create.call_args
         messages = call_args[1]['messages']
-        user_message = next(msg['content'] for msg in messages if msg['role'] == 'user')
+        user_message = messages[0]['content']
         
         # Verify the user prompt contains "Music Preference: any" (fallback)
         self.assertIn('Music Preference: any', user_message)
@@ -518,10 +518,10 @@ class TestChartCalculation(unittest.TestCase):
         
         mock_chart.return_value = mock_chart_instance
         
-        # Mock OpenAI client
+        # Mock Anthropic client
         mock_response = MagicMock()
-        mock_response.choices[0].message.content = "Test astrology analysis"
-        mock_client.chat.completions.create.return_value = mock_response
+        mock_response.content = [MagicMock(text="Test astrology analysis")]
+        mock_client.messages.create.return_value = mock_response
         
         # Call with "other" music_genre
         result = calculate_chart(
@@ -529,9 +529,9 @@ class TestChartCalculation(unittest.TestCase):
         )
         
         # Get the actual prompt that was sent to the API
-        call_args = mock_client.chat.completions.create.call_args
+        call_args = mock_client.messages.create.call_args
         messages = call_args[1]['messages']
-        user_message = next(msg['content'] for msg in messages if msg['role'] == 'user')
+        user_message = messages[0]['content']
         
         # Verify the user prompt contains the "other" preference text
         self.assertIn('Music Preference: (Please suggest songs from any genre that fits the vibe)', user_message)

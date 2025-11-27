@@ -142,7 +142,7 @@ class TestJavaScriptFunctionality(unittest.TestCase):
         sparkles_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'js', 'sparkles.js')
         
         if os.path.exists(sparkles_path):
-            with open(sparkles_path, 'r') as f:
+            with open(sparkles_path, 'r', encoding='utf-8') as f:
                 content = f.read()
                 
             self.assertIn('createSparkle', content)
