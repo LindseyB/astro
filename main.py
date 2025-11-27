@@ -326,7 +326,7 @@ def calculate_live_mas(birth_date, birth_time, timezone_offset, latitude, longit
 
     system_content = "You are a zoomer astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts and the taco bell menu quickly."
 
-    taco_bell_order = call_ai_api(system_content, user_prompt, temperature=1.2)
+    taco_bell_order = call_ai_api(system_content, user_prompt, temperature=1)
     if taco_bell_order is None:
         taco_bell_order = "🌮 **Cosmic Note:** The cosmic Taco Bell oracle is taking a nacho break! ☕ Try a Crunchwrap Supreme - it's universally delicious! 🔔✨"
 
