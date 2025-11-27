@@ -16,17 +16,40 @@ A web-based astrological horoscope for only the chillest of humans
 
 ## Installation
 
+### Option 1: GitHub Codespaces (Recommended)
+
+1. Click the "Code" button on GitHub
+2. Select the "Codespaces" tab
+3. Click "Create codespace on main"
+4. Set your Anthropic API key:
+```bash
+export ANTHROPIC_TOKEN="your-api-key-here"
+```
+5. Run the app:
+```bash
+python main.py
+```
+
+The environment will automatically set up Python 3.10 and install all dependencies. The app will be available on port 5000 with automatic port forwarding.
+
+### Option 2: Local Setup
+
 1. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Run the Flask app:
+2. Set your Anthropic API key:
+```bash
+export ANTHROPIC_TOKEN="your-api-key-here"
+```
+
+3. Run the Flask app:
 ```bash
 python run.py
 ```
 
-3. Open your browser to: http://localhost:8080
+4. Open your browser to: http://localhost:8080
 
 ## Location Format Examples
 
@@ -35,7 +58,7 @@ python run.py
 - **London:** 51n30, 0w10, +00:00 (GMT) / +01:00 (BST)
 - **Paris:** 48n52, 2e20, +01:00 (CET) / +02:00 (CEST)
 
-## Example outputs 
+## Example outputs
 
 ### Horoscope
 
@@ -109,7 +132,7 @@ Skip the tacos if you’re working late, triple up on sides if you’re friendsh
   <img src="images/screenshot.png" alt="Astro Horoscope Screenshot showing an example horoscope with the three main signs" width="400">
 </div>
 
-## Development 
+## Development
 
 ### Run all tests
 
