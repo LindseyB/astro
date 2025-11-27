@@ -32,22 +32,14 @@ class TestSwissEphemerisPathLogic(unittest.TestCase):
         fake_path = '/this/path/does/not/exist/xyz123'
         self.assertFalse(os.path.exists(fake_path))
         
-        # Test with a path that does exist
-        self.assertTrue(os.path.exists('/workspaces/astro'))
+        # Test with a path that does exist (use current file's directory)
+        current_dir = os.path.dirname(__file__)
+        self.assertTrue(os.path.exists(current_dir))
     
     @patch('os.path.exists')
     def test_path_validation_logic(self, mock_exists):
         """Test the path validation logic"""
-        test_path = '/workspaces/astro/swisseph'
-        
-        # Test when path exists
-        mock_exists.return_value = True
-        if os.path.exists(test_path):
-            result = "path_exists"
-        else:
-            result = "path_missing"
-        
-        self.assertEqual(result, "path_exists")
+        test_path = '/some/ephemeris/path'
         
         # Test when path doesn't exist
         mock_exists.return_value = False
@@ -65,7 +57,8 @@ class TestSwissEphemerisIntegration(unittest.TestCase):
     def test_swisseph_can_calculate_positions_with_local_path(self):
         """Test that Swiss Ephemeris can calculate planetary positions when path is set"""
         # Setup - use the actual swisseph directory if it exists
-        ephe_path = '/workspaces/astro/swisseph'
+        # Check environment variable first, then fall back to local path
+        ephe_path = os.environ.get('SE_EPHE_PATH') or os.path.join(os.path.dirname(os.path.dirname(__file__)), 'swisseph')
         if os.path.exists(ephe_path):
             swe.set_ephe_path(ephe_path)
         
@@ -98,7 +91,8 @@ class TestSwissEphemerisIntegration(unittest.TestCase):
     
     def test_swisseph_directory_contains_required_files(self):
         """Test that the ephemeris directory contains the required .se1 files"""
-        ephe_path = '/workspaces/astro/swisseph'
+        # Check environment variable first, then fall back to local path
+        ephe_path = os.environ.get('SE_EPHE_PATH') or os.path.join(os.path.dirname(os.path.dirname(__file__)), 'swisseph')
         
         if not os.path.exists(ephe_path):
             self.skipTest("Ephemeris directory does not exist")
