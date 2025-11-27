@@ -29,7 +29,7 @@
     }
   },
 
-  "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt",
+  "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt && mkdir -p /workspaces/astro/swisseph && cd /workspaces/astro/swisseph && wget -q https://github.com/aloistr/swisseph/raw/refs/heads/master/ephe/seas_18.se1 && wget -q https://github.com/aloistr/swisseph/raw/refs/heads/master/ephe/semo_18.se1 && wget -q https://github.com/aloistr/swisseph/raw/refs/heads/master/ephe/sepl_18.se1",
 
   "forwardPorts": [5000],
 
@@ -42,6 +42,7 @@
 
   "remoteEnv": {
     "FLASK_APP": "main.py",
-    "FLASK_ENV": "development"
+    "FLASK_ENV": "development",
+    "SE_EPHE_PATH": "/workspaces/astro/swisseph"
   }
 }
