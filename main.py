@@ -27,7 +27,7 @@ abs_ephe_path = os.path.abspath(ephe_path)
 swe.set_ephe_path(abs_ephe_path)
 print(f"pyswisseph configured with absolute path: {abs_ephe_path}")
 
-# End problem child pyuswisseph logic hack #
+# End problem child pyswisseph logic hack #
 
 
 from flask import Flask, render_template, request
