@@ -4,7 +4,7 @@ import os
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch
 import swisseph as swe
 
 
