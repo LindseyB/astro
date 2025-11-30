@@ -266,7 +266,7 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
         music_preference = " any"
 
     # Build the user prompt
-    user_prompt = "Only respond in a few sentences. Based on the following astrological chart data please recommend some activities to do or not to do ideally in bullet format the first sentence in your response should be what today's vibe will be like please also recommend a single song to listen to and recommend a beverage to drink given today's vibe:\n\n" + \
+    user_prompt = "Only respond in a few sentences. Based on the following astrological chart data: First give a single sentence summarizing the day for the person getting the horoscope as a title for the horoscope and then please recommend some activities to do or not to do ideally in bullet format the first sentence in your response should be what today's vibe will be like please also recommend a single song to listen to and recommend a beverage to drink given today's vibe:\n\n" + \
                   f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n" + \
                   "Planets in Houses:\n" + \
                   "\n".join([f"{HOUSE_NAMES[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" + \
@@ -279,7 +279,7 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
     print(user_prompt)
     print("=== END PROMPT ===")
 
-    system_content = "You are a zoomer astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly."
+    system_content = "You are cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly."
 
     astrology_analysis = call_ai_api(system_content, user_prompt)
     if astrology_analysis is None:
