@@ -4,6 +4,17 @@
 
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chart-wheel.js') }}"></script>
+<script>
+    // Pass chart data to JavaScript
+    window.chartData = {
+        sun: "{{ chart_data.sun }}",
+        moon: "{{ chart_data.moon }}",
+        ascendant: "{{ chart_data.ascendant }}",
+        planets: {{ chart_data.planets | tojson | safe }},
+        houses: {{ chart_data.houses | tojson | safe }}
+    };
+</script>
 {% endblock %}
 
 {% block og_title %}{{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆ - Complete Natal Chart{% endblock %}
@@ -32,6 +43,44 @@
     <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()" title="Copy your chart analysis">
         📋
     </button>
+</div>
+
+<!-- Chart Wheel Visualization -->
+<div class="chart-wheel-container">
+    <h2>🌟 <i>Your Chart Wheel</i></h2>
+    <div class="chart-wheel-wrapper">
+        <canvas id="chartWheel"></canvas>
+    </div>
+    <div class="chart-legend">
+        <div class="legend-section">
+            <strong>Planets:</strong>
+            <div class="legend-item">
+                <span class="legend-symbol" style="color: #FDB813;">☉</span> Sun
+                <span class="legend-symbol" style="color: #8B7355;">☽</span> Moon
+                <span class="legend-symbol" style="color: #4A90E2;">☿</span> Mercury
+                <span class="legend-symbol" style="color: #E74C3C;">♀</span> Venus
+                <span class="legend-symbol" style="color: #C0392B;">♂</span> Mars
+                <span class="legend-symbol" style="color: #F39C12;">♃</span> Jupiter
+            </div>
+            <div class="legend-item">
+                <span class="legend-symbol" style="color: #7F8C8D;">♄</span> Saturn
+                <span class="legend-symbol" style="color: #16A085;">♅</span> Uranus
+                <span class="legend-symbol" style="color: #2980B9;">♆</span> Neptune
+                <span class="legend-symbol" style="color: #34495E;">♇</span> Pluto
+                <span class="legend-symbol" style="color: #9B59B6;">⚷</span> Chiron
+            </div>
+        </div>
+        <div class="legend-section">
+            <strong>Aspects:</strong>
+            <div class="legend-item">
+                <span class="aspect-line" style="background: #FF6B6B;"></span> Conjunction (0°)
+                <span class="aspect-line" style="background: #3498DB;"></span> Trine (120°)
+                <span class="aspect-line" style="background: #E67E22;"></span> Square (90°)
+                <span class="aspect-line" style="background: #E74C3C;"></span> Opposition (180°)
+                <span class="aspect-line" style="background: #9B59B6;"></span> Sextile (60°)
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Main Signs -->
