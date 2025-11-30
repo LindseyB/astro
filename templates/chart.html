@@ -29,7 +29,6 @@ moon sign, and {{ chart_data.ascendant }} rising sign with AI-powered cosmic ins
 <!-- AI Astrology Analysis Section -->
 <div class="analysis-section" data-sun="{{ chart_data.sun }}" data-moon="{{ chart_data.moon }}"
     data-ascendant="{{ chart_data.ascendant }}">
-    <h2>🔮 <i>Your Cosmic Vibe Check</i></h2>
     <div class="analysis-content" id="analysisContent">
         {{ chart_data.astrology_analysis | markdown | safe }}
     </div>
