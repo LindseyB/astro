@@ -1,6 +1,10 @@
 import os
 from datetime import datetime
+import logging
 
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # Problem child pyswisseph logic hack here #
 
@@ -16,16 +20,16 @@ if os.path.exists(ephe_path):
     # Set BOTH environment variables that might be checked
     os.environ['EPHE_PATH'] = ephe_path
     os.environ['SE_EPHE_PATH'] = ephe_path
-    print(f"Setting ephemeris path to: {ephe_path}")
-    print(f"Files in directory: {os.listdir(ephe_path)}")
+    logger.info(f"Setting ephemeris path to: {ephe_path}")
+    logger.info(f"Files in directory: {os.listdir(ephe_path)}")
 else:
-    print(f"ERROR: Ephemeris path not found: {ephe_path}")
+    logger.error(f"Ephemeris path not found: {ephe_path}")
 
 # Import pyswisseph and set path with absolute path
 import swisseph as swe
 abs_ephe_path = os.path.abspath(ephe_path)
 swe.set_ephe_path(abs_ephe_path)
-print(f"pyswisseph configured with absolute path: {abs_ephe_path}")
+logger.info(f"pyswisseph configured with absolute path: {abs_ephe_path}")
 
 # End problem child pyswisseph logic hack #
 
@@ -217,7 +221,7 @@ def call_ai_api(system_content, user_prompt, temperature=1.0):
     """Make AI API call with error handling"""
 
     try:
-        print("=== AI API CALL ===")
+        logger.debug("=== AI API CALL ===")
         response = client.messages.create(
             model=model,
             max_tokens=1024,
@@ -232,16 +236,16 @@ def call_ai_api(system_content, user_prompt, temperature=1.0):
         )
 
         # Log the response to console
-        print("=== AI API RESPONSE ===")
-        print(response.content[0].text)
-        print("=== END RESPONSE ===")
+        logger.debug("=== AI API RESPONSE ===")
+        logger.debug(response.content[0].text)
+        logger.debug("=== END RESPONSE ===")
 
         return response.content[0].text
 
     except Exception as e:
         # Handle various API errors gracefully
         error_type = type(e).__name__
-        print(f"AI Analysis Error ({error_type}): {str(e)}")
+        logger.error(f"AI Analysis Error ({error_type}): {str(e)}")
         return None
 
 def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre="any"):
@@ -275,9 +279,9 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
                   f"\n\nMusic Preference:{music_preference}"
 
     # Log the prompt to console
-    print("=== USER PROMPT ===")
-    print(user_prompt)
-    print("=== END PROMPT ===")
+    logger.debug("=== USER PROMPT ===")
+    logger.debug(user_prompt)
+    logger.debug("=== END PROMPT ===")
 
     system_content = "You are cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly."
 
