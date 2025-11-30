@@ -7,7 +7,9 @@ import json
 # Add the parent directory to the path to import our app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main import app, calculate_chart, calculate_full_chart, format_planets_for_api, markdown_filter, prepare_music_genre_text, calculate_live_mas
+from routes import app
+from calculations import calculate_chart, calculate_full_chart, calculate_live_mas
+from formatters import format_planets_for_api, markdown_filter, prepare_music_genre_text
 
 
 class TestAstroApp(unittest.TestCase):
@@ -39,7 +41,7 @@ class TestAstroApp(unittest.TestCase):
             'longitude': '-74.0060'
         }
 
-        with patch('main.calculate_chart') as mock_calc:
+        with patch('routes.calculate_chart') as mock_calc:
             mock_calc.return_value = {
                 'sun': 'Capricorn',
                 'moon': 'Leo',
@@ -68,7 +70,7 @@ class TestAstroApp(unittest.TestCase):
             'longitude': '-74.0060'
         }
 
-        with patch('main.calculate_full_chart') as mock_calc:
+        with patch('routes.calculate_full_chart') as mock_calc:
             mock_calc.return_value = {
                 'sun': 'Capricorn',
                 'moon': 'Leo',
@@ -106,7 +108,7 @@ class TestAstroApp(unittest.TestCase):
             'longitude': '-74.0060'
         }
 
-        with patch('main.calculate_live_mas') as mock_calc:
+        with patch('routes.calculate_live_mas') as mock_calc:
             mock_calc.return_value = {
                 'sun': 'Capricorn',
                 'moon': 'Leo',
@@ -210,10 +212,10 @@ class TestUtilityFunctions(unittest.TestCase):
 
 class TestChartCalculation(unittest.TestCase):
 
-    @patch('main.datetime')
-    @patch('main.Chart')
-    @patch('main.Datetime')
-    @patch('main.GeoPos')
+    @patch('chart_data.datetime')
+    @patch('chart_data.Chart')
+    @patch('chart_data.Datetime')
+    @patch('chart_data.GeoPos')
     def test_calculate_chart_basic(self, mock_geopos, mock_datetime, mock_chart, mock_dt):
         """Test basic chart calculation with mocked dependencies"""
         # Mock the datetime
@@ -241,7 +243,7 @@ class TestChartCalculation(unittest.TestCase):
         mock_chart.return_value = mock_chart_instance
 
         # Mock Anthropic client
-        with patch('main.client') as mock_client:
+        with patch('ai_service.client') as mock_client:
             mock_response = MagicMock()
             mock_response.content = [MagicMock(text="Test astrology analysis")]
             mock_client.messages.create.return_value = mock_response
@@ -255,9 +257,9 @@ class TestChartCalculation(unittest.TestCase):
             self.assertEqual(result['ascendant'], 'Virgo')
             self.assertIn('astrology_analysis', result)
 
-    @patch('main.datetime')
-    @patch('main.Chart')
-    @patch('main.client')
+    @patch('chart_data.datetime')
+    @patch('chart_data.Chart')
+    @patch('ai_service.client')
     def test_calculate_chart_api_error(self, mock_client, mock_chart, mock_dt):
         """Test chart calculation when AI API fails"""
         # Mock datetime
@@ -293,9 +295,9 @@ class TestChartCalculation(unittest.TestCase):
 
         self.assertIn('cosmic coffee break', result['astrology_analysis'])
 
-    @patch('main.datetime')
-    @patch('main.Chart')
-    @patch('main.client')
+    @patch('chart_data.datetime')
+    @patch('chart_data.Chart')
+    @patch('ai_service.client')
     def test_calculate_chart_music_genre_default_any(self, mock_client, mock_chart, mock_dt):
         """Test that calculate_chart defaults to 'any' when no music_genre is specified"""
         # Mock datetime
@@ -348,9 +350,9 @@ class TestChartCalculation(unittest.TestCase):
         self.assertEqual(result['moon'], 'Leo')
         self.assertEqual(result['ascendant'], 'Virgo')
 
-    @patch('main.datetime')
-    @patch('main.Chart')
-    @patch('main.client')
+    @patch('chart_data.datetime')
+    @patch('chart_data.Chart')
+    @patch('ai_service.client')
     def test_calculate_chart_music_genre_explicit_any(self, mock_client, mock_chart, mock_dt):
         """Test that calculate_chart handles explicit 'any' music_genre correctly"""
         # Mock datetime
@@ -395,9 +397,9 @@ class TestChartCalculation(unittest.TestCase):
         # Verify the user prompt contains "Music Preference: any"
         self.assertIn('Music Preference: any', user_message)
 
-    @patch('main.datetime')
-    @patch('main.Chart')
-    @patch('main.client')
+    @patch('chart_data.datetime')
+    @patch('chart_data.Chart')
+    @patch('ai_service.client')
     def test_calculate_chart_music_genre_specific_genre(self, mock_client, mock_chart, mock_dt):
         """Test that calculate_chart handles specific music genres correctly"""
         # Mock datetime
@@ -442,9 +444,9 @@ class TestChartCalculation(unittest.TestCase):
         # Verify the user prompt contains the jazz preference text
         self.assertIn('Music Preference: (Please prioritize jazz genre if possible)', user_message)
 
-    @patch('main.datetime')
-    @patch('main.Chart')
-    @patch('main.client')
+    @patch('chart_data.datetime')
+    @patch('chart_data.Chart')
+    @patch('ai_service.client')
     def test_calculate_chart_music_genre_empty_string(self, mock_client, mock_chart, mock_dt):
         """Test that calculate_chart handles empty string music_genre correctly by falling back to 'any'"""
         # Mock datetime
@@ -489,9 +491,9 @@ class TestChartCalculation(unittest.TestCase):
         # Verify the user prompt contains "Music Preference: any" (fallback)
         self.assertIn('Music Preference: any', user_message)
 
-    @patch('main.datetime')
-    @patch('main.Chart')
-    @patch('main.client')
+    @patch('chart_data.datetime')
+    @patch('chart_data.Chart')
+    @patch('ai_service.client')
     def test_calculate_chart_music_genre_other(self, mock_client, mock_chart, mock_dt):
         """Test that calculate_chart handles 'other' music_genre correctly"""
         # Mock datetime
@@ -539,9 +541,9 @@ class TestChartCalculation(unittest.TestCase):
 
 class TestFullChartCalculation(unittest.TestCase):
 
-    @patch('main.Chart')
-    @patch('main.Datetime')
-    @patch('main.GeoPos')
+    @patch('calculations.Chart')
+    @patch('calculations.Datetime')
+    @patch('calculations.GeoPos')
     def test_calculate_full_chart_basic(self, mock_geopos, mock_datetime, mock_chart):
         """Test basic full chart calculation with mocked dependencies"""
         # Mock chart objects
@@ -618,9 +620,9 @@ class TestFullChartCalculation(unittest.TestCase):
         self.assertEqual(result['houses'][1]['sign'], 'Virgo')
         self.assertEqual(result['houses'][1]['degree'], 15.0)
 
-    @patch('main.Chart')
-    @patch('main.Datetime')
-    @patch('main.GeoPos')
+    @patch('calculations.Chart')
+    @patch('calculations.Datetime')
+    @patch('calculations.GeoPos')
     def test_calculate_full_chart_with_planets_in_houses(self, mock_geopos, mock_datetime, mock_chart):
         """Test full chart calculation with planets placed in houses"""
         # Mock basic chart objects
@@ -674,7 +676,7 @@ class TestFullChartCalculation(unittest.TestCase):
         self.assertIn('Jupiter', result['planets'])
         self.assertEqual(result['planets']['Jupiter']['house'], 5)
 
-    @patch('main.Chart')
+    @patch('calculations.Chart')
     def test_calculate_full_chart_error_handling(self, mock_chart):
         """Test full chart calculation handles errors gracefully"""
         # Mock chart that raises an exception for some planets
@@ -701,7 +703,7 @@ class TestFullChartCalculation(unittest.TestCase):
 class TestFullChartTemplateData(unittest.TestCase):
     """Test that full chart returns properly structured data for templates"""
 
-    @patch('main.calculate_full_chart')
+    @patch('routes.calculate_full_chart')
     def test_full_chart_template_data_structure(self, mock_calc):
         """Test that full chart route provides correct data structure for template"""
         # Mock comprehensive chart data
@@ -775,7 +777,7 @@ class TestMusicGenreFeature(unittest.TestCase):
         self.app = app.test_client()
         self.app.testing = True
 
-    @patch('main.calculate_chart')
+    @patch('routes.calculate_chart')
     def test_music_genre_rock_preference(self, mock_calc):
         """Test that rock genre preference is passed correctly"""
         mock_calc.return_value = {
@@ -802,7 +804,7 @@ class TestMusicGenreFeature(unittest.TestCase):
             '1990/08/15', '12:00', '-05:00', '40n42', '74w00', 'rock'
         )
 
-    @patch('main.calculate_chart')
+    @patch('routes.calculate_chart')
     def test_music_genre_other_custom_preference(self, mock_calc):
         """Test that custom 'other' genre preference is handled correctly"""
         mock_calc.return_value = {
@@ -830,7 +832,7 @@ class TestMusicGenreFeature(unittest.TestCase):
             '1985/02/10', '18:30', '+01:00', '51n30', '0w10', 'synthwave'
         )
 
-    @patch('main.calculate_chart')
+    @patch('routes.calculate_chart')
     def test_music_genre_other_empty_fallback(self, mock_calc):
         """Test that empty 'other' genre falls back to 'any'"""
         mock_calc.return_value = {
@@ -858,7 +860,7 @@ class TestMusicGenreFeature(unittest.TestCase):
             '1992/05/20', '14:15', '-07:00', '34n03', '118w15', 'any'
         )
 
-    @patch('main.calculate_full_chart')
+    @patch('routes.calculate_full_chart')
     def test_full_chart_music_genre_integration(self, mock_calc):
         """Test that full chart route also handles music genre correctly"""
         mock_calc.return_value = {
@@ -895,7 +897,7 @@ class TestIntegration(unittest.TestCase):
         self.app = app.test_client()
         self.app.testing = True
 
-    @patch('main.calculate_chart')
+    @patch('routes.calculate_chart')
     def test_full_chart_generation_flow(self, mock_calc):
         """Test the complete flow from form submission to chart display"""
         mock_calc.return_value = {
@@ -924,7 +926,7 @@ class TestIntegration(unittest.TestCase):
             '1995/02/10', '14:30', '-8', '34.0522', '-118.2437'
         )
 
-    @patch('main.calculate_full_chart')
+    @patch('routes.calculate_full_chart')
     def test_full_chart_generation_flow(self, mock_calc):
         """Test the complete flow from form submission to full chart display"""
         mock_calc.return_value = {
@@ -1012,7 +1014,7 @@ class TestFormPersistenceIntegration(unittest.TestCase):
             'music_genre': 'rock'
         }
 
-        with patch('main.calculate_chart') as mock_calc:
+        with patch('routes.calculate_chart') as mock_calc:
             mock_calc.return_value = {
                 'sun': 'Gemini',
                 'moon': 'Pisces',
@@ -1038,7 +1040,7 @@ class TestFormPersistenceIntegration(unittest.TestCase):
                 'longitude': '74w00'
             }
 
-            with patch('main.calculate_chart') as mock_calc:
+            with patch('routes.calculate_chart') as mock_calc:
                 mock_calc.return_value = {
                     'sun': 'Capricorn', 'moon': 'Leo', 'ascendant': 'Virgo',
                     'mercury_retrograde': False, 'astrology_analysis': 'Test'
@@ -1065,7 +1067,7 @@ class TestFormPersistenceIntegration(unittest.TestCase):
                 'longitude': lng
             }
 
-            with patch('main.calculate_chart') as mock_calc:
+            with patch('routes.calculate_chart') as mock_calc:
                 mock_calc.return_value = {
                     'sun': 'Capricorn', 'moon': 'Leo', 'ascendant': 'Virgo',
                     'mercury_retrograde': False, 'astrology_analysis': 'Test'
@@ -1087,7 +1089,7 @@ class TestFormPersistenceIntegration(unittest.TestCase):
             'other_genre': 'Ambient Techno'
         }
 
-        with patch('main.calculate_chart') as mock_calc:
+        with patch('routes.calculate_chart') as mock_calc:
             mock_calc.return_value = {
                 'sun': 'Capricorn', 'moon': 'Leo', 'ascendant': 'Virgo',
                 'mercury_retrograde': False, 'astrology_analysis': 'Test with Ambient Techno'

@@ -50,7 +50,7 @@ class TestTemplates(unittest.TestCase):
         """Test chart template structure with mock data"""
         from unittest.mock import patch
 
-        with patch('main.calculate_chart') as mock_calc:
+        with patch('routes.calculate_chart') as mock_calc:
             mock_calc.return_value = {
                 'sun': 'Leo',
                 'moon': 'Scorpio',
