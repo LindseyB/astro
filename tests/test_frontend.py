@@ -76,6 +76,54 @@ class TestTemplates(unittest.TestCase):
             self.assertIn(b'Cancer', response.data)
             self.assertIn(b'sparkleContainer', response.data)
 
+    def test_full_chart_template_structure(self):
+        """Test full chart template structure with mock data"""
+        from unittest.mock import patch
+
+        # Create complete house data (all 12 houses required)
+        signs = ['Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces', 'Aries',
+                 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra']
+        houses = {}
+        for i in range(1, 13):
+            houses[i] = {'sign': signs[i-1], 'degree': 12.4 + i}
+
+        with patch('routes.calculate_full_chart') as mock_calc:
+            mock_calc.return_value = {
+                'planets': {
+                    'Sun': {'sign': 'Leo', 'degree': 15.5, 'house': 10},
+                    'Moon': {'sign': 'Cancer', 'degree': 22.3, 'house': 9},
+                    'Mercury': {'sign': 'Virgo', 'degree': 5.1, 'house': 11}
+                },
+                'houses': houses,
+                'aspects': [],
+                'chart_analysis': '**Full chart analysis** with details'
+            }
+
+            form_data = {
+                'birth_date': '1988-08-08',
+                'birth_time': '10:30',
+                'timezone_offset': '0',
+                'latitude': '51.5074',
+                'longitude': '-0.1278'
+            }
+
+            response = self.app.post('/full-chart', data=form_data)
+            self.assertEqual(response.status_code, 200)
+
+            # Check for chart wheel canvas
+            self.assertIn(b'chartWheel', response.data)
+            self.assertIn(b'<canvas', response.data)
+            
+            # Check for chart-wheel.js script
+            self.assertIn(b'chart-wheel.js', response.data)
+            
+            # Check for window.chartData
+            self.assertIn(b'window.chartData', response.data)
+            
+            # Check for planet data
+            self.assertIn(b'Leo', response.data)
+            self.assertIn(b'Cancer', response.data)
+
 
 class TestErrorHandling(unittest.TestCase):
     """Test error handling and edge cases"""
@@ -161,6 +209,44 @@ class TestJavaScriptFunctionality(unittest.TestCase):
             self.assertIn('createStar', content)
             self.assertIn('animate', content)
             self.assertIn('mousemove', content)
+
+    def test_chart_wheel_js_class(self):
+        """Test that chart-wheel.js contains ChartWheel class"""
+        chart_wheel_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'js', 'chart-wheel.js')
+
+        if os.path.exists(chart_wheel_path):
+            with open(chart_wheel_path, 'r') as f:
+                content = f.read()
+
+            # Test for main class
+            self.assertIn('class ChartWheel', content)
+            
+            # Test for key methods
+            self.assertIn('drawZodiacWheel', content)
+            self.assertIn('drawHouseLines', content)
+            self.assertIn('drawHouseNumbers', content)
+            self.assertIn('drawPlanets', content)
+            self.assertIn('drawAspectLines', content)
+            self.assertIn('calculateAngle', content)
+            
+            # Test for constants
+            self.assertIn('ZODIAC_SYMBOLS', content)
+            self.assertIn('PLANET_SYMBOLS', content)
+            self.assertIn('SIGN_DEGREES', content)
+            
+            # Test for zodiac signs
+            self.assertIn('Aries', content)
+            self.assertIn('Cancer', content)
+            self.assertIn('Libra', content)
+            self.assertIn('Capricorn', content)
+
+    def test_chart_wheel_js_file_exists(self):
+        """Test that chart-wheel.js file exists"""
+        chart_wheel_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), 
+            'static', 'js', 'chart-wheel.js'
+        )
+        self.assertTrue(os.path.exists(chart_wheel_path), "chart-wheel.js should exist")
 
 
 class TestCSS(unittest.TestCase):
