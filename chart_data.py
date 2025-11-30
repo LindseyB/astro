@@ -107,7 +107,7 @@ def get_current_planets(today_chart):
                     if hasattr(planet_obj, 'isRetrograde'):
                         try:
                             retrograde = planet_obj.isRetrograde()
-                        except:
+                        except Exception:
                             retrograde = False
 
                 current_planets[planet_name] = {
