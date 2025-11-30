@@ -432,7 +432,7 @@ class ChartWheel {
                 const aspectAngle = this.calculateAspectAngle(planet1.angle, planet2.angle);
                 
                 // Check each aspect type
-                for (const [aspectName, aspect] of Object.entries(this.aspects)) {
+                for (const aspect of Object.values(this.aspects)) {
                     if (Math.abs(aspectAngle - aspect.angle) <= aspect.orb) {
                         // Draw aspect line
                         this.drawAspectLine(planet1.angle, planet2.angle, aspect);
