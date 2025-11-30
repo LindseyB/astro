@@ -927,7 +927,7 @@ class TestIntegration(unittest.TestCase):
         )
 
     @patch('routes.calculate_full_chart')
-    def test_full_chart_generation_flow(self, mock_calc):
+    def test_full_chart_route_generation_flow(self, mock_calc):
         """Test the complete flow from form submission to full chart display"""
         mock_calc.return_value = {
             'sun': 'Aquarius',
