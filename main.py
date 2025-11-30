@@ -21,7 +21,7 @@ if os.path.exists(ephe_path):
     os.environ['EPHE_PATH'] = ephe_path
     os.environ['SE_EPHE_PATH'] = ephe_path
     logger.info(f"Setting ephemeris path to: {ephe_path}")
-    logger.debug(f"Files in directory: {os.listdir(ephe_path)}")
+    logger.info(f"Files in directory: {os.listdir(ephe_path)}")
 else:
     logger.error(f"Ephemeris path not found: {ephe_path}")
 
