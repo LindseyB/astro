@@ -923,7 +923,7 @@ class TestIntegration(unittest.TestCase):
         self.assertIn(b'Pisces', response.data)
         self.assertIn(b'Gemini', response.data)
         mock_calc.assert_called_once_with(
-            '1995/02/10', '14:30', '-8', '34.0522', '-118.2437'
+            '1995/02/10', '14:30', '-8', '34.0522', '-118.2437', 'any'
         )
 
     @patch('routes.calculate_full_chart')
