@@ -1,16 +1,11 @@
 name: 🧪 Test Suite
 
 on:
-  # Run tests on all pull requests
   pull_request:
-    branches: [ main ]
-    types: [opened, ready_for_review]
-  
-  # Run tests when PRs are merged to main
+    types: [opened, synchronize, reopened]
+    branches: [main]
   push:
-    branches: [ main ]
-  
-  # Allow manual triggering
+    branches: [main]
   workflow_dispatch:
 
 jobs:
