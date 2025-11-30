@@ -5,7 +5,7 @@ import logging
 from flatlib import const
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Logging configuration is handled in main.py
 logger = logging.getLogger(__name__)
 
 # Filter for planets only (exclude house cusps, angles, etc.)
