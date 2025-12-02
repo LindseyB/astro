@@ -4,6 +4,7 @@
 
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
+{% if show_chart_wheel %}
 <script src="{{ url_for('static', filename='js/chart-wheel.js') }}"></script>
 <script>
     // Pass chart data to JavaScript
@@ -15,6 +16,7 @@
         houses: {{ chart_data.houses | tojson | safe }}
     };
 </script>
+{% endif %}
 {% endblock %}
 
 {% block og_title %}{{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆ - Complete Natal Chart{% endblock %}
@@ -46,6 +48,7 @@
 </div>
 
 <!-- Chart Wheel Visualization -->
+{% if show_chart_wheel %}
 <div class="chart-wheel-container">
     <h2>🌟 <i>Your Astrological Chart</i></h2>
     <div class="chart-wheel-wrapper">
@@ -82,6 +85,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <!-- Main Signs -->
 <div class="chart-section">

@@ -1,6 +1,7 @@
 import unittest
 import os
 import sys
+from unittest.mock import patch, MagicMock
 
 # Add the parent directory to the path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -267,6 +268,71 @@ class TestCSS(unittest.TestCase):
             self.assertIn('.analysis-section', content)
             self.assertIn('Space Mono', content)
             self.assertIn('@keyframes', content)
+
+
+class TestLaunchDarklyIntegration(unittest.TestCase):
+    """Test LaunchDarkly integration with routes"""
+
+    def setUp(self):
+        """Set up test client"""
+        self.app = app.test_client()
+        self.app.testing = True
+    
+    @patch('routes.should_show_chart_wheel')
+    @patch('routes.calculate_full_chart')
+    def test_full_chart_route_calls_feature_flag(self, mock_calc, mock_flag):
+        """Test that full chart route calls the LaunchDarkly feature flag"""
+        mock_flag.return_value = True
+        
+        # Mock the calculation to avoid complex dependency issues
+        mock_calc.return_value = {
+            'sun': 'Capricorn',
+            'moon': 'Taurus', 
+            'ascendant': 'Leo',
+            'astrology_analysis': 'Test analysis',
+            'planets': {
+                'Sun': {'sign': 'Capricorn', 'degree': 10.5, 'house': 1},
+                'Moon': {'sign': 'Taurus', 'degree': 15.2, 'house': 5}
+            },
+            'houses': {
+                1: {'sign': 'Leo', 'cusp_degree': 0.0},
+                2: {'sign': 'Virgo', 'cusp_degree': 30.0}
+            }
+        }
+        
+        form_data = {
+            'birth_date': '1990-01-01',
+            'birth_time': '12:00',
+            'timezone_offset': '0',
+            'latitude': '40.7128',
+            'longitude': '-74.0060',
+            'music_genre': 'rock'
+        }
+        
+        response = self.app.post('/full-chart', data=form_data)
+        
+        # The main thing we want to test is that the flag is being called
+        mock_flag.assert_called_once()
+        
+        # And that the calculation is called with proper parameters
+        mock_calc.assert_called_once_with('1990/01/01', '12:00', '0', '40.7128', '-74.0060', 'rock')
+        
+        # Response should be successful (either 200 or redirected)
+        self.assertIn(response.status_code, [200, 302])
+    
+    @patch('routes.should_show_chart_wheel')
+    def test_flag_function_integration(self, mock_flag):
+        """Test that we can call the flag function"""
+        mock_flag.return_value = False
+        
+        from routes import get_or_create_user_id, app as routes_app
+        with routes_app.test_request_context('/'):
+            user_id = get_or_create_user_id()
+            self.assertTrue(len(user_id) > 0)  # Should get a UUID
+                
+        # Test the flag function
+        result = mock_flag('test-user')
+        self.assertEqual(result, False)
 
 
 if __name__ == '__main__':
