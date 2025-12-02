@@ -1,15 +1,30 @@
 """
 Flask application and route handlers
 """
+
 from flask import Flask, render_template, request
 from config import logger
 from formatters import markdown_filter
 from calculations import calculate_chart, calculate_full_chart, calculate_live_mas
+from launchdarkly_service import should_show_chart_wheel
 
 app = Flask(__name__)
 
 # Add markdown filter to convert markdown to HTML
 app.template_filter('markdown')(markdown_filter)
+
+def get_user_ip():
+    """Get the user's IP address for feature flag evaluation"""
+    # Check for X-Forwarded-For header (load balancer/proxy)
+    if request.headers.get('X-Forwarded-For'):
+        # Get the first IP in case of multiple proxies
+        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
+    # Check for X-Real-IP header (nginx)
+    elif request.headers.get('X-Real-IP'):
+        return request.headers.get('X-Real-IP')
+    # Fallback to remote_addr
+    else:
+        return request.remote_addr or '127.0.0.1'
 
 
 @app.route('/')
@@ -76,12 +91,18 @@ def full_chart():
 
     # Convert date format from YYYY-MM-DD to YYYY/MM/DD
     birth_date = birth_date_html.replace('-', '/')
+    
+    # Get user IP and check feature flag
+    user_ip = get_user_ip()
+    show_chart_wheel = should_show_chart_wheel(user_ip)
 
     try:
         logger.info(f"Calculating full chart for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
+        logger.info(f"Chart wheel display flag for IP {user_ip}: {show_chart_wheel}")
+        
         # Calculate full chart
         full_chart_data = calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre)
-        return render_template('full_chart.html', chart_data=full_chart_data)
+        return render_template('full_chart.html', chart_data=full_chart_data, show_chart_wheel=show_chart_wheel)
     except Exception as e:
         logger.error(f"ERROR in /full-chart route: {type(e).__name__}: {str(e)}")
         if app.debug:

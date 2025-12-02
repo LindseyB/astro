@@ -27,7 +27,8 @@ class TestChartWheelVisualization(unittest.TestCase):
         for i in range(1, 13):
             houses[i] = {'sign': signs[i-1], 'degree': 10.0 + i}
 
-        with patch('routes.calculate_full_chart') as mock_calc:
+        with patch('routes.calculate_full_chart') as mock_calc, \
+             patch('routes.should_show_chart_wheel', return_value=True):
             mock_calc.return_value = {
                 'planets': {
                     'Sun': {'sign': 'Cancer', 'degree': 18.5, 'house': 1},
@@ -56,7 +57,8 @@ class TestChartWheelVisualization(unittest.TestCase):
         """Test that chart data is properly structured for JavaScript"""
         from unittest.mock import patch
 
-        with patch('routes.calculate_full_chart') as mock_calc:
+        with patch('routes.calculate_full_chart') as mock_calc, \
+             patch('routes.should_show_chart_wheel', return_value=True):
             test_data = {
                 'planets': {
                     'Sun': {'sign': 'Aries', 'degree': 10.5, 'house': 1},
@@ -193,7 +195,8 @@ class TestChartWheelVisualization(unittest.TestCase):
         """Test that all 12 house cusps are properly handled"""
         from unittest.mock import patch
 
-        with patch('routes.calculate_full_chart') as mock_calc:
+        with patch('routes.calculate_full_chart') as mock_calc, \
+             patch('routes.should_show_chart_wheel', return_value=True):
             houses = {}
             signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
                     'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
@@ -226,9 +229,11 @@ class TestChartWheelVisualization(unittest.TestCase):
 
             # Check that chart data includes all houses
             response_text = response.data.decode('utf-8')
-            for i in range(1, 13):
-                # House numbers should appear in the data
-                self.assertIn(f'"1":', response_text)  # At least house 1
+            # Check that houses data appears in window.chartData JSON
+            self.assertIn('window.chartData', response_text)
+            self.assertIn('houses:', response_text)
+            # Check that house 1 appears in the data structure (representative test)
+            self.assertIn('"1":', response_text)
 
 
 class TestChartWheelJavaScript(unittest.TestCase):
@@ -346,7 +351,8 @@ class TestFullChartRoute(unittest.TestCase):
         for i in range(1, 13):
             houses[i] = {'sign': signs[i-1], 'degree': 0.0}
 
-        with patch('routes.calculate_full_chart') as mock_calc:
+        with patch('routes.calculate_full_chart') as mock_calc, \
+             patch('routes.should_show_chart_wheel', return_value=True):
             mock_calc.return_value = {
                 'planets': {'Sun': {'sign': 'Leo', 'degree': 15.0, 'house': 1}},
                 'houses': houses,

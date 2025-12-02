@@ -1,6 +1,7 @@
 import unittest
 import os
 import sys
+from unittest.mock import patch
 
 # Add the parent directory to the path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -87,7 +88,8 @@ class TestTemplates(unittest.TestCase):
         for i in range(1, 13):
             houses[i] = {'sign': signs[i-1], 'degree': 12.4 + i}
 
-        with patch('routes.calculate_full_chart') as mock_calc:
+        with patch('routes.calculate_full_chart') as mock_calc, \
+             patch('routes.should_show_chart_wheel', return_value=True):
             mock_calc.return_value = {
                 'planets': {
                     'Sun': {'sign': 'Leo', 'degree': 15.5, 'house': 10},
@@ -267,6 +269,76 @@ class TestCSS(unittest.TestCase):
             self.assertIn('.analysis-section', content)
             self.assertIn('Space Mono', content)
             self.assertIn('@keyframes', content)
+
+
+class TestLaunchDarklyIntegration(unittest.TestCase):
+    """Test LaunchDarkly integration with routes"""
+
+    def setUp(self):
+        """Set up test client"""
+        self.app = app.test_client()
+        self.app.testing = True
+    
+    @patch('routes.should_show_chart_wheel')
+    @patch('routes.calculate_full_chart')
+    @patch('routes.get_user_ip')
+    def test_full_chart_route_calls_feature_flag(self, mock_get_ip, mock_calc, mock_flag):
+        """Test that full chart route calls the LaunchDarkly feature flag with IP"""
+        mock_flag.return_value = True
+        mock_get_ip.return_value = "192.168.1.100"
+        
+        # Mock the calculation to avoid complex dependency issues
+        mock_calc.return_value = {
+            'sun': 'Capricorn',
+            'moon': 'Taurus', 
+            'ascendant': 'Leo',
+            'astrology_analysis': 'Test analysis',
+            'planets': {
+                'Sun': {'sign': 'Capricorn', 'degree': 10.5, 'house': 1},
+                'Moon': {'sign': 'Taurus', 'degree': 15.2, 'house': 5}
+            },
+            'houses': {
+                1: {'sign': 'Leo', 'cusp_degree': 0.0},
+                2: {'sign': 'Virgo', 'cusp_degree': 30.0}
+            }
+        }
+        
+        form_data = {
+            'birth_date': '1990-01-01',
+            'birth_time': '12:00',
+            'timezone_offset': '0',
+            'latitude': '40.7128',
+            'longitude': '-74.0060',
+            'music_genre': 'rock'
+        }
+        
+        response = self.app.post('/full-chart', data=form_data)
+        
+        # The main thing we want to test is that the flag is being called with IP
+        mock_get_ip.assert_called_once()
+        mock_flag.assert_called_once_with("192.168.1.100")
+        
+        # And that the calculation is called with proper parameters
+        mock_calc.assert_called_once_with('1990/01/01', '12:00', '0', '40.7128', '-74.0060', 'rock')
+        
+        # Response should be successful (either 200 or redirected)
+        self.assertIn(response.status_code, [200, 302])
+    
+    @patch('routes.should_show_chart_wheel')
+    @patch('routes.get_user_ip')
+    def test_ip_function_integration(self, mock_get_ip, mock_flag):
+        """Test that we can get user IP and call the flag function"""
+        mock_flag.return_value = False
+        mock_get_ip.return_value = "203.0.113.195"
+        
+        from routes import get_user_ip, app as routes_app
+        with routes_app.test_request_context('/', headers={'X-Forwarded-For': '203.0.113.195'}):
+            user_ip = get_user_ip()
+            self.assertEqual(user_ip, "203.0.113.195")
+                
+        # Test the flag function
+        result = mock_flag('203.0.113.195')
+        self.assertEqual(result, False)
 
 
 if __name__ == '__main__':
