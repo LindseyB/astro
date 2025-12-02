@@ -122,11 +122,6 @@ python -m pytest tests/test_launchdarkly_service.py -v
 python -m pytest tests/test_frontend.py::TestLaunchDarklyIntegration -v
 ```
 
-### Demo Script
-```bash
-# Run the demonstration script
-python demo_launchdarkly.py
-```
 
 ### Manual Testing
 
