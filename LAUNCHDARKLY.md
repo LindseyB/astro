@@ -6,10 +6,10 @@ This document explains the LaunchDarkly feature flag integration in the Astro ap
 
 The application uses LaunchDarkly to control whether the interactive chart wheel visualization is displayed on the full natal chart page. This allows for:
 
-- **Gradual feature rollouts**: Enable the chart wheel for specific users or percentages
-- **A/B testing**: Compare user engagement with and without the chart wheel
+- **Gradual feature rollouts**: Enable the chart wheel for specific IP ranges or percentages
+- **Geographic testing**: Target users from specific regions or networks
 - **Emergency disable**: Quickly turn off the feature if issues arise
-- **User targeting**: Show the feature to specific user segments
+- **IP-based targeting**: Show the feature to users from specific networks or locations
 
 ## Feature Flag Configuration
 
@@ -24,9 +24,10 @@ The application uses LaunchDarkly to control whether the interactive chart wheel
 1. Create a new boolean flag called `show-new-chart`
 2. Set the default value to `false` for safety
 3. Configure targeting rules as needed:
-   - **User targeting**: Target specific user IDs
-   - **Percentage rollouts**: Enable for X% of users
-   - **Attribute-based**: Target based on user properties
+   - **IP range targeting**: Target specific IP address ranges
+   - **Geographic targeting**: Use IP geolocation for regional rollouts
+   - **Percentage rollouts**: Enable for X% of traffic
+   - **Custom rules**: Combine IP attributes with other conditions
 4. Set variations:
    - `true`: Show chart wheel
    - `false`: Hide chart wheel
@@ -38,9 +39,6 @@ The application uses LaunchDarkly to control whether the interactive chart wheel
 ```bash
 # LaunchDarkly SDK key (get from your LaunchDarkly project settings)
 LAUNCHDARKLY_SDK_KEY=sdk-your-key-here
-
-# Flask secret key (for session management and user tracking)
-SECRET_KEY=your-secret-key-here
 ```
 
 ### Local Development
@@ -59,26 +57,26 @@ unset LAUNCHDARKLY_SDK_KEY
 The `LaunchDarklyService` class handles:
 - Client initialization with error handling
 - Feature flag evaluation with fallback values
-- User context creation
+- IP-based user context creation
 - Graceful degradation when LaunchDarkly is unavailable
 
 ```python
 from launchdarkly_service import should_show_chart_wheel
 
-# Check if chart wheel should be shown for a user
-show_chart = should_show_chart_wheel(user_id)
+# Check if chart wheel should be shown for a user's IP
+show_chart = should_show_chart_wheel(user_ip)
 ```
 
 ### Route Integration (`routes.py`)
 
 The `/full-chart` route:
-1. Gets or creates a unique user ID from the session
-2. Evaluates the `show-new-chart` flag for that user
+1. Extracts the user's IP address from request headers
+2. Evaluates the `show-new-chart` flag for that IP
 3. Passes the flag result to the template
 
 ```python
-user_id = get_or_create_user_id()
-show_chart_wheel = should_show_chart_wheel(user_id)
+user_ip = get_user_ip()
+show_chart_wheel = should_show_chart_wheel(user_ip)
 return render_template('full_chart.html', 
                       chart_data=chart_data, 
                       show_chart_wheel=show_chart_wheel)
@@ -151,7 +149,7 @@ python demo_launchdarkly.py
 ### Logs
 The application logs LaunchDarkly events:
 - Client initialization status
-- Flag evaluation results
+- Flag evaluation results with IP addresses
 - Error conditions and fallbacks
 
 ```bash
@@ -186,17 +184,19 @@ This ensures the application always works, even if LaunchDarkly has issues.
 
 1. **Start with feature disabled**: Set default to `false` for new features
 2. **Gradual rollout**: Use percentage targeting to slowly enable
-3. **Monitor metrics**: Track user engagement and error rates
+3. **Monitor metrics**: Track engagement and error rates by IP/region
 4. **Test both states**: Ensure app works with feature on/off
 5. **Document changes**: Update this README when adding new flags
-6. **Clean up**: Remove old flags and code when features are fully launched
+6. **Privacy considerations**: Be mindful of IP-based tracking regulations
+7. **Clean up**: Remove old flags and code when features are fully launched
 
 ## Future Enhancements
 
 Potential improvements to the LaunchDarkly integration:
 
-1. **User attributes**: Send user properties for better targeting
+1. **Geographic attributes**: Send country/region data for location-based targeting
 2. **Multiple flags**: Control other features (animations, AI analysis, etc.)
 3. **Metrics tracking**: Send custom events to LaunchDarkly
-4. **Advanced targeting**: Location-based, device-based rules
-5. **Flag management**: Automated flag cleanup and lifecycle management
+4. **ISP/Organization targeting**: Target based on IP ownership data
+5. **Time-based rules**: Combine IP targeting with time-of-day conditions
+6. **Flag management**: Automated flag cleanup and lifecycle management

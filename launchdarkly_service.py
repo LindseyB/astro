@@ -37,12 +37,12 @@ class LaunchDarklyService:
             logger.error(f"Failed to initialize LaunchDarkly client: {str(e)}")
             self.client = None
     
-    def should_show_chart_wheel(self, user_id="anonymous"):
+    def should_show_chart_wheel(self, user_ip="127.0.0.1"):
         """
         Check the 'show-new-chart' flag to determine if chart wheel should be shown
         
         Args:
-            user_id (str): Unique identifier for the user (defaults to "anonymous")
+            user_ip (str): IP address of the user (defaults to "127.0.0.1")
             
         Returns:
             bool: True if chart wheel should be shown, False otherwise
@@ -55,13 +55,13 @@ class LaunchDarklyService:
             return default_value
         
         try:
-            # Create user context
-            context = Context.builder(user_id).build()
+            # Create user context with IP address as key
+            context = Context.builder(user_ip).set("ip", user_ip).build()
             
             # Evaluate the flag
             show_chart = self.client.variation(flag_key, context, default_value)
             
-            logger.info(f"Feature flag '{flag_key}' evaluated to: {show_chart} for user: {user_id}")
+            logger.info(f"Feature flag '{flag_key}' evaluated to: {show_chart} for IP: {user_ip}")
             return show_chart
             
         except Exception as e:
@@ -84,7 +84,7 @@ def get_launchdarkly_service():
         _launchdarkly_service = LaunchDarklyService()
     return _launchdarkly_service
 
-def should_show_chart_wheel(user_id="anonymous"):
+def should_show_chart_wheel(user_ip="127.0.0.1"):
     """Convenience function to check if chart wheel should be shown"""
     service = get_launchdarkly_service()
-    return service.should_show_chart_wheel(user_id)
+    return service.should_show_chart_wheel(user_ip)

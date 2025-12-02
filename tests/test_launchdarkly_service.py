@@ -17,7 +17,7 @@ class TestLaunchDarklyService:
             assert service.client is None
             
             # Should return default value when client is not available
-            result = service.should_show_chart_wheel("test-user")
+            result = service.should_show_chart_wheel("192.168.1.1")
             assert result is False
     
     def test_service_with_sdk_key_success(self):
@@ -33,7 +33,7 @@ class TestLaunchDarklyService:
                         service = LaunchDarklyService()
                         assert service.client is not None
                         
-                        result = service.should_show_chart_wheel("test-user")
+                        result = service.should_show_chart_wheel("192.168.1.100")
                         assert result is True
                         mock_client.variation.assert_called_once()
                         mock_config.assert_called_once_with('test-key')
@@ -50,7 +50,7 @@ class TestLaunchDarklyService:
                         service = LaunchDarklyService()
                         assert service.client is None
                         
-                        result = service.should_show_chart_wheel("test-user")
+                        result = service.should_show_chart_wheel("10.0.0.1")
                         assert result is False
     
     def test_flag_evaluation_error_handling(self):
@@ -65,7 +65,7 @@ class TestLaunchDarklyService:
                     with patch('ldclient.get', return_value=mock_client):
                         service = LaunchDarklyService()
                         
-                        result = service.should_show_chart_wheel("test-user")
+                        result = service.should_show_chart_wheel("172.16.0.1")
                         assert result is False  # Should return default value on error
     
     def test_convenience_function(self):
@@ -75,9 +75,9 @@ class TestLaunchDarklyService:
             mock_service.should_show_chart_wheel.return_value = True
             mock_get_service.return_value = mock_service
             
-            result = should_show_chart_wheel("test-user")
+            result = should_show_chart_wheel("203.0.113.1")
             assert result is True
-            mock_service.should_show_chart_wheel.assert_called_once_with("test-user")
+            mock_service.should_show_chart_wheel.assert_called_once_with("203.0.113.1")
     
     def test_singleton_behavior(self):
         """Test that get_launchdarkly_service returns the same instance"""

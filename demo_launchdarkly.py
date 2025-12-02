@@ -48,14 +48,14 @@ def demonstrate_launchdarkly():
     
     print()
     
-    # Test flag evaluation for different users
+    # Test flag evaluation for different IP addresses
     print("🎛️  Testing 'show-new-chart' feature flag:")
-    test_users = ['user123', 'test@example.com', 'anonymous']
+    test_ips = ['192.168.1.100', '10.0.0.50', '203.0.113.195', '127.0.0.1']
     
-    for user in test_users:
-        show_chart = should_show_chart_wheel(user)
+    for ip in test_ips:
+        show_chart = should_show_chart_wheel(ip)
         status = "✅ ENABLED" if show_chart else "❌ DISABLED" 
-        print(f"   User '{user}': Chart wheel is {status}")
+        print(f"   IP '{ip}': Chart wheel is {status}")
     
     print()
     
@@ -76,13 +76,17 @@ def demonstrate_launchdarkly():
     # Configuration tips
     print("⚙️  Configuration Tips:")
     print("   1. Set up your LaunchDarkly flag named 'show-new-chart'")
-    print("   2. Configure targeting rules based on user attributes")
+    print("   2. Configure targeting rules based on IP addresses or regions")
     print("   3. Use percentage rollouts to gradually enable the feature")
     print("   4. Set fallback value to 'false' for safety")
     print()
     print("   Environment Variables:")
     print("   - LAUNCHDARKLY_SDK_KEY: Your LaunchDarkly SDK key")
-    print("   - SECRET_KEY: Flask session secret (for user tracking)")
+    print()
+    print("   IP-based Targeting Examples:")
+    print("   - Target specific IP ranges (corporate networks)")
+    print("   - Geographic targeting by IP location")
+    print("   - A/B test based on IP hash distribution")
     
     # Cleanup
     service.close()

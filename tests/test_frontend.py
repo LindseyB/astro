@@ -280,9 +280,11 @@ class TestLaunchDarklyIntegration(unittest.TestCase):
     
     @patch('routes.should_show_chart_wheel')
     @patch('routes.calculate_full_chart')
-    def test_full_chart_route_calls_feature_flag(self, mock_calc, mock_flag):
-        """Test that full chart route calls the LaunchDarkly feature flag"""
+    @patch('routes.get_user_ip')
+    def test_full_chart_route_calls_feature_flag(self, mock_get_ip, mock_calc, mock_flag):
+        """Test that full chart route calls the LaunchDarkly feature flag with IP"""
         mock_flag.return_value = True
+        mock_get_ip.return_value = "192.168.1.100"
         
         # Mock the calculation to avoid complex dependency issues
         mock_calc.return_value = {
@@ -311,8 +313,9 @@ class TestLaunchDarklyIntegration(unittest.TestCase):
         
         response = self.app.post('/full-chart', data=form_data)
         
-        # The main thing we want to test is that the flag is being called
-        mock_flag.assert_called_once()
+        # The main thing we want to test is that the flag is being called with IP
+        mock_get_ip.assert_called_once()
+        mock_flag.assert_called_once_with("192.168.1.100")
         
         # And that the calculation is called with proper parameters
         mock_calc.assert_called_once_with('1990/01/01', '12:00', '0', '40.7128', '-74.0060', 'rock')
@@ -321,17 +324,19 @@ class TestLaunchDarklyIntegration(unittest.TestCase):
         self.assertIn(response.status_code, [200, 302])
     
     @patch('routes.should_show_chart_wheel')
-    def test_flag_function_integration(self, mock_flag):
-        """Test that we can call the flag function"""
+    @patch('routes.get_user_ip')
+    def test_ip_function_integration(self, mock_get_ip, mock_flag):
+        """Test that we can get user IP and call the flag function"""
         mock_flag.return_value = False
+        mock_get_ip.return_value = "203.0.113.195"
         
-        from routes import get_or_create_user_id, app as routes_app
-        with routes_app.test_request_context('/'):
-            user_id = get_or_create_user_id()
-            self.assertTrue(len(user_id) > 0)  # Should get a UUID
+        from routes import get_user_ip, app as routes_app
+        with routes_app.test_request_context('/', headers={'X-Forwarded-For': '203.0.113.195'}):
+            user_ip = get_user_ip()
+            self.assertEqual(user_ip, "203.0.113.195")
                 
         # Test the flag function
-        result = mock_flag('test-user')
+        result = mock_flag('203.0.113.195')
         self.assertEqual(result, False)
 
 
