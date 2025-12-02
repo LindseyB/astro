@@ -88,7 +88,8 @@ class TestTemplates(unittest.TestCase):
         for i in range(1, 13):
             houses[i] = {'sign': signs[i-1], 'degree': 12.4 + i}
 
-        with patch('routes.calculate_full_chart') as mock_calc:
+        with patch('routes.calculate_full_chart') as mock_calc, \
+             patch('routes.should_show_chart_wheel', return_value=True):
             mock_calc.return_value = {
                 'planets': {
                     'Sun': {'sign': 'Leo', 'degree': 15.5, 'house': 10},
