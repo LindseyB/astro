@@ -1,7 +1,7 @@
 """
 Tests for LaunchDarkly service
 """
-import pytest
+
 import os
 from unittest.mock import patch, MagicMock
 from launchdarkly_service import LaunchDarklyService, should_show_chart_wheel, get_launchdarkly_service

@@ -1,7 +1,7 @@
 """
 Flask application and route handlers
 """
-import os
+
 from flask import Flask, render_template, request
 from config import logger
 from formatters import markdown_filter
