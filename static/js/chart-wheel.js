@@ -66,7 +66,7 @@ class ChartWheel {
         this.size = 600;
         this.canvas.width = this.size * this.dpr;
         this.canvas.height = this.size * this.dpr;
-        this.canvas.style.width = this.size + 'px';
+        
         this.ctx.scale(this.dpr, this.dpr);
         
         this.centerX = this.size / 2;
