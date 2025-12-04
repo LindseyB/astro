@@ -36,11 +36,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Dark mode script loaded early to prevent flash -->
+    <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
     <script src="{{ url_for('static', filename='js/sparkles.js') }}"></script>
     <script src="{{ url_for('static', filename='js/star-trail.js') }}"></script>
     {% block extra_scripts %}{% endblock %}
 </head>
 <body>
+    <!-- Dark Mode Toggle Button -->
+    <button id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+    
     <div class="container">
         {% block content %}{% endblock %}
     </div>

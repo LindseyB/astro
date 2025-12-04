@@ -11,10 +11,10 @@
 
 {% block content %}
 <h1>🌟 <i>Astro Horoscope</i></h1>
-<p style="text-align: center; color: #666;">Enter your birth information to generate your natal chart to get a super chill super accurate horoscope</p>
+<p class="intro-text">Enter your birth information to generate your natal chart to get a super chill super accurate horoscope</p>
 
 <!-- Form data status indicator -->
-<div id="formDataStatus" style="display: none; text-align: center; background: #e6fffa; color: #234e52; padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #81e6d9;">
+<div id="formDataStatus" class="form-data-status">
     📂 <strong>Restored your previous form data!</strong> Feel free to make any changes.
 </div>
 
@@ -33,7 +33,7 @@
         <label for="timezone_offset">Timezone Offset (e.g., -04:00 for EDT, -05:00 for EST):</label>
         <input type="text" id="timezone_offset" name="timezone_offset" required 
                placeholder="-04:00" pattern="[+\-]?\d{1,2}:\d{2}">
-        <small style="color: #666;">Format: +/-HH:MM (include daylight savings adjustment)</small>
+        <small class="field-hint">Format: +/-HH:MM (include daylight savings adjustment)</small>
     </div>
     
     <div class="form-group">
@@ -58,11 +58,10 @@
             <option value="k-pop">K-Pop</option>
             <option value="other">Other (specify below)</option>
         </select>
-        <div id="other_genre_div" style="display: none; margin-top: 10px;">
-            <input type="text" id="other_genre" name="other_genre" placeholder="Specify your preferred genre..." 
-                   style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        <div id="other_genre_div" class="other-genre-input">
+            <input type="text" id="other_genre" name="other_genre" placeholder="Specify your preferred genre...">
         </div>
-        <small style="color: #666;">This helps customize song recommendations in your horoscope</small>
+        <small class="field-hint">This helps customize song recommendations in your horoscope</small>
     </div>
     
     <!-- Interactive Location Selector -->
@@ -70,15 +69,13 @@
         <label>📍 Select Birth Location:</label>
         <div class="location-selector">
             <div class="location-search">
-                <input type="text" id="locationSearch" placeholder="Search for a city or address..." 
-                       style="width: 70%; padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                <button type="button" onclick="searchLocation()" 
-                        style="padding: 8px 15px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <input type="text" id="locationSearch" placeholder="Search for a city or address...">
+                <button type="button" onclick="searchLocation()">
                     Search
                 </button>
             </div>
-            <div id="locationMap" style="height: 300px; width: 100%; border-radius: 8px; margin: 10px 0; border: 1px solid #ddd;"></div>
-            <div id="locationDisplay" style="padding: 10px; background: #f7fafc; border-radius: 4px; font-size: 14px; color: #666;">
+            <div id="locationMap"></div>
+            <div id="locationDisplay">
                 Click on the map or search for a location to set your birth place
             </div>
         </div>
@@ -88,14 +85,14 @@
         <label for="latitude">Latitude (auto-filled from map):</label>
         <input type="text" id="latitude" name="latitude" required 
                placeholder="40n42" readonly>
-        <small style="color: #666;">Format: DDnMM for North, DDsM for South</small>
+        <small class="field-hint">Format: DDnMM for North, DDsM for South</small>
     </div>
     
     <div class="form-group">
         <label for="longitude">Longitude (auto-filled from map):</label>
         <input type="text" id="longitude" name="longitude" required 
                placeholder="74w00" readonly>
-        <small style="color: #666;">Format: DDwMM for West, DDeMM for East</small>
+        <small class="field-hint">Format: DDwMM for West, DDeMM for East</small>
     </div>
     
     <div class="button-group">
@@ -104,16 +101,15 @@
         <button type="submit" formaction="/live-mas">Live Más 🔔</button>
     </div>
     
-    <div style="text-align: center; margin-top: 15px;">
-        <button type="button" id="resetFormBtn" 
-                style="background: #e2e8f0; color: #4a5568; border: 1px solid #cbd5e0; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px;"
+    <div class="clear-data-container">
+        <button type="button" id="resetFormBtn" class="clear-data-btn"
                 title="Clear all saved form data">
             🗑️ Clear Saved Data
         </button>
     </div>
 </form>
 
-<div style="margin-top: 30px; padding: 20px; background: #f7fafc; border-radius: 10px;">
+<div class="location-help">
     <h3>📍 Location Help</h3>
     <p><strong>🗺️ Using the Interactive Map:</strong></p>
     <ul>
