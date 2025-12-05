@@ -1,12 +1,54 @@
+/* CSS Variables for Theme Colors */
+:root {
+    --bg-gradient-start: #667eea;
+    --bg-gradient-end: #764ba2;
+    --container-bg: #ffffff;
+    --text-color: #333333;
+    --text-secondary: #4a5568;
+    --text-tertiary: #2d3748;
+    --border-color: #e2e8f0;
+    --section-bg: #f7fafc;
+    --card-bg: #ffffff;
+    --input-bg: #ffffff;
+    --selection-bg: #ea66cd;
+    --selection-text: #2d3748;
+    --error-bg: #fed7d7;
+    --error-text: #c53030;
+    --error-border: #fc8181;
+    --location-display-bg: #f7fafc;
+    --readonly-input-bg: #f7fafc;
+}
+
+/* Dark Mode Variables */
+.dark-mode {
+    --bg-gradient-start: #1a1a2e;
+    --bg-gradient-end: #16213e;
+    --container-bg: #0f1419;
+    --text-color: #e4e4e7;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #d4d4d8;
+    --border-color: #27272a;
+    --section-bg: #1a1a24;
+    --card-bg: #18181b;
+    --input-bg: #27272a;
+    --selection-bg: #ea66cd;
+    --selection-text: #ffffff;
+    --error-bg: #450a0a;
+    --error-text: #fca5a5;
+    --error-border: #991b1b;
+    --location-display-bg: #1a1a24;
+    --readonly-input-bg: #1a1a24;
+}
+
 /* Custom text selection colors */
 ::selection {
-    background: #ea66cd;
-    color: #2d3748; 
+    background: var(--selection-bg);
+    color: var(--selection-text); 
 }
 
 ::-moz-selection {
-    background: #ea66cd; 
-    color: #2d3748; 
+    background: var(--selection-bg); 
+    color: var(--selection-text); 
 }
 
 body {
@@ -14,22 +56,25 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
     min-height: 100vh;
-    color: #333;
+    color: var(--text-color);
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .container {
     max-width: 800px;
     margin: 0 auto;
-    background: white;
+    background: var(--container-bg);
     border-radius: 15px;
     padding: 30px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: background 0.3s ease;
+    position: relative;
 }
 
 h1, h2 {
-    color: #4a5568;
+    color: var(--text-secondary);
     text-align: center;
 }
 
@@ -41,16 +86,19 @@ label {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
-    color: #2d3748;
+    color: var(--text-tertiary);
 }
 
 input, select {
     width: 100%;
     padding: 10px;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
     font-size: 16px;
     box-sizing: border-box;
+    background: var(--input-bg);
+    color: var(--text-color);
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 input:focus, select:focus {
@@ -114,9 +162,10 @@ button.loading:hover {
 .chart-section {
     margin: 30px 0;
     padding: 20px;
-    background: #f7fafc;
+    background: var(--section-bg);
     border-radius: 10px;
     border-left: 5px solid #667eea;
+    transition: background 0.3s ease;
 }
 
 .main-signs {
@@ -127,11 +176,12 @@ button.loading:hover {
 }
 
 .sign-card {
-    background: white;
+    background: var(--card-bg);
     padding: 20px;
     border-radius: 10px;
     text-align: center;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: background 0.3s ease;
 }
 
 .mercury-status {
@@ -156,12 +206,13 @@ button.loading:hover {
 }
 
 .error {
-    background: #fed7d7;
-    color: #c53030;
+    background: var(--error-bg);
+    color: var(--error-text);
     padding: 20px;
     border-radius: 8px;
-    border: 2px solid #fc8181;
+    border: 2px solid var(--error-border);
     margin: 20px 0;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .analysis-section {
@@ -346,17 +397,18 @@ button.loading:hover {
 
 #locationDisplay {
     padding: 10px;
-    background: #f7fafc;
+    background: var(--location-display-bg);
     border-radius: 4px;
     font-size: 14px;
-    color: #666;
-    border: 1px solid #e2e8f0;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Make latitude/longitude inputs readonly-styled */
 input[readonly] {
-    background-color: #f7fafc;
-    color: #4a5568;
+    background-color: var(--readonly-input-bg);
+    color: var(--text-secondary);
     cursor: not-allowed;
 }
 
@@ -523,11 +575,16 @@ input[readonly] {
     margin: 30px 0;
     backdrop-filter: blur(10px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s ease;
+}
+
+.dark-mode .chart-wheel-container {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
 }
 
 .chart-wheel-container h2 {
     text-align: center;
-    color: #4a5568;
+    color: var(--text-secondary);
     margin-bottom: 30px;
 }
 
@@ -551,7 +608,7 @@ input[readonly] {
     gap: 15px;
     margin-top: 25px;
     font-size: 14px;
-    color: #4a5568;
+    color: var(--text-secondary);
 }
 
 .legend-section {
@@ -562,8 +619,14 @@ input[readonly] {
 }
 
 .legend-section strong {
-    color: #2c3e50;
+    color: var(--text-tertiary);
     font-size: 15px;
+    transition: color 0.3s ease;
+}
+
+.dark-mode .legend-section strong {
+    color: #f4f4f5;
+    font-weight: 700;
 }
 
 .legend-item {
@@ -596,6 +659,143 @@ input[readonly] {
     flex-wrap: wrap;
 }
 
+/* Index Page Specific Styles */
+.intro-text {
+    text-align: center;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.form-data-status {
+    display: none;
+    text-align: center;
+    background: #e6fffa;
+    color: #234e52;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #81e6d9;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark-mode .form-data-status {
+    background: #042f2e;
+    color: #99f6e4;
+    border-color: #134e4a;
+}
+
+.field-hint {
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.other-genre-input {
+    display: none;
+    margin-top: 10px;
+}
+
+.other-genre-input input {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--input-bg);
+    box-sizing: border-box;
+}
+
+.clear-data-container {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.clear-data-btn {
+    background: #e2e8f0;
+    color: #4a5568;
+    border: 1px solid #cbd5e0;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    transition: all 0.3s ease;
+    width: auto;
+    margin: 0;
+}
+
+.dark-mode .clear-data-btn {
+    background: #27272a;
+    color: #a1a1aa;
+    border-color: #3f3f46;
+}
+
+.clear-data-btn:hover {
+    background: #cbd5e0;
+    transform: translateY(-1px);
+}
+
+.dark-mode .clear-data-btn:hover {
+    background: #3f3f46;
+}
+
+.location-help {
+    margin-top: 30px;
+    padding: 20px;
+    background: var(--section-bg);
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.location-help h3 {
+    color: var(--text-secondary);
+    margin-top: 0;
+}
+
+.location-help p,
+.location-help li {
+    color: var(--text-color);
+}
+
+/* Dark Mode Toggle Button */
+#darkModeToggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 3px solid #764ba2;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(118, 75, 162, 0.2);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    padding: 0;
+    margin: 0;
+}
+
+.dark-mode #darkModeToggle {
+    background: rgba(39, 39, 42, 0.95);
+    border: 3px solid #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(255, 255, 255, 0.2);
+}
+
+#darkModeToggle:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.dark-mode #darkModeToggle:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(155, 135, 245, 0.5);
+}
+
+#darkModeToggle:active {
+    transform: translateY(0) scale(0.95);
+}
+
 @media (max-width: 768px) {
     .planets-grid,
     .houses-grid {
@@ -618,5 +818,13 @@ input[readonly] {
     
     .legend-item {
         gap: 10px;
+    }
+    
+    #darkModeToggle {
+        top: 10px;
+        right: 10px;
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
     }
 }
