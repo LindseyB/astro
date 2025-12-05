@@ -94,7 +94,7 @@ def full_chart():
     
     # Get user IP and check feature flag
     user_ip = get_user_ip()
-    show_chart_wheel = True #should_show_chart_wheel(user_ip)
+    show_chart_wheel = should_show_chart_wheel(user_ip)
 
     try:
         logger.info(f"Calculating full chart for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
