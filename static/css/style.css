@@ -758,8 +758,8 @@ input[readonly] {
     position: fixed;
     top: 20px;
     right: 20px;
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.95);
+    border: 3px solid #764ba2;
     border-radius: 50%;
     width: 50px;
     height: 50px;
@@ -768,7 +768,7 @@ input[readonly] {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(118, 75, 162, 0.2);
     transition: all 0.3s ease;
     z-index: 1000;
     padding: 0;
@@ -776,13 +776,18 @@ input[readonly] {
 }
 
 .dark-mode #darkModeToggle {
-    background: rgba(39, 39, 42, 0.9);
-    border-color: var(--border-color);
+    background: rgba(39, 39, 42, 0.95);
+    border: 3px solid #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(255, 255, 255, 0.2);
 }
 
 #darkModeToggle:hover {
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.dark-mode #darkModeToggle:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(155, 135, 245, 0.5);
 }
 
 #darkModeToggle:active {
