@@ -60,7 +60,7 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
     logger.debug(user_prompt)
     logger.debug("=== END PROMPT ===")
 
-    system_content = "You are cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly. Never use any mdashes in your responses those just aren't cool."
+    system_content = "You are a cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly. Never use any mdashes in your responses those just aren't cool."
 
     astrology_analysis = call_ai_api(system_content, user_prompt)
     if astrology_analysis is None:
