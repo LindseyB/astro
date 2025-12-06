@@ -34,7 +34,7 @@ def test_music_suggestion_missing_data(client):
     response = client.post('/music-suggestion', json={})
     
     # Should return error
-    assert response.status_code == 500
+    assert response.status_code == 400
 
 
 def test_music_suggestion_invalid_method(client):

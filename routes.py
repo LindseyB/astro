@@ -3,7 +3,7 @@ Flask application and route handlers
 """
 
 from flask import Flask, render_template, request, Response, stream_with_context, jsonify
-from config import logger, PLANET_CONSTANTS, HOUSE_NAMES
+from config import logger, HOUSE_NAMES
 from formatters import markdown_filter, prepare_music_genre_text, format_planets_for_api
 from calculations import calculate_chart, calculate_full_chart, calculate_live_mas
 from launchdarkly_service import should_show_chart_wheel
@@ -196,8 +196,8 @@ def music_suggestion():
             f"Chart Data:\n"
             f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
             "Planets in Houses:\n" +
-            "\n".join([f"{HOUSE_NAMES[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) 
-                      for house_number, data in planets_in_houses.items()]) + "\n\n"
+            "\n".join([f"{HOUSE_NAMES[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in house_data['planets']]) 
+                      for house_number, house_data in planets_in_houses.items()]) + "\n\n"
         )
 
         if chart_type == 'daily':

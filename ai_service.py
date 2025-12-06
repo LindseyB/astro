@@ -111,7 +111,7 @@ def verify_song_exists(song_info):
             f"You are a music expert. Check if this song is real:\n\n"
             f"{song_info}\n\n"
             f"Respond ONLY with a JSON object in this exact format:\n"
-            f'{{is_real: true/false, "explanation": "brief explanation"}}\n\n'
+            f'{{"is_real": true/false, "explanation": "brief explanation"}}\n\n'
             f"If the song exists, is_real should be true. If it's made up or you're not confident it exists, is_real should be false."
         )
 
@@ -135,12 +135,12 @@ def verify_song_exists(song_info):
         
         # Parse JSON response
         import json
-        # Extract JSON if wrapped in markdown code blocks
-        if result_text.startswith('```'):
-            result_text = result_text.split('```')[1]
-            if result_text.startswith('json'):
-                result_text = result_text[4:]
-            result_text = result_text.strip()
+        import re
+        # Extract JSON if wrapped in markdown code blocks using regex
+        match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', result_text, re.DOTALL)
+        if match:
+            result_text = match.group(1)
+        result_text = result_text.strip()
         
         result = json.loads(result_text)
         return result

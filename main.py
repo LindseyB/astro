@@ -8,7 +8,8 @@ import os
 import logging
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+log_level = os.environ.get('LOG_LEVEL', 'INFO')
+logging.basicConfig(level=getattr(logging, log_level), format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Problem child pyswisseph logic hack here #

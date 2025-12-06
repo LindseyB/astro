@@ -41,10 +41,22 @@ function loadMusicSuggestion(chartData, chartType) {
                             
                             if (data.type === 'chunk') {
                                 suggestionText += data.content;
-                                container.innerHTML = `<p>${suggestionText}<span class="typing-cursor">|</span></p>`;
+                                // Safely update suggestion text with cursor
+                                const p = document.createElement('p');
+                                p.textContent = suggestionText;
+                                const cursor = document.createElement('span');
+                                cursor.className = 'typing-cursor';
+                                cursor.textContent = '|';
+                                p.appendChild(cursor);
+                                container.innerHTML = '';
+                                container.appendChild(p);
                             } else if (data.type === 'verified') {
                                 const icon = data.verified ? '' : ' ⚠️';
-                                container.innerHTML = `<p>${data.content}${icon}</p>`;
+                                // Safely update verified message
+                                const p = document.createElement('p');
+                                p.textContent = data.content + icon;
+                                container.innerHTML = '';
+                                container.appendChild(p);
                             } else if (data.type === 'retry') {
                                 suggestionText = '';
                                 container.innerHTML = '<p><em>Finding alternative...</em></p>';
