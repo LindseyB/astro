@@ -47,7 +47,7 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
         music_preference = " any"
 
     # Build the user prompt
-    user_prompt = "Only respond in a few sentences. Based on the following astrological chart data: First give a single sentence summarizing the day for the person getting the horoscope as a title for the horoscope and then please recommend some activities to do or not to do ideally in bullet format the first sentence in your response should be what today's vibe will be like please also recommend a single song to listen to and recommend a beverage to drink given today's vibe:\n\n" + \
+    user_prompt = "Only respond in a few sentences. Based on the following astrological chart data: First give a single sentence summarizing the day for the person getting the horoscope as a title for the horoscope and then please recommend some activities to do or not to do ideally in bullet format the first sentence in your response should be what today's vibe will be like please also recommend a single song to listen to (double check that it's real) and recommend a beverage to drink given today's vibe:\n\n" + \
                   f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n" + \
                   "Planets in Houses:\n" + \
                   "\n".join([f"{HOUSE_NAMES[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" + \
@@ -60,11 +60,11 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
     logger.debug(user_prompt)
     logger.debug("=== END PROMPT ===")
 
-    system_content = "You are cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly."
+    system_content = "You are a cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly. Never use any mdashes in your responses those just aren't cool."
 
     astrology_analysis = call_ai_api(system_content, user_prompt)
     if astrology_analysis is None:
-        astrology_analysis = f"**Cosmic Note:** The AI astrologer is taking a cosmic coffee break. ☕ Trust your intuition today! 🔮"
+        astrology_analysis = f"**Cosmic Note:** The AI astrologer is taking a cosmic tea break. ☕ Trust your intuition today! 🔮"
 
     return {
         'sun': sun.sign,
@@ -114,7 +114,7 @@ def calculate_live_mas(birth_date, birth_time, timezone_offset, latitude, longit
         format_planets_for_api(current_planets)
     )
 
-    system_content = "You are a zoomer astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts and the taco bell menu quickly."
+    system_content = "You are a cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts and the taco bell menu quickly. Never use any mdashes in your responses those just aren't cool."
 
     taco_bell_order = call_ai_api(system_content, user_prompt, temperature=1)
     if taco_bell_order is None:
@@ -206,7 +206,7 @@ def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, long
         "Only respond in a few sentences. Based on the following natal chart data, "
         "please give a concise, emoji-filled summary of this person's personality and life themes. "
         "Highlight any unique planetary placements or house patterns. "
-        f"Format your response in bullet points. Recommend a single song that fits this chart{song_request}:\n\n"
+        f"Format your response in bullet points. Recommend a single song that fits this chart{song_request} (double check that it's a real song):\n\n"
         f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
         "Planets:\n" +
         "\n".join([
@@ -221,11 +221,11 @@ def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, long
         ])
     )
 
-    system_content = "You are a zoomer astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly."
+    system_content = "You are a cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly. Never use any mdashes in your responses those just aren't cool."
 
     astrology_analysis = call_ai_api(system_content, user_prompt)
     if astrology_analysis is None:
-        astrology_analysis = f"**Cosmic Note:** The AI astrologer is taking a cosmic coffee break. ☕ You're as special and unique as the stars! 🔮"
+        astrology_analysis = f"**Cosmic Note:** The AI astrologer is taking a cosmic tea break. ☕ You're as special and unique as the stars! 🔮"
 
     return {
         'sun': sun.sign,
