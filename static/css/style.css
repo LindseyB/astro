@@ -828,3 +828,23 @@ input[readonly] {
         font-size: 20px;
     }
 }
+
+/* Music Suggestion Styles */
+#music-suggestion-placeholder {
+    margin-top: 15px;
+}
+
+#music-suggestion-placeholder p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+.typing-cursor {
+    animation: blink 1s infinite;
+    color: var(--text-color);
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}

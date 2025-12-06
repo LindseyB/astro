@@ -342,8 +342,9 @@ class TestChartCalculation(unittest.TestCase):
         messages = call_args[1]['messages']
         user_message = messages[0]['content']
 
-        # Verify the user prompt contains "Music Preference: any"
-        self.assertIn('Music Preference: any', user_message)
+        # Verify the user prompt does NOT contain music preferences (moved to async endpoint)
+        self.assertNotIn('Music Preference:', user_message)
+        # Note: "song" check removed as it's loaded separately now
 
         # Verify result structure
         self.assertEqual(result['sun'], 'Capricorn')
@@ -394,8 +395,9 @@ class TestChartCalculation(unittest.TestCase):
         messages = call_args[1]['messages']
         user_message = messages[0]['content']
 
-        # Verify the user prompt contains "Music Preference: any"
-        self.assertIn('Music Preference: any', user_message)
+        # Verify the user prompt does NOT contain music preferences (moved to async endpoint)
+        self.assertNotIn('Music Preference:', user_message)
+        # Note: "song" check removed as it's loaded separately now
 
     @patch('chart_data.datetime')
     @patch('chart_data.Chart')
@@ -441,8 +443,9 @@ class TestChartCalculation(unittest.TestCase):
         messages = call_args[1]['messages']
         user_message = messages[0]['content']
 
-        # Verify the user prompt contains the jazz preference text
-        self.assertIn('Music Preference: (Please prioritize jazz genre if possible)', user_message)
+        # Verify the user prompt does NOT contain music preferences (moved to async endpoint)
+        self.assertNotIn('Music Preference:', user_message)
+        self.assertNotIn('song', user_message.lower())
 
     @patch('chart_data.datetime')
     @patch('chart_data.Chart')
@@ -488,8 +491,9 @@ class TestChartCalculation(unittest.TestCase):
         messages = call_args[1]['messages']
         user_message = messages[0]['content']
 
-        # Verify the user prompt contains "Music Preference: any" (fallback)
-        self.assertIn('Music Preference: any', user_message)
+        # Verify the user prompt does NOT contain music preferences (moved to async endpoint)
+        self.assertNotIn('Music Preference:', user_message)
+        # Note: "song" check removed as it's loaded separately now
 
     @patch('chart_data.datetime')
     @patch('chart_data.Chart')
@@ -535,8 +539,9 @@ class TestChartCalculation(unittest.TestCase):
         messages = call_args[1]['messages']
         user_message = messages[0]['content']
 
-        # Verify the user prompt contains the "other" preference text
-        self.assertIn('Music Preference: (Please suggest songs from any genre that fits the vibe)', user_message)
+        # Verify the user prompt does NOT contain music preferences (moved to async endpoint)
+        self.assertNotIn('Music Preference:', user_message)
+        # Note: "song" check removed as it's loaded separately now
 
 
 class TestFullChartCalculation(unittest.TestCase):

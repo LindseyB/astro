@@ -4,6 +4,7 @@
 
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
+<script src="{{ url_for('static', filename='js/music-suggestion.js') }}"></script>
 {% if show_chart_wheel %}
 <script src="{{ url_for('static', filename='js/chart-wheel.js') }}"></script>
 <script>
@@ -17,6 +18,17 @@
     };
 </script>
 {% endif %}
+<script>
+    // Pass chart data to JavaScript for music suggestion
+    window.chartDataForMusic = {
+        birthDate: "{{ form_data.birth_date }}",
+        birthTime: "{{ form_data.birth_time }}",
+        timezoneOffset: "{{ form_data.timezone_offset }}",
+        latitude: "{{ form_data.latitude }}",
+        longitude: "{{ form_data.longitude }}",
+        musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
+    };
+</script>
 {% endblock %}
 
 {% block og_title %}{{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆ - Complete Natal Chart{% endblock %}
@@ -41,6 +53,8 @@
     <h2>🔮 <i>Your Complete Chart Analysis</i></h2>
     <div class="analysis-content" id="analysisContent">
         {{ chart_data.astrology_analysis | markdown | safe }}
+        <!-- Music Suggestion (loaded async, appears inline at the end) -->
+        <div id="music-suggestion-placeholder" data-chart-type="natal"></div>
     </div>
     <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()" title="Copy your chart analysis">
         📋
