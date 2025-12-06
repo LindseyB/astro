@@ -2,6 +2,8 @@
 AI service for astrological analysis using Anthropic Claude
 """
 import os
+import json
+import re
 from anthropic import Anthropic
 from config import logger
 
@@ -133,9 +135,6 @@ def verify_song_exists(song_info):
         result_text = response.content[0].text.strip()
         logger.debug(f"Verification response: {result_text}")
         
-        # Parse JSON response
-        import json
-        import re
         # Extract JSON if wrapped in markdown code blocks using regex
         match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', result_text, re.DOTALL)
         if match:

@@ -60,6 +60,9 @@ function loadMusicSuggestion(chartData, chartType) {
                             } else if (data.type === 'retry') {
                                 suggestionText = '';
                                 container.innerHTML = '<p><em>Finding alternative...</em></p>';
+                            } else if (data.type === 'error') {
+                                console.error('Music suggestion error:', data.content);
+                                container.remove();
                             }
                         } catch (e) {
                             console.error('Error parsing SSE data:', e);

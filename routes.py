@@ -149,6 +149,14 @@ def music_suggestion():
     """Handle async music suggestion request with streaming and verification"""
     try:
         data = request.get_json()
+        
+        # Validate required fields (check for None or empty string, but allow 0/0.0)
+        required_fields = ['birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude']
+        missing_fields = [field for field in required_fields if field not in data or data.get(field) is None or data.get(field) == '']
+        
+        if missing_fields:
+            return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
+        
         birth_date = data.get('birth_date')
         birth_time = data.get('birth_time')
         timezone_offset = data.get('timezone_offset')
@@ -215,9 +223,17 @@ def music_suggestion():
             
             # Stream the initial suggestion
             for chunk in stream_ai_api(system_content, user_prompt, temperature=0.8):
+                if chunk is None:
+                    yield f"data: {json.dumps({'type': 'error', 'content': 'Failed to generate music suggestion'})}\n\n"
+                    return
                 if chunk:
                     full_response += chunk
                     yield f"data: {json.dumps({'type': 'chunk', 'content': chunk})}\n\n"
+            
+            # Check if we got any response
+            if not full_response:
+                yield f"data: {json.dumps({'type': 'error', 'content': 'No response received from AI'})}\n\n"
+                return
             
             # Now verify the song exists
             logger.info(f"Verifying song: {full_response}")
@@ -240,9 +256,17 @@ def music_suggestion():
                 
                 retry_response = ""
                 for chunk in stream_ai_api(system_content, retry_prompt, temperature=0.5):
+                    if chunk is None:
+                        yield f"data: {json.dumps({'type': 'error', 'content': 'Failed to generate alternative suggestion'})}\n\n"
+                        return
                     if chunk:
                         retry_response += chunk
                         yield f"data: {json.dumps({'type': 'chunk', 'content': chunk})}\n\n"
+                
+                # Check if we got any retry response
+                if not retry_response:
+                    yield f"data: {json.dumps({'type': 'error', 'content': 'No alternative response received'})}\n\n"
+                    return
                 
                 # Verify retry
                 retry_verification = verify_song_exists(retry_response)
