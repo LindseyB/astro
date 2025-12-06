@@ -3,9 +3,6 @@ Tests for the async music suggestion endpoint
 """
 import pytest
 from routes import app
-import json
-
-
 @pytest.fixture
 def client():
     """Create a test client for the Flask app"""
