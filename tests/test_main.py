@@ -293,7 +293,7 @@ class TestChartCalculation(unittest.TestCase):
             '1990/01/15', '12:00', '-5', 40.7128, -74.0060
         )
 
-        self.assertIn('cosmic coffee break', result['astrology_analysis'])
+        self.assertIn('cosmic tea break', result['astrology_analysis'])
 
     @patch('chart_data.datetime')
     @patch('chart_data.Chart')
