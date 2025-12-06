@@ -7,7 +7,8 @@ from config import logger
 
 # Client setup for Anthropic API
 token = os.environ.get("ANTHROPIC_TOKEN") or "default_token"
-model = "claude-haiku-4-5"
+model = "claude-haiku-4-5-20251001"
+MAX_TOKENS = 8192 # Max tokens for Claude models
 client = Anthropic(
     api_key=token,
     timeout=60.0  # 60 second timeout
@@ -30,7 +31,7 @@ def call_ai_api(system_content, user_prompt, temperature=1.0):
         logger.debug("=== AI API CALL ===")
         response = client.messages.create(
             model=model,
-            max_tokens=1024,
+            max_tokens=MAX_TOKENS,
             temperature=temperature,
             system=system_content,
             messages=[
