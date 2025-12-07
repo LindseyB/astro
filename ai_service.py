@@ -95,7 +95,8 @@ def stream_ai_api(system_content, user_prompt, temperature=1.0):
         # Handle various API errors gracefully
         error_type = type(e).__name__
         logger.error(f"AI Streaming Error ({error_type}): {str(e)}")
-        yield None
+        # pass through error to caller for handling
+        raise e
 
 
 def verify_song_exists(song_info):
