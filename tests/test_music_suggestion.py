@@ -60,22 +60,26 @@ def test_music_suggestion_missing_data(client):
 
 def test_music_suggestion_without_token(client):
     """Test that the endpoint returns 503 when AI token is not available"""
-    response = client.post('/music-suggestion', 
-                          json={
-                              'birth_date': '1990/01/01',
-                              'birth_time': '12:00',
-                              'timezone_offset': '+00:00',
-                              'latitude': 0.0,
-                              'longitude': 0.0,
-                              'music_genre': 'any',
-                              'chart_type': 'daily'
-                          })
-    
-    # Should return 503 Service Unavailable when token is not set
-    assert response.status_code == 503
-    data = response.get_json()
-    assert 'error' in data
-    assert 'unavailable' in data['error'].lower()
+    # Mock get_client to raise ValueError simulating missing token
+    with patch('ai_service.get_client') as mock_get_client:
+        mock_get_client.side_effect = ValueError("ANTHROPIC_TOKEN environment variable is not set")
+        
+        response = client.post('/music-suggestion', 
+                              json={
+                                  'birth_date': '1990/01/01',
+                                  'birth_time': '12:00',
+                                  'timezone_offset': '+00:00',
+                                  'latitude': 0.0,
+                                  'longitude': 0.0,
+                                  'music_genre': 'any',
+                                  'chart_type': 'daily'
+                              })
+        
+        # Should return 503 Service Unavailable when token is not set
+        assert response.status_code == 503
+        data = response.get_json()
+        assert 'error' in data
+        assert 'unavailable' in data['error'].lower()
 
 
 def test_music_suggestion_invalid_method(client):

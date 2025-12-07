@@ -112,6 +112,13 @@ def stream_chart_analysis():
         
         data = request.get_json()
         
+        # Validate required fields (check for None or empty string, but allow 0/0.0)
+        required_fields = ['birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude']
+        missing_fields = [field for field in required_fields if field not in data or data.get(field) is None or data.get(field) == '']
+        
+        if missing_fields:
+            return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
+        
         birth_date = data.get('birth_date')
         birth_time = data.get('birth_time')
         timezone_offset = data.get('timezone_offset')
@@ -268,6 +275,13 @@ def stream_full_chart_analysis():
         
         data = request.get_json()
         
+        # Validate required fields (check for None or empty string, but allow 0/0.0)
+        required_fields = ['birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude']
+        missing_fields = [field for field in required_fields if field not in data or data.get(field) is None or data.get(field) == '']
+        
+        if missing_fields:
+            return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
+        
         birth_date = data.get('birth_date')
         birth_time = data.get('birth_time')
         timezone_offset = data.get('timezone_offset')
@@ -361,6 +375,13 @@ def stream_live_mas_analysis():
             return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
         
         data = request.get_json()
+        
+        # Validate required fields (check for None or empty string, but allow 0/0.0)
+        required_fields = ['birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude']
+        missing_fields = [field for field in required_fields if field not in data or data.get(field) is None or data.get(field) == '']
+        
+        if missing_fields:
+            return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
         
         birth_date = data.get('birth_date')
         birth_time = data.get('birth_time')
