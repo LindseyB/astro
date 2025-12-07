@@ -81,28 +81,38 @@
         // Clear loading message
         analysisContainer.innerHTML = '';
         
-        // Helper to finalize analysis display and music suggestion
-        function finalizeAnalysis(fullText, chartData, analysisContainer) {
-            // Convert markdown to HTML if we have marked.js
-            if (window.marked && fullText) {
-                analysisContainer.innerHTML = marked.parse(fullText);
-            }
-            // Re-add music suggestion placeholder and trigger loading
-            const musicPlaceholder = document.createElement('div');
-            musicPlaceholder.id = 'music-suggestion-placeholder';
-            const chartType = chartData.pageType === 'chart' ? 'daily' : (chartData.pageType === 'full-chart' ? 'natal' : 'live-mas');
-            musicPlaceholder.setAttribute('data-chart-type', chartType);
-            analysisContainer.appendChild(musicPlaceholder);
-            // Trigger music suggestion loading if function exists
-            if (typeof loadMusicSuggestion === 'function' && window.chartDataForMusic) {
-                loadMusicSuggestion(window.chartDataForMusic, chartType);
-            }
-        }
-
         function processStream() {
             reader.read().then(({ done, value }) => {
                 if (done) {
-                    finalizeAnalysis(fullText, chartData, analysisContainer);
+                    // Convert markdown to HTML if we have marked.js
+                    if (window.marked && fullText) {
+                        analysisContainer.innerHTML = marked.parse(fullText);
+                    }
+                    // Re-add music suggestion placeholder and trigger loading
+                    const musicPlaceholder = document.createElement('div');
+                    musicPlaceholder.id = 'music-suggestion-placeholder';
+                    const chartType = chartData.pageType === 'chart' ? 'daily' : (chartData.pageType === 'full-chart' ? 'natal' : 'live-mas');
+                    musicPlaceholder.setAttribute('data-chart-type', chartType);
+                    analysisContainer.appendChild(musicPlaceholder);
+                    
+                    // Trigger music suggestion loading if function exists
+                    if (typeof loadMusicSuggestion === 'function' && window.chartDataForMusic) {
+                        loadMusicSuggestion(window.chartDataForMusic, chartType);
+                    }
+                    return;
+                }
+                
+                // Decode the chunk
+                buffer += decoder.decode(value, { stream: true });
+                
+                // Process complete SSE messages
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || ''; // Keep incomplete line in buffer
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.substring(6));
                             
                             if (data.chunk) {
                                 fullText += data.chunk;
@@ -127,7 +137,6 @@
                             } else if (data.error) {
                                 console.error('Streaming error:', data.error);
                                 analysisContainer.innerHTML = '<p style="color: var(--error-color, #d32f2f);">❌ Error loading analysis. Please try again.</p>';
-                                reader.cancel();
                                 return;
                             }
                         } catch (e) {
