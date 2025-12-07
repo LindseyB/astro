@@ -112,7 +112,7 @@ def stream_chart_analysis():
         music_genre = data.get('music_genre', 'any')
         
         # Convert date format if needed
-        if '-' in birth_date:
+        if birth_date is not None and '-' in birth_date:
             birth_date = birth_date.replace('-', '/')
         
         logger.info(f"Streaming chart analysis for: {birth_date} {birth_time}")
@@ -259,7 +259,7 @@ def stream_full_chart_analysis():
         longitude = data.get('longitude')
         music_genre = data.get('music_genre', 'any')
         
-        if '-' in birth_date:
+        if birth_date is not None and '-' in birth_date:
             birth_date = birth_date.replace('-', '/')
         
         logger.info(f"Streaming full chart analysis for: {birth_date} {birth_time}")
@@ -344,7 +344,22 @@ def stream_live_mas_analysis():
         latitude = data.get('latitude')
         longitude = data.get('longitude')
         
-        if '-' in birth_date:
+        # Input validation: check required fields
+        missing_fields = []
+        for field_name, value in [
+            ('birth_date', birth_date),
+            ('birth_time', birth_time),
+            ('timezone_offset', timezone_offset),
+            ('latitude', latitude),
+            ('longitude', longitude)
+        ]:
+            if value is None:
+                missing_fields.append(field_name)
+        if missing_fields:
+            logger.error(f"Missing required fields in /stream-live-mas-analysis: {missing_fields}")
+            return jsonify({'error': f"Missing required fields: {', '.join(missing_fields)}"}), 400
+        
+        if birth_date is not None and '-' in birth_date:
             birth_date = birth_date.replace('-', '/')
         
         logger.info(f"Streaming live mas analysis for: {birth_date} {birth_time}")
