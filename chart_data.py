@@ -121,3 +121,73 @@ def get_current_planets(today_chart):
             continue
 
     return current_planets
+
+
+def get_full_chart_structure(birth_date, birth_time, timezone_offset, latitude, longitude):
+    """
+    Get complete natal chart structure with all planets and houses
+    
+    Args:
+        birth_date (str): Birth date in YYYY/MM/DD format
+        birth_time (str): Birth time in HH:MM format
+        timezone_offset (str): Timezone offset (e.g., '+00:00')
+        latitude (float): Latitude
+        longitude (float): Longitude
+    
+    Returns:
+        dict: Complete chart structure with sun, moon, ascendant, planets, and houses
+    """
+    # Create chart
+    dt = Datetime(birth_date, birth_time, timezone_offset)
+    pos = GeoPos(latitude, longitude)
+    chart_obj = Chart(dt, pos, IDs=const.LIST_OBJECTS)
+    
+    # Get main positions
+    sun = chart_obj.get('Sun')
+    moon = chart_obj.get('Moon')
+    ascendant = chart_obj.get('House1')
+    
+    # Get all planets with detailed information
+    planets = {}
+    for planet_name, planet_const in PLANET_CONSTANTS.items():
+        try:
+            planet_obj = chart_obj.get(planet_const)
+            if planet_obj and hasattr(planet_obj, 'sign') and hasattr(planet_obj, 'signlon'):
+                planets[planet_name] = {
+                    'sign': planet_obj.sign,
+                    'degree': float(planet_obj.signlon),
+                    'house': None
+                }
+        except Exception as e:
+            logger.warning(f"Could not get data for {planet_name}: {e}")
+            continue
+    
+    # Get all houses
+    houses = chart_obj.houses
+    house_data = {}
+    
+    for house in houses:
+        house_number = int(house.id.replace('House', ''))
+        house_data[house_number] = {
+            'sign': house.sign,
+            'degree': float(house.signlon),
+            'planets': []
+        }
+        
+        objects_in_house = chart_obj.objects.getObjectsInHouse(house)
+        for obj in objects_in_house:
+            if obj.id in planets:
+                planets[obj.id]['house'] = house_number
+                house_data[house_number]['planets'].append({
+                    'name': obj.id,
+                    'sign': obj.sign,
+                    'degree': float(obj.signlon)
+                })
+    
+    return {
+        'sun': sun.sign,
+        'moon': moon.sign,
+        'ascendant': ascendant.sign,
+        'planets': planets,
+        'houses': house_data
+    }

@@ -7,7 +7,7 @@ from config import logger, HOUSE_NAMES
 from formatters import markdown_filter, prepare_music_genre_text, format_planets_for_api
 from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas
 from launchdarkly_service import should_show_chart_wheel
-from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets
+from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets, get_full_chart_structure
 from ai_service import stream_ai_api, verify_song_exists
 import json
 
@@ -179,65 +179,8 @@ def full_chart():
         logger.info(f"Chart wheel display flag for IP {user_ip}: {show_chart_wheel}")
         
         # Calculate chart structure (fast - no AI)
-        from flatlib.chart import Chart
-        from flatlib.datetime import Datetime
-        from flatlib.geopos import GeoPos
-        from flatlib import const
-        from config import PLANET_CONSTANTS
-        
-        dt = Datetime(birth_date, birth_time, timezone_offset)
-        pos = GeoPos(latitude, longitude)
-        chart_obj = Chart(dt, pos, IDs=const.LIST_OBJECTS)
-        
-        sun = chart_obj.get('Sun')
-        moon = chart_obj.get('Moon')
-        ascendant = chart_obj.get('House1')
-        
-        # Get all planets with detailed information
-        planets = {}
-        for planet_name, planet_const in PLANET_CONSTANTS.items():
-            try:
-                planet_obj = chart_obj.get(planet_const)
-                if planet_obj and hasattr(planet_obj, 'sign') and hasattr(planet_obj, 'signlon'):
-                    planets[planet_name] = {
-                        'sign': planet_obj.sign,
-                        'degree': float(planet_obj.signlon),
-                        'house': None
-                    }
-            except Exception as e:
-                logger.warning(f"Could not get data for {planet_name}: {e}")
-                continue
-        
-        # Get all houses
-        houses = chart_obj.houses
-        house_data = {}
-        
-        for house in houses:
-            house_number = int(house.id.replace('House', ''))
-            house_data[house_number] = {
-                'sign': house.sign,
-                'degree': float(house.signlon),
-                'planets': []
-            }
-            
-            objects_in_house = chart_obj.objects.getObjectsInHouse(house)
-            for obj in objects_in_house:
-                if obj.id in planets:
-                    planets[obj.id]['house'] = house_number
-                    house_data[house_number]['planets'].append({
-                        'name': obj.id,
-                        'sign': obj.sign,
-                        'degree': float(obj.signlon)
-                    })
-        
-        full_chart_data = {
-            'sun': sun.sign,
-            'moon': moon.sign,
-            'ascendant': ascendant.sign,
-            'planets': planets,
-            'houses': house_data,
-            'astrology_analysis': ''  # Will be loaded via streaming
-        }
+        full_chart_data = get_full_chart_structure(birth_date, birth_time, timezone_offset, latitude, longitude)
+        full_chart_data['astrology_analysis'] = ''  # Will be loaded via streaming
         
         # Prepare form data for template (keep HTML date format for JavaScript)
         form_data = {
