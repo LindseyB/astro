@@ -17,13 +17,13 @@ def client():
 
 def test_music_suggestion_endpoint_exists(client):
     """Test that the music suggestion endpoint exists and accepts POST requests"""
-    # Mock the get_client function to avoid needing a real token
-    with patch('ai_service.get_client') as mock_get_client:
+    # Mock the get_openai_client function to avoid needing a real token
+    with patch('ai_service.get_openai_client') as mock_get_openai_client:
         mock_client = MagicMock()
-        mock_get_client.return_value = mock_client
+        mock_get_openai_client.return_value = mock_client
         
-        # Mock the stream_ai_api to return some test data
-        with patch('ai_service.stream_ai_api') as mock_stream:
+        # Mock the stream_music_suggestion to return some test data
+        with patch('ai_service.stream_music_suggestion') as mock_stream:
             mock_stream.return_value = iter(['Song: Test Song by Test Artist'])
             
             # Mock verify_song_exists to avoid additional API calls
@@ -48,9 +48,9 @@ def test_music_suggestion_endpoint_exists(client):
 
 def test_music_suggestion_missing_data(client):
     """Test that the endpoint handles missing data gracefully"""
-    # Mock the get_client function to avoid token validation error
-    with patch('ai_service.get_client') as mock_get_client:
-        mock_get_client.return_value = MagicMock()
+    # Mock the get_openai_client function to avoid token validation error
+    with patch('ai_service.get_openai_client') as mock_get_openai_client:
+        mock_get_openai_client.return_value = MagicMock()
         
         response = client.post('/music-suggestion', json={})
         
@@ -60,9 +60,9 @@ def test_music_suggestion_missing_data(client):
 
 def test_music_suggestion_without_token(client):
     """Test that the endpoint returns 503 when AI token is not available"""
-    # Mock get_client to raise ValueError simulating missing token
-    with patch('ai_service.get_client') as mock_get_client:
-        mock_get_client.side_effect = ValueError("ANTHROPIC_TOKEN environment variable is not set")
+    # Mock get_openai_client to raise ValueError simulating missing token
+    with patch('ai_service.get_openai_client') as mock_get_openai_client:
+        mock_get_openai_client.side_effect = ValueError("OPENAI_API_KEY environment variable is not set")
         
         response = client.post('/music-suggestion', 
                               json={
