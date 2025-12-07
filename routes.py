@@ -496,7 +496,7 @@ def music_suggestion():
             full_response = ""
             
             # Stream the initial suggestion
-            for chunk in stream_ai_api(system_content, user_prompt, temperature=0.8):
+            for chunk in stream_ai_api(system_content, user_prompt, temperature=1):
                 if chunk is None:
                     yield f"data: {json.dumps({'type': 'error', 'content': 'Failed to generate music suggestion'})}\n\n"
                     return
@@ -529,7 +529,7 @@ def music_suggestion():
                 )
                 
                 retry_response = ""
-                for chunk in stream_ai_api(system_content, retry_prompt, temperature=0.5):
+                for chunk in stream_ai_api(system_content, retry_prompt, temperature=1):
                     if chunk is None:
                         yield f"data: {json.dumps({'type': 'error', 'content': 'Failed to generate alternative suggestion'})}\n\n"
                         return
