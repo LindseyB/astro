@@ -13,6 +13,28 @@
         initStreaming();
     }
     
+    /**
+     * Finalize streaming: convert markdown and trigger music suggestion
+     */
+    function finalizeStream(analysisContainer, fullText, chartData) {
+        // Convert markdown to HTML if we have marked.js
+        if (window.marked && fullText) {
+            analysisContainer.innerHTML = marked.parse(fullText);
+        }
+        
+        // Re-add music suggestion placeholder and trigger loading
+        const musicPlaceholder = document.createElement('div');
+        musicPlaceholder.id = 'music-suggestion-placeholder';
+        const chartType = chartData.pageType === 'chart' ? 'daily' : (chartData.pageType === 'full-chart' ? 'natal' : 'live-mas');
+        musicPlaceholder.setAttribute('data-chart-type', chartType);
+        analysisContainer.appendChild(musicPlaceholder);
+        
+        // Trigger music suggestion loading if function exists
+        if (typeof loadMusicSuggestion === 'function' && window.chartDataForMusic) {
+            loadMusicSuggestion(window.chartDataForMusic, chartType);
+        }
+    }
+    
     function initStreaming() {
         // Check if we're on a streaming-enabled page
         const streamingEnabled = document.body.dataset.streaming === 'true';
@@ -84,21 +106,7 @@
         function processStream() {
             reader.read().then(({ done, value }) => {
                 if (done) {
-                    // Convert markdown to HTML if we have marked.js
-                    if (window.marked && fullText) {
-                        analysisContainer.innerHTML = marked.parse(fullText);
-                    }
-                    // Re-add music suggestion placeholder and trigger loading
-                    const musicPlaceholder = document.createElement('div');
-                    musicPlaceholder.id = 'music-suggestion-placeholder';
-                    const chartType = chartData.pageType === 'chart' ? 'daily' : (chartData.pageType === 'full-chart' ? 'natal' : 'live-mas');
-                    musicPlaceholder.setAttribute('data-chart-type', chartType);
-                    analysisContainer.appendChild(musicPlaceholder);
-                    
-                    // Trigger music suggestion loading if function exists
-                    if (typeof loadMusicSuggestion === 'function' && window.chartDataForMusic) {
-                        loadMusicSuggestion(window.chartDataForMusic, chartType);
-                    }
+                    finalizeStream(analysisContainer, fullText, chartData);
                     return;
                 }
                 
@@ -119,21 +127,7 @@
                                 // Display raw text while streaming
                                 analysisContainer.textContent = fullText;
                             } else if (data.done) {
-                                // Convert to HTML when done
-                                if (window.marked && fullText) {
-                                    analysisContainer.innerHTML = marked.parse(fullText);
-                                }
-                                // Re-add music suggestion placeholder and trigger loading
-                                const musicPlaceholder = document.createElement('div');
-                                musicPlaceholder.id = 'music-suggestion-placeholder';
-                                const chartType = chartData.pageType === 'chart' ? 'daily' : (chartData.pageType === 'full-chart' ? 'natal' : 'live-mas');
-                                musicPlaceholder.setAttribute('data-chart-type', chartType);
-                                analysisContainer.appendChild(musicPlaceholder);
-                                
-                                // Trigger music suggestion loading if function exists
-                                if (typeof loadMusicSuggestion === 'function' && window.chartDataForMusic) {
-                                    loadMusicSuggestion(window.chartDataForMusic, chartType);
-                                }
+                                finalizeStream(analysisContainer, fullText, chartData);
                             } else if (data.error) {
                                 console.error('Streaming error:', data.error);
                                 analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
