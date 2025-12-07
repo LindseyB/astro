@@ -1,14 +1,11 @@
 import unittest
-from unittest.mock import patch, MagicMock
 import sys
 import os
-import json
 
 # Add the parent directory to the path to import our app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from routes import app
-from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas
 from formatters import format_planets_for_api, markdown_filter, prepare_music_genre_text
 
 
