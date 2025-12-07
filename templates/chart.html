@@ -6,6 +6,10 @@
 <script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
 <script src="{{ url_for('static', filename='js/button-loading.js') }}"></script>
 <script src="{{ url_for('static', filename='js/music-suggestion.js') }}"></script>
+{% if streaming %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="{{ url_for('static', filename='js/stream-analysis.js') }}"></script>
+{% endif %}
 <script>
     // Pass chart data to JavaScript for music suggestion
     window.chartDataForMusic = {
@@ -16,6 +20,19 @@
         longitude: "{{ form_data.longitude }}",
         musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
     };
+    
+    {% if streaming %}
+    // Pass chart data for streaming analysis
+    window.chartDataForStreaming = {
+        pageType: 'chart',
+        birthDate: "{{ form_data.birth_date }}",
+        birthTime: "{{ form_data.birth_time }}",
+        timezoneOffset: "{{ form_data.timezone_offset }}",
+        latitude: "{{ form_data.latitude }}",
+        longitude: "{{ form_data.longitude }}",
+        musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
+    };
+    {% endif %}
 </script>
 {% endblock %}
 
@@ -33,6 +50,9 @@ chart_data.ascendant }} rising. Check yours out too! ✨🌙⭐{% endblock %}
 moon sign, and {{ chart_data.ascendant }} rising sign with AI-powered cosmic insights.{% endblock %}
 
 {% block content %}
+{% if streaming %}
+<script>document.body.dataset.streaming = 'true';</script>
+{% endif %}
 <!-- Sparkle Animation Container -->
 <div class="sparkle-container" id="sparkleContainer"></div>
 
@@ -42,7 +62,11 @@ moon sign, and {{ chart_data.ascendant }} rising sign with AI-powered cosmic ins
 <div class="analysis-section" data-sun="{{ chart_data.sun }}" data-moon="{{ chart_data.moon }}"
     data-ascendant="{{ chart_data.ascendant }}">
     <div class="analysis-content" id="analysisContent">
+        {% if streaming %}
+        <!-- Content will be loaded via streaming JavaScript -->
+        {% else %}
         {{ chart_data.astrology_analysis | markdown | safe }}
+        {% endif %}
         <!-- Music Suggestion (loaded async, appears inline at the end) -->
         <div id="music-suggestion-placeholder" data-chart-type="daily"></div>
     </div>

@@ -8,13 +8,24 @@ from anthropic import Anthropic
 from config import logger
 
 # Client setup for Anthropic API
-token = os.environ.get("ANTHROPIC_TOKEN") or "default_token"
-model = "claude-sonnet-4-5-20250929"
+token = os.environ.get("ANTHROPIC_TOKEN")
+model = "claude-haiku-4-5-20251001"
 MAX_TOKENS = 20000
-client = Anthropic(
-    api_key=token,
-    timeout=60.0  # 60 second timeout
-)
+
+# Initialize client as None, will be created when needed
+client = None
+
+def get_client():
+    """Get or create Anthropic client with validation"""
+    global client
+    if client is None:
+        if not token:
+            raise ValueError("ANTHROPIC_TOKEN environment variable is not set")
+        client = Anthropic(
+            api_key=token,
+            timeout=60.0  # 60 second timeout
+        )
+    return client
 
 
 def call_ai_api(system_content, user_prompt, temperature=1.0):
@@ -31,7 +42,8 @@ def call_ai_api(system_content, user_prompt, temperature=1.0):
     """
     try:
         logger.debug("=== AI API CALL ===")
-        response = client.messages.create(
+        api_client = get_client()
+        response = api_client.messages.create(
             model=model,
             max_tokens=MAX_TOKENS,
             temperature=temperature,
@@ -75,8 +87,10 @@ def stream_ai_api(system_content, user_prompt, temperature=1.0):
     """
     try:
         logger.debug("=== STREAMING AI API CALL ===")
+        # Validate token before starting stream
+        api_client = get_client()
         
-        with client.messages.stream(
+        with api_client.messages.stream(
             model=model,
             max_tokens=MAX_TOKENS,
             temperature=temperature,
@@ -95,7 +109,8 @@ def stream_ai_api(system_content, user_prompt, temperature=1.0):
         # Handle various API errors gracefully
         error_type = type(e).__name__
         logger.error(f"AI Streaming Error ({error_type}): {str(e)}")
-        yield None
+        # pass through error to caller for handling
+        raise e
 
 
 def verify_song_exists(song_info):
@@ -119,7 +134,8 @@ def verify_song_exists(song_info):
 
         system_content = "You are a precise music database expert. You only respond with valid JSON."
 
-        response = client.messages.create(
+        api_client = get_client()
+        response = api_client.messages.create(
             model=model,
             max_tokens=500,
             temperature=0.3,  # Lower temperature for factual verification

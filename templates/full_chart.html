@@ -5,6 +5,10 @@
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
 <script src="{{ url_for('static', filename='js/music-suggestion.js') }}"></script>
+{% if streaming %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="{{ url_for('static', filename='js/stream-analysis.js') }}"></script>
+{% endif %}
 {% if show_chart_wheel %}
 <script src="{{ url_for('static', filename='js/chart-wheel.js') }}"></script>
 <script>
@@ -28,6 +32,19 @@
         longitude: "{{ form_data.longitude }}",
         musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
     };
+    
+    {% if streaming %}
+    // Pass chart data for streaming analysis
+    window.chartDataForStreaming = {
+        pageType: 'full-chart',
+        birthDate: "{{ form_data.birth_date }}",
+        birthTime: "{{ form_data.birth_time }}",
+        timezoneOffset: "{{ form_data.timezone_offset }}",
+        latitude: "{{ form_data.latitude }}",
+        longitude: "{{ form_data.longitude }}",
+        musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
+    };
+    {% endif %}
 </script>
 {% endblock %}
 
@@ -40,6 +57,9 @@
 {% block meta_description %}Complete natal chart showing all planets, houses, and aspects for {{ chart_data.sun }} sun sign, {{ chart_data.moon }} moon sign, and {{ chart_data.ascendant }} rising sign.{% endblock %}
 
 {% block content %}
+{% if streaming %}
+<script>document.body.dataset.streaming = 'true';</script>
+{% endif %}
 <!-- Sparkle Animation Container -->
 <div class="sparkle-container" id="sparkleContainer"></div>
 
@@ -52,7 +72,11 @@
      data-ascendant="{{ chart_data.ascendant }}">
     <h2>🔮 <i>Your Complete Chart Analysis</i></h2>
     <div class="analysis-content" id="analysisContent">
+        {% if streaming %}
+        <!-- Content will be loaded via streaming JavaScript -->
+        {% else %}
         {{ chart_data.astrology_analysis | markdown | safe }}
+        {% endif %}
         <!-- Music Suggestion (loaded async, appears inline at the end) -->
         <div id="music-suggestion-placeholder" data-chart-type="natal"></div>
     </div>
