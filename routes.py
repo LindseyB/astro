@@ -8,7 +8,7 @@ from formatters import markdown_filter, prepare_music_genre_text, format_planets
 from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas
 from launchdarkly_service import should_show_chart_wheel
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets, get_full_chart_structure
-from ai_service import stream_ai_api, stream_music_suggestion, verify_song_exists
+from ai_service import stream_ai_api, verify_song_exists
 import json
 
 app = Flask(__name__)
@@ -358,9 +358,9 @@ def music_suggestion():
     """Handle async music suggestion request with streaming and verification"""
     try:
         # Validate API token early, before starting stream
-        from ai_service import get_openai_client
+        from ai_service import get_client
         try:
-            get_openai_client()
+            get_client()
         except ValueError as e:
             logger.error(f"AI service not available: {e}")
             return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
@@ -414,10 +414,12 @@ def music_suggestion():
         # Build the user prompt
         user_prompt = (
             f"Based on this astrological chart, recommend ONE perfect song of the following genre: {song_request}. "
-            f"Provide *ONLY* the song title and artist in this exact format:\n"
+            f"Try to provide *ONLY* the song title and artist in this exact format:\n"
             f"Song: [Title] by [Artist]\n\n"
-            f"Provide no additional explanation or text, just the song information.\n\n"
-            f"Make sure it's a REAL song that actually exists. Double-check your recommendation.\n\n"
+            f"If you're having a hard time providing a song recommend an artist instead in this format:\n\n"
+            f"Artist: [Artist Name]\n\n"
+            f"Provide a single sentence justification for your recommendation.\n\n"
+            f"Make sure it's a REAL song that actually exists. Double-check your recommendation. Most importantly it should match the genre it does not need to be well-known\n\n"
             f"Chart Data:\n"
             f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
             "Planets in Houses:\n" +
@@ -428,7 +430,7 @@ def music_suggestion():
         if chart_type == 'daily':
             user_prompt += "Current Planets status:\n" + format_planets_for_api(current_planets)
 
-        system_content = "You are a music expert and astrologer. You recommend REAL songs that exist. Be precise with song titles and artists."
+        system_content = "You are a music expert and astrologer.You are a cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly. Never use any mdashes in your responses those just aren't cool. You recommend REAL songs that exist. Be precise with song titles and artists. The songs should match the vibe of the astrological chart data provided."
 
         logger.debug("=== MUSIC SUGGESTION PROMPT ===")
         logger.debug(user_prompt)
@@ -436,59 +438,62 @@ def music_suggestion():
 
         def generate():
             """Generator function for streaming response with verification"""
-            full_response = ""
+            max_attempts = 3
             
-            # Stream the initial suggestion
-            for chunk in stream_music_suggestion(system_content, user_prompt, temperature=1):
-                if chunk is None:
-                    yield f"data: {json.dumps({'type': 'error', 'content': 'Failed to generate music suggestion'})}\n\n"
-                    return
-                if chunk:
-                    full_response += chunk
-                    yield f"data: {json.dumps({'type': 'chunk', 'content': chunk})}\n\n"
-            
-            # Check if we got any response
-            if not full_response:
-                yield f"data: {json.dumps({'type': 'error', 'content': 'No response received from AI'})}\n\n"
-                return
-            
-            # Now verify the song exists
-            logger.info(f"Verifying song: {full_response}")
-            yield f"data: {json.dumps({'type': 'verifying', 'content': 'Verifying song exists...'})}\n\n"
-            
-            verification = verify_song_exists(full_response)
-            
-            if verification['is_real']:
-                yield f"data: {json.dumps({'type': 'verified', 'content': full_response, 'verified': True})}\n\n"
-            else:
-                # Song is likely hallucinated, ask for a more well-known alternative
-                logger.warning(f"Song verification failed: {verification['explanation']}")
-                yield f"data: {json.dumps({'type': 'retry', 'content': 'Original suggestion could not be verified. Getting alternative...'})}\n\n"
+            for attempt in range(max_attempts):
+                full_response = ""
                 
-                retry_prompt = (
-                    f"{user_prompt}\n\n"
-                    f"IMPORTANT: The previous suggestion couldn't be verified. Please recommend a VERY WELL-KNOWN, "
-                    f"POPULAR song that definitely exists. Choose a classic or mainstream hit."
-                )
+                # Build prompt based on attempt number
+                if attempt == 0:
+                    current_prompt = user_prompt
+                    yield f"data: {json.dumps({'type': 'attempt', 'attempt': attempt + 1})}\n\n"
+                else:
+                    # For retries, emphasize that it must be a real song
+                    current_prompt = (
+                        f"{user_prompt}\n\n"
+                        f"IMPORTANT: Previous suggestion(s) couldn't be verified as real songs. "
+                        f"Please recommend a song that DEFINITELY EXISTS. Verify the song title and artist are correct."
+                    )
+                    yield f"data: {json.dumps({'type': 'retry', 'content': f'Attempt {attempt + 1}: Getting alternative suggestion...', 'attempt': attempt + 1})}\n\n"
                 
-                retry_response = ""
-                for chunk in stream_music_suggestion(system_content, retry_prompt, temperature=1):
+                # Stream the suggestion
+                for chunk in stream_ai_api(system_content, current_prompt, temperature=0.1):
                     if chunk is None:
-                        yield f"data: {json.dumps({'type': 'error', 'content': 'Failed to generate alternative suggestion'})}\n\n"
-                        return
+                        logger.error(f"Attempt {attempt + 1}: Failed to generate music suggestion")
+                        break
                     if chunk:
-                        retry_response += chunk
+                        full_response += chunk
                         yield f"data: {json.dumps({'type': 'chunk', 'content': chunk})}\n\n"
                 
-                # Check if we got any retry response
-                if not retry_response:
-                    yield f"data: {json.dumps({'type': 'error', 'content': 'No alternative response received'})}\n\n"
-                    return
+                # Check if we got any response
+                if not full_response:
+                    logger.warning(f"Attempt {attempt + 1}: No response received from AI")
+                    continue
                 
-                # Verify retry
-                retry_verification = verify_song_exists(retry_response)
-                yield f"data: {json.dumps({'type': 'verified', 'content': retry_response, 'verified': retry_verification['is_real'], 'note': 'Alternative suggestion' if not retry_verification['is_real'] else None})}\n\n"
+                # Verify the song exists
+                logger.info(f"Attempt {attempt + 1}: Verifying song: {full_response}")
+                yield f"data: {json.dumps({'type': 'verifying', 'content': 'Verifying song exists...'})}\n\n"
+                
+                verification = verify_song_exists(full_response)
+                
+                if verification['is_real']:
+                    # Success! Return the verified song
+                    yield f"data: {json.dumps({'type': 'verified', 'content': full_response, 'verified': True, 'attempt': attempt + 1})}\n\n"
+                    yield f"data: {json.dumps({'type': 'done'})}\n\n"
+                    return
+                else:
+                    # Song verification failed
+                    logger.warning(f"Attempt {attempt + 1}: Song verification failed: {verification['explanation']}")
+                    
+                    # If this was the last attempt, return empty string
+                    if attempt == max_attempts - 1:
+                        logger.error(f"All {max_attempts} attempts failed. Returning empty string.")
+                        yield f"data: {json.dumps({'type': 'verified', 'content': '', 'verified': False, 'note': 'All attempts failed to find a verifiable song'})}\n\n"
+                        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+                        return
             
+            # Fallback (should not reach here, but just in case)
+            yield f"data: {json.dumps({'type': 'verified', 'content': '', 'verified': False})}\n\n"
             yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
         return Response(stream_with_context(generate()), mimetype='text/event-stream')

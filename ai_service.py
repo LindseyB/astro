@@ -1,49 +1,31 @@
 """
-AI service for astrological analysis using Anthropic Claude and OpenAI GPT
+AI service for astrological analysis using Anthropic Claude
 """
 import os
 import json
 import re
 from anthropic import Anthropic
-from openai import OpenAI
 from config import logger
 
-# Client setup for Anthropic API (used for horoscope analysis)
-anthropic_token = os.environ.get("ANTHROPIC_TOKEN")
-anthropic_model = "claude-haiku-4-5-20251001"
+# Client setup for Anthropic API
+token = os.environ.get("ANTHROPIC_TOKEN")
+model = "claude-sonnet-4-5-20250929"
 MAX_TOKENS = 20000
 
-# Client setup for OpenAI API (used for music suggestions)
-openai_token = os.environ.get("OPENAI_API_KEY")
-openai_model = "gpt-4o-mini"
-
-# Initialize clients as None, will be created when needed
-anthropic_client = None
-openai_client = None
+# Initialize client as None, will be created when needed
+client = None
 
 def get_client():
     """Get or create Anthropic client with validation"""
-    global anthropic_client
-    if anthropic_client is None:
-        if not anthropic_token:
+    global client
+    if client is None:
+        if not token:
             raise ValueError("ANTHROPIC_TOKEN environment variable is not set")
-        anthropic_client = Anthropic(
-            api_key=anthropic_token,
+        client = Anthropic(
+            api_key=token,
             timeout=60.0  # 60 second timeout
         )
-    return anthropic_client
-
-def get_openai_client():
-    """Get or create OpenAI client with validation"""
-    global openai_client
-    if openai_client is None:
-        if not openai_token:
-            raise ValueError("OPENAI_API_KEY environment variable is not set")
-        openai_client = OpenAI(
-            api_key=openai_token,
-            timeout=60.0  # 60 second timeout
-        )
-    return openai_client
+    return client
 
 
 def call_ai_api(system_content, user_prompt, temperature=1.0):
@@ -62,7 +44,7 @@ def call_ai_api(system_content, user_prompt, temperature=1.0):
         logger.debug("=== AI API CALL ===")
         api_client = get_client()
         response = api_client.messages.create(
-            model=anthropic_model,
+            model=model,
             max_tokens=MAX_TOKENS,
             temperature=temperature,
             system=system_content,
@@ -109,7 +91,7 @@ def stream_ai_api(system_content, user_prompt, temperature=1.0):
         api_client = get_client()
         
         with api_client.messages.stream(
-            model=anthropic_model,
+            model=model,
             max_tokens=MAX_TOKENS,
             temperature=temperature,
             system=system_content,
@@ -127,49 +109,6 @@ def stream_ai_api(system_content, user_prompt, temperature=1.0):
         # Handle various API errors gracefully
         error_type = type(e).__name__
         logger.error(f"AI Streaming Error ({error_type}): {str(e)}")
-        # pass through error to caller for handling
-        raise e
-
-
-def stream_music_suggestion(system_content, user_prompt, temperature=1.0):
-    """
-    Make OpenAI API call with streaming response for music suggestions
-
-    Args:
-        system_content (str): System prompt defining AI personality/role
-        user_prompt (str): User message with chart data and request
-        temperature (float): AI creativity level (default 1.0)
-
-    Yields:
-        str: Chunks of AI response text
-
-    Returns:
-        Generator yielding response chunks or error message
-    """
-    try:
-        logger.debug("=== STREAMING OPENAI API CALL (MUSIC) ===")
-        # Validate token before starting stream
-        api_client = get_openai_client()
-        
-        stream = api_client.chat.completions.create(
-            model=openai_model,
-            max_tokens=500,  # Music suggestions are short
-            temperature=temperature,
-            messages=[
-                {"role": "system", "content": system_content},
-                {"role": "user", "content": user_prompt}
-            ],
-            stream=True
-        )
-        
-        for chunk in stream:
-            if chunk.choices[0].delta.content is not None:
-                yield chunk.choices[0].delta.content
-
-    except Exception as e:
-        # Handle various API errors gracefully
-        error_type = type(e).__name__
-        logger.error(f"OpenAI Streaming Error ({error_type}): {str(e)}")
         # pass through error to caller for handling
         raise e
 
@@ -195,18 +134,21 @@ def verify_song_exists(song_info):
 
         system_content = "You are a precise music database expert. You only respond with valid JSON."
 
-        api_client = get_openai_client()
-        response = api_client.chat.completions.create(
-            model=openai_model,
+        api_client = get_client()
+        response = api_client.messages.create(
+            model=model,
             max_tokens=500,
             temperature=0.3,  # Lower temperature for factual verification
+            system=system_content,
             messages=[
-                {"role": "system", "content": system_content},
-                {"role": "user", "content": verification_prompt}
+                {
+                    "role": "user",
+                    "content": verification_prompt
+                }
             ]
         )
 
-        result_text = response.choices[0].message.content.strip()
+        result_text = response.content[0].text.strip()
         logger.debug(f"Verification response: {result_text}")
         
         # Extract JSON if wrapped in markdown code blocks using regex

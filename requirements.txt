@@ -2,7 +2,6 @@ pyswisseph
 flatlib
 flask
 anthropic
-openai
 gunicorn
 markdown
 pytest
