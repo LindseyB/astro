@@ -136,7 +136,7 @@
                                 }
                             } else if (data.error) {
                                 console.error('Streaming error:', data.error);
-                                analysisContainer.innerHTML = '<p style="color: var(--error-color, #d32f2f);">❌ Error loading analysis. Please try again.</p>';
+                                analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
                                 return;
                             }
                         } catch (e) {
@@ -148,7 +148,7 @@
                 processStream();
             }).catch(err => {
                 console.error('Stream reading error:', err);
-                analysisContainer.innerHTML = '<p style="color: var(--error-color, #d32f2f);">❌ Connection error. Please try again.</p>';
+                analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
             });
         }
         
@@ -156,7 +156,7 @@
     })
     .catch(err => {
         console.error('Fetch error:', err);
-        analysisContainer.innerHTML = '<p style="color: var(--error-color, #d32f2f);">❌ Failed to load analysis. Please try again.</p>';
+        analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
     });
     }
 })();

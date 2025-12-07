@@ -102,6 +102,14 @@ def chart():
 def stream_chart_analysis():
     """Stream daily horoscope analysis"""
     try:
+        # Validate API token early, before starting stream
+        from ai_service import get_client
+        try:
+            get_client()
+        except ValueError as e:
+            logger.error(f"AI service not available: {e}")
+            return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
+        
         data = request.get_json()
         
         birth_date = data.get('birth_date')
@@ -250,6 +258,14 @@ def full_chart():
 def stream_full_chart_analysis():
     """Stream full natal chart analysis"""
     try:
+        # Validate API token early, before starting stream
+        from ai_service import get_client
+        try:
+            get_client()
+        except ValueError as e:
+            logger.error(f"AI service not available: {e}")
+            return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
+        
         data = request.get_json()
         
         birth_date = data.get('birth_date')
@@ -336,6 +352,14 @@ def live_mas():
 def stream_live_mas_analysis():
     """Stream Taco Bell order analysis"""
     try:
+        # Validate API token early, before starting stream
+        from ai_service import get_client
+        try:
+            get_client()
+        except ValueError as e:
+            logger.error(f"AI service not available: {e}")
+            return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
+        
         data = request.get_json()
         
         birth_date = data.get('birth_date')
@@ -369,6 +393,14 @@ def stream_live_mas_analysis():
 def music_suggestion():
     """Handle async music suggestion request with streaming and verification"""
     try:
+        # Validate API token early, before starting stream
+        from ai_service import get_client
+        try:
+            get_client()
+        except ValueError as e:
+            logger.error(f"AI service not available: {e}")
+            return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
+        
         data = request.get_json()
         
         # Validate required fields (check for None or empty string, but allow 0/0.0)
