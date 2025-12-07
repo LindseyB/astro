@@ -457,7 +457,7 @@ def music_suggestion():
                     yield f"data: {json.dumps({'type': 'retry', 'content': f'Attempt {attempt + 1}: Getting alternative suggestion...', 'attempt': attempt + 1})}\n\n"
                 
                 # Stream the suggestion
-                for chunk in stream_ai_api(system_content, current_prompt, temperature=0.1):
+                for chunk in stream_ai_api(system_content, current_prompt, temperature=0.4):
                     if chunk is None:
                         logger.error(f"Attempt {attempt + 1}: Failed to generate music suggestion")
                         break
