@@ -137,6 +137,7 @@
                             } else if (data.error) {
                                 console.error('Streaming error:', data.error);
                                 analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
+                                reader.cancel();
                                 return;
                             }
                         } catch (e) {
@@ -149,6 +150,7 @@
             }).catch(err => {
                 console.error('Stream reading error:', err);
                 analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
+                reader.cancel();
             });
         }
         

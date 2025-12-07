@@ -62,6 +62,7 @@ function loadMusicSuggestion(chartData, chartType) {
                                 container.innerHTML = '<p><em>Finding alternative...</em></p>';
                             } else if (data.type === 'error') {
                                 console.error('Music suggestion error:', data.content);
+                                reader.cancel();
                                 container.remove();
                             }
                         } catch (e) {
@@ -78,6 +79,9 @@ function loadMusicSuggestion(chartData, chartType) {
     })
     .catch(error => {
         console.error('Error loading music suggestion:', error);
+        if (reader) {
+            reader.cancel();
+        }
         container.remove();
     });
 }
