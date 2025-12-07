@@ -120,7 +120,7 @@ def stream_chart_analysis():
         music_genre = data.get('music_genre', 'any')
         
         # Convert date format if needed
-        if '-' in birth_date:
+        if birth_date and '-' in birth_date:
             birth_date = birth_date.replace('-', '/')
         
         logger.info(f"Streaming chart analysis for: {birth_date} {birth_time}")
@@ -275,7 +275,7 @@ def stream_full_chart_analysis():
         longitude = data.get('longitude')
         music_genre = data.get('music_genre', 'any')
         
-        if '-' in birth_date:
+        if birth_date and '-' in birth_date:
             birth_date = birth_date.replace('-', '/')
         
         logger.info(f"Streaming full chart analysis for: {birth_date} {birth_time}")
@@ -368,7 +368,7 @@ def stream_live_mas_analysis():
         latitude = data.get('latitude')
         longitude = data.get('longitude')
         
-        if '-' in birth_date:
+        if birth_date and '-' in birth_date:
             birth_date = birth_date.replace('-', '/')
         
         logger.info(f"Streaming live mas analysis for: {birth_date} {birth_time}")
