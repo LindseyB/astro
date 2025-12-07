@@ -8,7 +8,7 @@ from formatters import markdown_filter, prepare_music_genre_text, format_planets
 from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas
 from launchdarkly_service import should_show_chart_wheel
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets, get_full_chart_structure
-from ai_service import stream_ai_api, verify_song_exists
+from ai_service import stream_ai_api, stream_music_suggestion, verify_song_exists
 import json
 
 app = Flask(__name__)
@@ -358,9 +358,9 @@ def music_suggestion():
     """Handle async music suggestion request with streaming and verification"""
     try:
         # Validate API token early, before starting stream
-        from ai_service import get_client
+        from ai_service import get_openai_client
         try:
-            get_client()
+            get_openai_client()
         except ValueError as e:
             logger.error(f"AI service not available: {e}")
             return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
@@ -439,7 +439,7 @@ def music_suggestion():
             full_response = ""
             
             # Stream the initial suggestion
-            for chunk in stream_ai_api(system_content, user_prompt, temperature=1):
+            for chunk in stream_music_suggestion(system_content, user_prompt, temperature=1):
                 if chunk is None:
                     yield f"data: {json.dumps({'type': 'error', 'content': 'Failed to generate music suggestion'})}\n\n"
                     return
@@ -472,7 +472,7 @@ def music_suggestion():
                 )
                 
                 retry_response = ""
-                for chunk in stream_ai_api(system_content, retry_prompt, temperature=1):
+                for chunk in stream_music_suggestion(system_content, retry_prompt, temperature=1):
                     if chunk is None:
                         yield f"data: {json.dumps({'type': 'error', 'content': 'Failed to generate alternative suggestion'})}\n\n"
                         return
