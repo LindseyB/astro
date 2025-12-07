@@ -48,83 +48,42 @@ class TestTemplates(unittest.TestCase):
         self.assertIn(b'timezone_offset', response.data)
 
     def test_chart_template_structure(self):
-        """Test chart template structure with mock data"""
-        from unittest.mock import patch
+        """Test chart template structure with streaming placeholder"""
+        form_data = {
+            'birth_date': '1988-08-08',
+            'birth_time': '10:30',
+            'timezone_offset': '0',
+            'latitude': '51n30',
+            'longitude': '00w07'
+        }
 
-        with patch('routes.calculate_chart') as mock_calc:
-            mock_calc.return_value = {
-                'sun': 'Leo',
-                'moon': 'Scorpio',
-                'ascendant': 'Cancer',
-                'mercury_retrograde': False,
-                'astrology_analysis': '**Test analysis** with markdown'
-            }
+        response = self.app.post('/chart', data=form_data)
+        self.assertEqual(response.status_code, 200)
 
-            form_data = {
-                'birth_date': '1988-08-08',
-                'birth_time': '10:30',
-                'timezone_offset': '0',
-                'latitude': '51.5074',
-                'longitude': '-0.1278'
-            }
-
-            response = self.app.post('/chart', data=form_data)
-            self.assertEqual(response.status_code, 200)
-
-            # Check for chart elements
-            self.assertIn(b'Leo', response.data)
-            self.assertIn(b'Scorpio', response.data)
-            self.assertIn(b'Cancer', response.data)
-            self.assertIn(b'sparkleContainer', response.data)
+        # Check for streaming setup
+        self.assertIn(b'document.body.dataset.streaming', response.data)
+        self.assertIn(b'sparkleContainer', response.data)
+        self.assertIn(b'stream-analysis.js', response.data)
 
     def test_full_chart_template_structure(self):
-        """Test full chart template structure with mock data"""
+        """Test full chart template structure with streaming placeholder"""
         from unittest.mock import patch
 
-        # Create complete house data (all 12 houses required)
-        signs = ['Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces', 'Aries',
-                 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra']
-        houses = {}
-        for i in range(1, 13):
-            houses[i] = {'sign': signs[i-1], 'degree': 12.4 + i}
-
-        with patch('routes.calculate_full_chart') as mock_calc, \
-             patch('routes.should_show_chart_wheel', return_value=True):
-            mock_calc.return_value = {
-                'planets': {
-                    'Sun': {'sign': 'Leo', 'degree': 15.5, 'house': 10},
-                    'Moon': {'sign': 'Cancer', 'degree': 22.3, 'house': 9},
-                    'Mercury': {'sign': 'Virgo', 'degree': 5.1, 'house': 11}
-                },
-                'houses': houses,
-                'aspects': [],
-                'chart_analysis': '**Full chart analysis** with details'
-            }
-
+        with patch('routes.should_show_chart_wheel', return_value=False):
             form_data = {
                 'birth_date': '1988-08-08',
                 'birth_time': '10:30',
                 'timezone_offset': '0',
-                'latitude': '51.5074',
-                'longitude': '-0.1278'
+                'latitude': '51n30',
+                'longitude': '00w07'
             }
 
             response = self.app.post('/full-chart', data=form_data)
             self.assertEqual(response.status_code, 200)
 
-            # Check for chart wheel canvas
-            self.assertIn(b'chartWheel', response.data)
-            self.assertIn(b'<canvas', response.data)
-            
-            # Check for chart-wheel.js script
-            self.assertIn(b'chart-wheel.js', response.data)
-            
-            # Check for window.chartData
-            self.assertIn(b'window.chartData', response.data)
-            
-            # Check for planet data
-            self.assertIn(b'Leo', response.data)
-            self.assertIn(b'Cancer', response.data)
+            # Check for streaming setup
+            self.assertIn(b'document.body.dataset.streaming', response.data)
+            self.assertIn(b'stream-analysis.js', response.data)
 
 
 class TestErrorHandling(unittest.TestCase):
@@ -280,35 +239,18 @@ class TestLaunchDarklyIntegration(unittest.TestCase):
         self.app.testing = True
     
     @patch('routes.should_show_chart_wheel')
-    @patch('routes.calculate_full_chart')
     @patch('routes.get_user_ip')
-    def test_full_chart_route_calls_feature_flag(self, mock_get_ip, mock_calc, mock_flag):
+    def test_full_chart_route_calls_feature_flag(self, mock_get_ip, mock_flag):
         """Test that full chart route calls the LaunchDarkly feature flag with IP"""
         mock_flag.return_value = True
         mock_get_ip.return_value = "192.168.1.100"
-        
-        # Mock the calculation to avoid complex dependency issues
-        mock_calc.return_value = {
-            'sun': 'Capricorn',
-            'moon': 'Taurus', 
-            'ascendant': 'Leo',
-            'astrology_analysis': 'Test analysis',
-            'planets': {
-                'Sun': {'sign': 'Capricorn', 'degree': 10.5, 'house': 1},
-                'Moon': {'sign': 'Taurus', 'degree': 15.2, 'house': 5}
-            },
-            'houses': {
-                1: {'sign': 'Leo', 'cusp_degree': 0.0},
-                2: {'sign': 'Virgo', 'cusp_degree': 30.0}
-            }
-        }
         
         form_data = {
             'birth_date': '1990-01-01',
             'birth_time': '12:00',
             'timezone_offset': '0',
-            'latitude': '40.7128',
-            'longitude': '-74.0060',
+            'latitude': '40n42',
+            'longitude': '74w00',
             'music_genre': 'rock'
         }
         
@@ -318,11 +260,10 @@ class TestLaunchDarklyIntegration(unittest.TestCase):
         mock_get_ip.assert_called_once()
         mock_flag.assert_called_once_with("192.168.1.100")
         
-        # And that the calculation is called with proper parameters
-        mock_calc.assert_called_once_with('1990/01/01', '12:00', '0', '40.7128', '-74.0060', 'rock')
-        
-        # Response should be successful (either 200 or redirected)
-        self.assertIn(response.status_code, [200, 302])
+        # Response should be successful
+        self.assertEqual(response.status_code, 200)
+        # Should contain streaming setup
+        self.assertIn(b'document.body.dataset.streaming', response.data)
     
     @patch('routes.should_show_chart_wheel')
     @patch('routes.get_user_ip')

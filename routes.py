@@ -5,7 +5,7 @@ Flask application and route handlers
 from flask import Flask, render_template, request, Response, stream_with_context, jsonify
 from config import logger, HOUSE_NAMES
 from formatters import markdown_filter, prepare_music_genre_text, format_planets_for_api
-from calculations import calculate_chart, calculate_full_chart, calculate_live_mas
+from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas
 from launchdarkly_service import should_show_chart_wheel
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets
 from ai_service import stream_ai_api, verify_song_exists
@@ -38,7 +38,7 @@ def index():
 
 @app.route('/chart', methods=['POST'])
 def chart():
-    """Handle daily horoscope request"""
+    """Handle daily horoscope request - renders placeholder page immediately"""
     # Get form data
     birth_date_html = request.form['birth_date']  # HTML date format: YYYY-MM-DD
     birth_time = request.form['birth_time']
@@ -59,10 +59,35 @@ def chart():
     birth_date = birth_date_html.replace('-', '/')
 
     try:
-        logger.info(f"Calculating chart for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
-        # Calculate chart
-        chart_data = calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre)
-        return render_template('chart.html', chart_data=chart_data, form_data=request.form)
+        logger.info(f"Rendering chart placeholder for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
+        
+        # Calculate basic chart data (fast - no AI)
+        from chart_data import create_charts, get_main_positions, get_current_planets
+        chart_obj, today_chart = create_charts(birth_date, birth_time, timezone_offset, latitude, longitude)
+        sun, moon, ascendant = get_main_positions(chart_obj)
+        current_planets = get_current_planets(today_chart)
+        
+        # Build minimal chart_data for placeholder page
+        chart_data = {
+            'sun': sun.sign,
+            'moon': moon.sign,
+            'ascendant': ascendant.sign,
+            'mercury_retrograde': current_planets.get('Mercury', {}).get('retrograde', False),
+            'astrology_analysis': ''  # Will be loaded via streaming
+        }
+        
+        # Prepare form data for template (keep HTML date format for JavaScript)
+        form_data = {
+            'birth_date': birth_date_html,
+            'birth_time': birth_time,
+            'timezone_offset': timezone_offset,
+            'latitude': latitude,
+            'longitude': longitude,
+            'music_genre': music_genre,
+            'other_genre': request.form.get('other_genre', '')
+        }
+        
+        return render_template('chart.html', chart_data=chart_data, form_data=form_data, streaming=True)
     except Exception as e:
         logger.error(f"ERROR in /chart route: {type(e).__name__}: {str(e)}")
         if app.debug:
@@ -73,9 +98,44 @@ def chart():
             return render_template('error.html', error="Something went wrong while calculating your chart. Please check your birth information and try again.")
 
 
+@app.route('/stream-chart-analysis', methods=['POST'])
+def stream_chart_analysis():
+    """Stream daily horoscope analysis"""
+    try:
+        data = request.get_json()
+        
+        birth_date = data.get('birth_date')
+        birth_time = data.get('birth_time')
+        timezone_offset = data.get('timezone_offset')
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        music_genre = data.get('music_genre', 'any')
+        
+        # Convert date format if needed
+        if '-' in birth_date:
+            birth_date = birth_date.replace('-', '/')
+        
+        logger.info(f"Streaming chart analysis for: {birth_date} {birth_time}")
+        
+        def generate():
+            try:
+                for chunk in stream_calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre):
+                    if chunk:
+                        yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+                yield f"data: {json.dumps({'done': True})}\n\n"
+            except Exception as e:
+                logger.error(f"Error in stream_chart_analysis: {e}")
+                yield f"data: {json.dumps({'error': str(e)})}\n\n"
+        
+        return Response(stream_with_context(generate()), mimetype='text/event-stream')
+    except Exception as e:
+        logger.error(f"ERROR in /stream-chart-analysis route: {type(e).__name__}: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/full-chart', methods=['POST'])
 def full_chart():
-    """Handle full natal chart request"""
+    """Handle full natal chart request - renders placeholder page immediately"""
     # Get form data
     birth_date_html = request.form['birth_date']  # HTML date format: YYYY-MM-DD
     birth_time = request.form['birth_time']
@@ -100,12 +160,82 @@ def full_chart():
     show_chart_wheel = should_show_chart_wheel(user_ip)
 
     try:
-        logger.info(f"Calculating full chart for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
+        logger.info(f"Rendering full chart placeholder for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
         logger.info(f"Chart wheel display flag for IP {user_ip}: {show_chart_wheel}")
         
-        # Calculate full chart
-        full_chart_data = calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre)
-        return render_template('full_chart.html', chart_data=full_chart_data, show_chart_wheel=show_chart_wheel, form_data=request.form)
+        # Calculate chart structure (fast - no AI)
+        from flatlib.chart import Chart
+        from flatlib.datetime import Datetime
+        from flatlib.geopos import GeoPos
+        from flatlib import const
+        from config import PLANET_CONSTANTS
+        
+        dt = Datetime(birth_date, birth_time, timezone_offset)
+        pos = GeoPos(latitude, longitude)
+        chart_obj = Chart(dt, pos, IDs=const.LIST_OBJECTS)
+        
+        sun = chart_obj.get('Sun')
+        moon = chart_obj.get('Moon')
+        ascendant = chart_obj.get('House1')
+        
+        # Get all planets with detailed information
+        planets = {}
+        for planet_name, planet_const in PLANET_CONSTANTS.items():
+            try:
+                planet_obj = chart_obj.get(planet_const)
+                if planet_obj and hasattr(planet_obj, 'sign') and hasattr(planet_obj, 'signlon'):
+                    planets[planet_name] = {
+                        'sign': planet_obj.sign,
+                        'degree': float(planet_obj.signlon),
+                        'house': None
+                    }
+            except Exception as e:
+                logger.warning(f"Could not get data for {planet_name}: {e}")
+                continue
+        
+        # Get all houses
+        houses = chart_obj.houses
+        house_data = {}
+        
+        for house in houses:
+            house_number = int(house.id.replace('House', ''))
+            house_data[house_number] = {
+                'sign': house.sign,
+                'degree': float(house.signlon),
+                'planets': []
+            }
+            
+            objects_in_house = chart_obj.objects.getObjectsInHouse(house)
+            for obj in objects_in_house:
+                if obj.id in planets:
+                    planets[obj.id]['house'] = house_number
+                    house_data[house_number]['planets'].append({
+                        'name': obj.id,
+                        'sign': obj.sign,
+                        'degree': float(obj.signlon)
+                    })
+        
+        full_chart_data = {
+            'sun': sun.sign,
+            'moon': moon.sign,
+            'ascendant': ascendant.sign,
+            'planets': planets,
+            'houses': house_data,
+            'astrology_analysis': ''  # Will be loaded via streaming
+        }
+        
+        # Prepare form data for template (keep HTML date format for JavaScript)
+        form_data = {
+            'birth_date': birth_date_html,
+            'birth_time': birth_time,
+            'timezone_offset': timezone_offset,
+            'latitude': latitude,
+            'longitude': longitude,
+            'music_genre': music_genre,
+            'other_genre': request.form.get('other_genre', '')
+        }
+        
+        return render_template('full_chart.html', chart_data=full_chart_data, show_chart_wheel=show_chart_wheel, form_data=form_data, streaming=True)
     except Exception as e:
         logger.error(f"ERROR in /full-chart route: {type(e).__name__}: {str(e)}")
         if app.debug:
@@ -116,9 +246,43 @@ def full_chart():
             return render_template('error.html', error="Something went wrong while calculating your full chart. Please check your birth information and try again.")
 
 
+@app.route('/stream-full-chart-analysis', methods=['POST'])
+def stream_full_chart_analysis():
+    """Stream full natal chart analysis"""
+    try:
+        data = request.get_json()
+        
+        birth_date = data.get('birth_date')
+        birth_time = data.get('birth_time')
+        timezone_offset = data.get('timezone_offset')
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        music_genre = data.get('music_genre', 'any')
+        
+        if '-' in birth_date:
+            birth_date = birth_date.replace('-', '/')
+        
+        logger.info(f"Streaming full chart analysis for: {birth_date} {birth_time}")
+        
+        def generate():
+            try:
+                for chunk in stream_calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre):
+                    if chunk:
+                        yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+                yield f"data: {json.dumps({'done': True})}\n\n"
+            except Exception as e:
+                logger.error(f"Error in stream_full_chart_analysis: {e}")
+                yield f"data: {json.dumps({'error': str(e)})}\n\n"
+        
+        return Response(stream_with_context(generate()), mimetype='text/event-stream')
+    except Exception as e:
+        logger.error(f"ERROR in /stream-full-chart-analysis route: {type(e).__name__}: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/live-mas', methods=['POST'])
 def live_mas():
-    """Handle Taco Bell order request"""
+    """Handle Taco Bell order request - renders placeholder page immediately"""
     # Get form data
     birth_date_html = request.form['birth_date']  # HTML date format: YYYY-MM-DD
     birth_time = request.form['birth_time']
@@ -130,10 +294,34 @@ def live_mas():
     birth_date = birth_date_html.replace('-', '/')
 
     try:
-        logger.info(f"Calculating Live Más order for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
-        # Calculate Live Más order
-        live_mas_data = calculate_live_mas(birth_date, birth_time, timezone_offset, latitude, longitude)
-        return render_template('live_mas.html', chart_data=live_mas_data, form_data=request.form)
+        logger.info(f"Rendering Live Más placeholder for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
+        
+        # Calculate basic chart data (fast - no AI)
+        from chart_data import create_charts, get_main_positions, get_current_planets
+        chart_obj, today_chart = create_charts(birth_date, birth_time, timezone_offset, latitude, longitude)
+        sun, moon, ascendant = get_main_positions(chart_obj)
+        current_planets = get_current_planets(today_chart)
+        
+        live_mas_data = {
+            'sun': sun.sign,
+            'moon': moon.sign,
+            'ascendant': ascendant.sign,
+            'mercury_retrograde': current_planets.get('Mercury', {}).get('retrograde', False),
+            'taco_bell_order': ''  # Will be loaded via streaming
+        }
+        
+        # Prepare form data for template (keep HTML date format for JavaScript)
+        form_data = {
+            'birth_date': birth_date_html,
+            'birth_time': birth_time,
+            'timezone_offset': timezone_offset,
+            'latitude': latitude,
+            'longitude': longitude,
+            'music_genre': 'any',  # live_mas doesn't use music genre
+            'other_genre': ''
+        }
+        
+        return render_template('live_mas.html', chart_data=live_mas_data, form_data=form_data, streaming=True)
     except Exception as e:
         logger.error(f"ERROR in /live-mas route: {type(e).__name__}: {str(e)}")
         if app.debug:
@@ -142,6 +330,39 @@ def live_mas():
             return f"<h1>Error</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>", 500
         else:
             return render_template('error.html', error="Something went wrong while calculating your Taco Bell order. Please check your birth information and try again.")
+
+
+@app.route('/stream-live-mas-analysis', methods=['POST'])
+def stream_live_mas_analysis():
+    """Stream Taco Bell order analysis"""
+    try:
+        data = request.get_json()
+        
+        birth_date = data.get('birth_date')
+        birth_time = data.get('birth_time')
+        timezone_offset = data.get('timezone_offset')
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        
+        if '-' in birth_date:
+            birth_date = birth_date.replace('-', '/')
+        
+        logger.info(f"Streaming live mas analysis for: {birth_date} {birth_time}")
+        
+        def generate():
+            try:
+                for chunk in stream_calculate_live_mas(birth_date, birth_time, timezone_offset, latitude, longitude):
+                    if chunk:
+                        yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+                yield f"data: {json.dumps({'done': True})}\n\n"
+            except Exception as e:
+                logger.error(f"Error in stream_live_mas_analysis: {e}")
+                yield f"data: {json.dumps({'error': str(e)})}\n\n"
+        
+        return Response(stream_with_context(generate()), mimetype='text/event-stream')
+    except Exception as e:
+        logger.error(f"ERROR in /stream-live-mas-analysis route: {type(e).__name__}: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/music-suggestion', methods=['POST'])

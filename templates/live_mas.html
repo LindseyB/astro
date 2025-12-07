@@ -4,6 +4,22 @@
 
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
+{% if streaming %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="{{ url_for('static', filename='js/stream-analysis.js') }}"></script>
+<script>
+    // Pass chart data for streaming analysis
+    window.chartDataForStreaming = {
+        pageType: 'live-mas',
+        birthDate: "{{ form_data.birth_date }}",
+        birthTime: "{{ form_data.birth_time }}",
+        timezoneOffset: "{{ form_data.timezone_offset }}",
+        latitude: "{{ form_data.latitude }}",
+        longitude: "{{ form_data.longitude }}",
+        musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
+    };
+</script>
+{% endif %}
 {% endblock %}
 
 {% block og_title %}{{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆ - Cosmic Taco Bell Order{% endblock %}
@@ -15,6 +31,9 @@
 {% block meta_description %}Personalized Taco Bell order based on astrological chart for {{ chart_data.sun }} sun sign, {{ chart_data.moon }} moon sign, and {{ chart_data.ascendant }} rising sign.{% endblock %}
 
 {% block content %}
+{% if streaming %}
+<script>document.body.dataset.streaming = 'true';</script>
+{% endif %}
 <!-- Sparkle Animation Container -->
 <div class="sparkle-container" id="sparkleContainer"></div>
 
@@ -27,7 +46,11 @@
      data-ascendant="{{ chart_data.ascendant }}">
     <h2>🌮 <i>Your Personalized Taco Bell Order</i></h2>
     <div class="analysis-content" id="analysisContent">
+        {% if streaming %}
+        <!-- Content will be loaded via streaming JavaScript -->
+        {% else %}
         {{ chart_data.taco_bell_order | markdown | safe }}
+        {% endif %}
     </div>
     <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()" title="Copy your Taco Bell order">
         📋

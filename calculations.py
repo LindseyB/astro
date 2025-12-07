@@ -8,12 +8,12 @@ from flatlib import const
 from config import PLANET_CONSTANTS, HOUSE_NAMES, logger
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets
 from formatters import prepare_music_genre_text, format_planets_for_api
-from ai_service import call_ai_api
+from ai_service import stream_ai_api
 
 
-def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre="any"):
+def stream_calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre="any"):
     """
-    Calculate daily horoscope with current transits
+    Calculate daily horoscope with current transits, yielding streaming chunks
 
     Args:
         birth_date (str): Birth date in YYYY/MM/DD format
@@ -23,8 +23,8 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
         longitude (float): Longitude
         music_genre (str): Music genre preference (default "any")
 
-    Returns:
-        dict: Chart data with sun, moon, ascendant, mercury_retrograde, and astrology_analysis
+    Yields:
+        str: Text chunks from AI streaming response
     """
     # Setup charts
     chart, today_chart = create_charts(birth_date, birth_time, timezone_offset, latitude, longitude)
@@ -38,8 +38,7 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
     # Get current planet statuses
     current_planets = get_current_planets(today_chart)
 
-    # Generate AI analysis with error handling
-    # Build the user prompt (music will be loaded separately via async call)
+    # Build the user prompt
     user_prompt = "Only respond in a few sentences. Based on the following astrological chart data: First give a single sentence summarizing the day for the person getting the horoscope as a title for the horoscope and then please recommend some activities to do or not to do ideally in bullet format the first sentence in your response should be what today's vibe will be like please also recommend a beverage to drink given today's vibe:\n\n" + \
                   f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n" + \
                   "Planets in Houses:\n" + \
@@ -54,22 +53,18 @@ def calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude
 
     system_content = "You are a cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly. Never use any mdashes in your responses those just aren't cool."
 
-    astrology_analysis = call_ai_api(system_content, user_prompt)
-    if astrology_analysis is None:
-        astrology_analysis = f"**Cosmic Note:** The AI astrologer is taking a cosmic tea break. ☕ Trust your intuition today! 🔮"
-
-    return {
-        'sun': sun.sign,
-        'moon': moon.sign,
-        'ascendant': ascendant.sign,
-        'mercury_retrograde': current_planets.get('Mercury', {}).get('retrograde', False),
-        'astrology_analysis': astrology_analysis
-    }
+    # Stream AI response
+    try:
+        for chunk in stream_ai_api(system_content, user_prompt):
+            yield chunk
+    except Exception as e:
+        logger.error(f"Error streaming chart calculation: {e}")
+        yield f"**Cosmic Note:** The AI astrologer is taking a cosmic tea break. ☕ Trust your intuition today! 🔮"
 
 
-def calculate_live_mas(birth_date, birth_time, timezone_offset, latitude, longitude):
+def stream_calculate_live_mas(birth_date, birth_time, timezone_offset, latitude, longitude):
     """
-    Calculate Taco Bell order based on astrological data
+    Calculate Taco Bell order based on astrological data, yielding streaming chunks
 
     Args:
         birth_date (str): Birth date in YYYY/MM/DD format
@@ -78,8 +73,8 @@ def calculate_live_mas(birth_date, birth_time, timezone_offset, latitude, longit
         latitude (float): Latitude
         longitude (float): Longitude
 
-    Returns:
-        dict: Chart data with sun, moon, ascendant, mercury_retrograde, and taco_bell_order
+    Yields:
+        str: Text chunks from AI streaming response
     """
     # Setup charts
     chart, today_chart = create_charts(birth_date, birth_time, timezone_offset, latitude, longitude)
@@ -93,7 +88,6 @@ def calculate_live_mas(birth_date, birth_time, timezone_offset, latitude, longit
     # Get current planet statuses
     current_planets = get_current_planets(today_chart)
 
-    # Generate Taco Bell order with AI
     # Build the Taco Bell user prompt
     user_prompt = (
         "You are a cosmic Taco Bell expert! Based on this person's astrological chart, "
@@ -108,22 +102,18 @@ def calculate_live_mas(birth_date, birth_time, timezone_offset, latitude, longit
 
     system_content = "You are a cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts and the taco bell menu quickly. Never use any mdashes in your responses those just aren't cool."
 
-    taco_bell_order = call_ai_api(system_content, user_prompt, temperature=1)
-    if taco_bell_order is None:
-        taco_bell_order = "🌮 **Cosmic Note:** The cosmic Taco Bell oracle is taking a nacho break! ☕ Try a Crunchwrap Supreme - it's universally delicious! 🔔✨"
-
-    return {
-        'sun': sun.sign,
-        'moon': moon.sign,
-        'ascendant': ascendant.sign,
-        'mercury_retrograde': current_planets.get('Mercury', {}).get('retrograde', False),
-        'taco_bell_order': taco_bell_order
-    }
+    # Stream AI response
+    try:
+        for chunk in stream_ai_api(system_content, user_prompt, temperature=1):
+            yield chunk
+    except Exception as e:
+        logger.error(f"Error streaming live mas calculation: {e}")
+        yield "🌮 **Cosmic Note:** The cosmic Taco Bell oracle is taking a nacho break! ☕ Try a Crunchwrap Supreme - it's universally delicious! 🔔✨"
 
 
-def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre="any"):
+def stream_calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre="any"):
     """
-    Calculate comprehensive natal chart data
+    Calculate comprehensive natal chart data, yielding streaming chunks
 
     Args:
         birth_date (str): Birth date in YYYY/MM/DD format
@@ -133,8 +123,8 @@ def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, long
         longitude (float): Longitude
         music_genre (str): Music genre preference (default "any")
 
-    Returns:
-        dict: Comprehensive chart data with planets, houses, and astrology_analysis
+    Yields:
+        str: Text chunks from AI streaming response
     """
     # Setup chart
     dt = Datetime(birth_date, birth_time, timezone_offset)
@@ -186,7 +176,7 @@ def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, long
                     'degree': float(obj.signlon)
                 })
 
-    # Build the user prompt for the full chart (music will be loaded separately via async call)
+    # Build the user prompt for the full chart
     user_prompt = (
         "Only respond in a few sentences. Based on the following natal chart data, "
         "please give a concise, emoji-filled summary of this person's personality and life themes. "
@@ -208,15 +198,10 @@ def calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, long
 
     system_content = "You are a cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly. Never use any mdashes in your responses those just aren't cool."
 
-    astrology_analysis = call_ai_api(system_content, user_prompt)
-    if astrology_analysis is None:
-        astrology_analysis = f"**Cosmic Note:** The AI astrologer is taking a cosmic tea break. ☕ You're as special and unique as the stars! 🔮"
-
-    return {
-        'sun': sun.sign,
-        'moon': moon.sign,
-        'ascendant': ascendant.sign,
-        'planets': planets,
-        'houses': house_data,
-        'astrology_analysis': astrology_analysis
-    }
+    # Stream AI response
+    try:
+        for chunk in stream_ai_api(system_content, user_prompt):
+            yield chunk
+    except Exception as e:
+        logger.error(f"Error streaming full chart calculation: {e}")
+        yield f"**Cosmic Note:** The AI astrologer is taking a cosmic tea break. ☕ You're as special and unique as the stars! 🔮"
