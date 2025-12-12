@@ -9,6 +9,7 @@ from calculations import stream_calculate_chart, stream_calculate_full_chart, st
 from launchdarkly_service import should_show_chart_wheel
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets, get_full_chart_structure
 from ai_service import stream_ai_api, verify_song_exists
+from lastfm_service import get_top_tracks_by_genre, format_tracks_for_prompt
 import json
 
 app = Flask(__name__)
@@ -411,15 +412,26 @@ def music_suggestion():
         else:
             song_request = " any genre"
 
+        # Get top tracks from Last.fm for the genre
+        lastfm_tracks = get_top_tracks_by_genre(music_genre)
+        tracks_context = format_tracks_for_prompt(lastfm_tracks)
+        
         # Build the user prompt
         user_prompt = (
             f"Based on this astrological chart, recommend ONE perfect song of the following genre: {song_request}. "
             f"Try to provide *ONLY* the song title and artist in this exact format:\n"
-            f"Song: [Title] by [Artist]\n\n"
+            f"🎶 [Title] by [Artist]\n\n"
             f"If you're having a hard time providing a song recommend an artist instead in this format:\n\n"
             f"Artist: [Artist Name]\n\n"
-            f"Provide a single sentence justification for your recommendation.\n\n"
+            f"Provide a single sentence justification for your recommendation it should be concise short and to the point while maintaining a casual vibey tone.\n\n"
             f"Make sure it's a REAL song that actually exists. Double-check your recommendation. Most importantly it should match the genre it does not need to be well-known\n\n"
+        )
+        
+        # Add Last.fm tracks as examples if available
+        if tracks_context:
+            user_prompt += f"{tracks_context}\n\nYou may choose from these popular tracks or suggest other songs in the same genre that match the astrological vibe.\n\n"
+        
+        user_prompt += (
             f"Chart Data:\n"
             f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
             "Planets in Houses:\n" +
@@ -430,7 +442,7 @@ def music_suggestion():
         if chart_type == 'daily':
             user_prompt += "Current Planets status:\n" + format_planets_for_api(current_planets)
 
-        system_content = "You are a music expert and astrologer.You are a cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly. Never use any mdashes in your responses those just aren't cool. You recommend REAL songs that exist. Be precise with song titles and artists. The songs should match the vibe of the astrological chart data provided."
+        system_content = "You are a music expert and astrologer. You are a cool astrologer who uses lots of emojis and is very casual. You are also VERY concise and to the point. You are an expert in astrology and can analyze charts quickly. Never use any mdashes in your responses those just aren't cool. You recommend REAL songs that exist. Be precise with song titles and artists. The songs should match the vibe of the astrological chart data provided."
 
         logger.debug("=== MUSIC SUGGESTION PROMPT ===")
         logger.debug(user_prompt)
