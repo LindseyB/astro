@@ -1,7 +1,7 @@
 """
 Tests for the Last.fm service integration
 """
-import pytest
+
 from unittest.mock import patch, MagicMock
 from lastfm_service import get_top_tracks_by_genre, format_tracks_for_prompt
 

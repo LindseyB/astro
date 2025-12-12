@@ -421,9 +421,9 @@ def music_suggestion():
             f"Based on this astrological chart, recommend ONE perfect song of the following genre: {song_request}. "
             f"Try to provide *ONLY* the song title and artist in this exact format:\n"
             f"🎶 [Title] by [Artist]\n\n"
-            f"If you're having a hard time providing a song recommend an artist instead in this format:\n\n"
+            f"If you're having a hard time providing a song, recommend an artist instead in this format:\n\n"
             f"Artist: [Artist Name]\n\n"
-            f"Provide a single sentence justification for your recommendation it should be concise short and to the point while maintaining a casual vibey tone.\n\n"
+            f"Provide a single sentence justification for your recommendation. It should be concise, short, and to the point, while maintaining a casual, vibey tone.\n\n"
         )
         
         # Add Last.fm tracks as examples if available
