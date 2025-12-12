@@ -9,7 +9,7 @@ from config import logger
 
 # Client setup for Anthropic API
 token = os.environ.get("ANTHROPIC_TOKEN")
-model = "claude-sonnet-4-5-20250929"
+model = "claude-haiku-4-5-20251001"
 MAX_TOKENS = 20000
 
 # Initialize client as None, will be created when needed
