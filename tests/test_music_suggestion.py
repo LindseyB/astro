@@ -26,24 +26,20 @@ def test_music_suggestion_endpoint_exists(client):
         with patch('ai_service.stream_ai_api') as mock_stream:
             mock_stream.return_value = iter(['Song: Test Song by Test Artist'])
             
-            # Mock verify_song_exists to avoid additional API calls
-            with patch('ai_service.verify_song_exists') as mock_verify:
-                mock_verify.return_value = {'is_real': True, 'explanation': 'Test'}
-                
-                response = client.post('/music-suggestion', 
-                                      json={
-                                          'birth_date': '1990/01/01',
-                                          'birth_time': '12:00',
-                                          'timezone_offset': '+00:00',
-                                          'latitude': 0.0,
-                                          'longitude': 0.0,
-                                          'music_genre': 'any',
-                                          'chart_type': 'daily'
-                                      })
-                
-                # Should return 200 OK (streaming response)
-                assert response.status_code == 200
-                assert response.mimetype == 'text/event-stream'
+            response = client.post('/music-suggestion', 
+                                  json={
+                                      'birth_date': '1990/01/01',
+                                      'birth_time': '12:00',
+                                      'timezone_offset': '+00:00',
+                                      'latitude': 0.0,
+                                      'longitude': 0.0,
+                                      'music_genre': 'any',
+                                      'chart_type': 'daily'
+                                  })
+            
+            # Should return 200 OK (streaming response)
+            assert response.status_code == 200
+            assert response.mimetype == 'text/event-stream'
 
 
 def test_music_suggestion_missing_data(client):
@@ -90,55 +86,47 @@ def test_music_suggestion_invalid_method(client):
     assert response.status_code == 405
 
 
-def test_music_suggestion_first_attempt_success(client):
-    """Test successful song suggestion on first attempt"""
+def test_music_suggestion_success(client):
+    """Test successful song suggestion"""
     with patch('ai_service.get_client') as mock_get_client:
         mock_get_client.return_value = MagicMock()
         
         with patch('routes.stream_ai_api') as mock_stream:
             mock_stream.return_value = iter(['Song: Bohemian Rhapsody by Queen'])
             
-            with patch('routes.verify_song_exists') as mock_verify:
-                mock_verify.return_value = {'is_real': True, 'explanation': 'Valid song'}
-                
-                response = client.post('/music-suggestion',
-                                      json={
-                                          'birth_date': '1990/01/01',
-                                          'birth_time': '12:00',
-                                          'timezone_offset': '+00:00',
-                                          'latitude': 0.0,
-                                          'longitude': 0.0,
-                                          'music_genre': 'rock',
-                                          'chart_type': 'daily'
-                                      })
-                
-                assert response.status_code == 200
-                # Consume the streaming response to trigger the generator
-                _ = b''.join(response.response)
-                # Verify stream_ai_api was called only once
-                assert mock_stream.call_count == 1
-                # Verify verify_song_exists was called once
-                assert mock_verify.call_count == 1
+            response = client.post('/music-suggestion',
+                                  json={
+                                      'birth_date': '1990/01/01',
+                                      'birth_time': '12:00',
+                                      'timezone_offset': '+00:00',
+                                      'latitude': 0.0,
+                                      'longitude': 0.0,
+                                      'music_genre': 'rock',
+                                      'chart_type': 'daily'
+                                  })
+            
+            assert response.status_code == 200
+            # Consume the streaming response to trigger the generator
+            _ = b''.join(response.response)
+            # Verify stream_ai_api was called
+            assert mock_stream.call_count == 1
 
 
-def test_music_suggestion_retry_on_verification_failure(client):
-    """Test that the endpoint retries when song verification fails"""
+def test_music_suggestion_with_lastfm_integration(client):
+    """Test that Last.fm service is called and tracks are included in prompt"""
     with patch('ai_service.get_client') as mock_get_client:
         mock_get_client.return_value = MagicMock()
         
-        with patch('routes.stream_ai_api') as mock_stream:
-            # First attempt returns fake song, second returns real song
-            mock_stream.side_effect = [
-                iter(['Song: Fake Song by Fake Artist']),
-                iter(['Song: Yesterday by The Beatles'])
+        # Mock Last.fm service to return tracks
+        with patch('routes.get_top_tracks_by_genre') as mock_lastfm:
+            mock_lastfm.return_value = [
+                {'name': 'Stayin\' Alive', 'artist': 'Bee Gees'},
+                {'name': 'Le Freak', 'artist': 'Chic'},
+                {'name': 'I Will Survive', 'artist': 'Gloria Gaynor'}
             ]
             
-            with patch('routes.verify_song_exists') as mock_verify:
-                # First verification fails, second succeeds
-                mock_verify.side_effect = [
-                    {'is_real': False, 'explanation': 'Song not found'},
-                    {'is_real': True, 'explanation': 'Valid song'}
-                ]
+            with patch('routes.stream_ai_api') as mock_stream:
+                mock_stream.return_value = iter(['Song: Stayin\' Alive by Bee Gees'])
                 
                 response = client.post('/music-suggestion',
                                       json={
@@ -147,33 +135,35 @@ def test_music_suggestion_retry_on_verification_failure(client):
                                           'timezone_offset': '+00:00',
                                           'latitude': 0.0,
                                           'longitude': 0.0,
-                                          'music_genre': 'any',
+                                          'music_genre': 'disco',
                                           'chart_type': 'daily'
                                       })
                 
                 assert response.status_code == 200
-                # Consume the streaming response to trigger the generator
                 _ = b''.join(response.response)
-                # Should have called stream_ai_api twice (1 initial + 1 retry)
-                assert mock_stream.call_count == 2
-                # Should have called verify_song_exists twice
-                assert mock_verify.call_count == 2
-def test_music_suggestion_max_retries_exceeded(client):
-    """Test that the endpoint returns empty string after 3 failed attempts"""
+                
+                # Verify Last.fm was called with correct genre
+                mock_lastfm.assert_called_once_with('disco')
+                
+                # Verify the prompt included Last.fm tracks
+                call_args = mock_stream.call_args
+                prompt = call_args[0][1]  # Second argument is the user prompt
+                assert 'Popular tracks in this genre include:' in prompt
+                assert 'Stayin\' Alive by Bee Gees' in prompt
+                assert 'Le Freak by Chic' in prompt
+
+
+def test_music_suggestion_lastfm_no_tracks_found(client):
+    """Test that endpoint works when Last.fm returns no tracks"""
     with patch('ai_service.get_client') as mock_get_client:
         mock_get_client.return_value = MagicMock()
         
-        with patch('routes.stream_ai_api') as mock_stream:
-            # All attempts return fake songs
-            mock_stream.side_effect = [
-                iter(['Song: Fake Song 1 by Artist 1']),
-                iter(['Song: Fake Song 2 by Artist 2']),
-                iter(['Song: Fake Song 3 by Artist 3'])
-            ]
+        # Mock Last.fm to return empty list
+        with patch('routes.get_top_tracks_by_genre') as mock_lastfm:
+            mock_lastfm.return_value = []
             
-            with patch('routes.verify_song_exists') as mock_verify:
-                # All verifications fail
-                mock_verify.return_value = {'is_real': False, 'explanation': 'Song not found'}
+            with patch('routes.stream_ai_api') as mock_stream:
+                mock_stream.return_value = iter(['Song: Test Song by Test Artist'])
                 
                 response = client.post('/music-suggestion',
                                       json={
@@ -182,73 +172,33 @@ def test_music_suggestion_max_retries_exceeded(client):
                                           'timezone_offset': '+00:00',
                                           'latitude': 0.0,
                                           'longitude': 0.0,
-                                          'music_genre': 'any',
+                                          'music_genre': 'unknown_genre',
                                           'chart_type': 'daily'
                                       })
                 
                 assert response.status_code == 200
-                # Consume the streaming response to trigger the generator
-                data = b''.join(response.response).decode('utf-8')
-                # Should have called stream_ai_api 3 times (max attempts)
-                assert mock_stream.call_count == 3
-                # Should have called verify_song_exists 3 times
-                assert mock_verify.call_count == 3
-                
-                # Verify empty content was returned
-                assert '"verified": false' in data.lower()
-                assert '"content": ""' in data
-def test_music_suggestion_no_response_from_ai(client):
-    """Test handling when AI returns no response"""
-    with patch('ai_service.get_client') as mock_get_client:
-        mock_get_client.return_value = MagicMock()
-        
-        with patch('routes.stream_ai_api') as mock_stream:
-            # Return empty responses for all attempts
-            mock_stream.side_effect = [
-                iter([]),
-                iter([]),
-                iter([])
-            ]
-            
-            with patch('routes.verify_song_exists') as mock_verify:
-                response = client.post('/music-suggestion',
-                                      json={
-                                          'birth_date': '1990/01/01',
-                                          'birth_time': '12:00',
-                                          'timezone_offset': '+00:00',
-                                          'latitude': 0.0,
-                                          'longitude': 0.0,
-                                          'music_genre': 'any',
-                                          'chart_type': 'daily'
-                                      })
-                
-                assert response.status_code == 200
-                # Consume the streaming response to trigger the generator
                 _ = b''.join(response.response)
-                # Should have tried 3 times
-                assert mock_stream.call_count == 3
-                # Verify was never called since we got no responses
-                assert mock_verify.call_count == 0
-def test_music_suggestion_third_attempt_success(client):
-    """Test successful song suggestion on third attempt"""
+                
+                # Verify Last.fm was still called
+                mock_lastfm.assert_called_once()
+                
+                # Verify the prompt does NOT include Last.fm section
+                call_args = mock_stream.call_args
+                prompt = call_args[0][1]
+                assert 'Popular tracks in this genre include:' not in prompt
+
+
+def test_music_suggestion_any_genre_skips_lastfm(client):
+    """Test that 'any' genre skips Last.fm API call"""
     with patch('ai_service.get_client') as mock_get_client:
         mock_get_client.return_value = MagicMock()
         
-        with patch('routes.stream_ai_api') as mock_stream:
-            # First two fail, third succeeds
-            mock_stream.side_effect = [
-                iter(['Song: Fake Song 1 by Artist 1']),
-                iter(['Song: Fake Song 2 by Artist 2']),
-                iter(['Song: Imagine by John Lennon'])
-            ]
+        # Mock Last.fm to return empty (simulating skip)
+        with patch('routes.get_top_tracks_by_genre') as mock_lastfm:
+            mock_lastfm.return_value = []
             
-            with patch('routes.verify_song_exists') as mock_verify:
-                # First two verifications fail, third succeeds
-                mock_verify.side_effect = [
-                    {'is_real': False, 'explanation': 'Not found'},
-                    {'is_real': False, 'explanation': 'Not found'},
-                    {'is_real': True, 'explanation': 'Valid song'}
-                ]
+            with patch('routes.stream_ai_api') as mock_stream:
+                mock_stream.return_value = iter(['Song: Test Song by Test Artist'])
                 
                 response = client.post('/music-suggestion',
                                       json={
@@ -262,9 +212,7 @@ def test_music_suggestion_third_attempt_success(client):
                                       })
                 
                 assert response.status_code == 200
-                # Consume the streaming response to trigger the generator
                 _ = b''.join(response.response)
-                # Should have called stream_ai_api 3 times
-                assert mock_stream.call_count == 3
-                # Should have called verify_song_exists 3 times
-                assert mock_verify.call_count == 3
+                
+                # Last.fm should still be called (it handles 'any' internally)
+                mock_lastfm.assert_called_once_with('any')

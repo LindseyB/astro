@@ -39,8 +39,8 @@ function loadMusicSuggestion(chartData, chartType) {
                         try {
                             const data = JSON.parse(line.substring(6));
                             
-                            if (data.type === 'chunk') {
-                                suggestionText += data.content;
+                            if (data.chunk) {
+                                suggestionText += data.chunk;
                                 // Safely update suggestion text with cursor
                                 const p = document.createElement('p');
                                 p.textContent = suggestionText;
@@ -50,18 +50,14 @@ function loadMusicSuggestion(chartData, chartType) {
                                 p.appendChild(cursor);
                                 container.innerHTML = '';
                                 container.appendChild(p);
-                            } else if (data.type === 'verified') {
-                                const icon = data.verified ? '' : ' ⚠️';
-                                // Safely update verified message
+                            } else if (data.done) {
+                                // Remove cursor when done
                                 const p = document.createElement('p');
-                                p.textContent = data.content + icon;
+                                p.textContent = suggestionText;
                                 container.innerHTML = '';
                                 container.appendChild(p);
-                            } else if (data.type === 'retry') {
-                                suggestionText = '';
-                                container.innerHTML = '<p><em>Finding alternative...</em></p>';
-                            } else if (data.type === 'error') {
-                                console.error('Music suggestion error:', data.content);
+                            } else if (data.error) {
+                                console.error('Music suggestion error:', data.error);
                                 reader.cancel();
                                 container.remove();
                             }
