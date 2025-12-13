@@ -5,6 +5,7 @@
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
 <script src="{{ url_for('static', filename='js/music-suggestion.js') }}"></script>
+<script src="{{ url_for('static', filename='js/section-toggle.js') }}"></script>
 {% if streaming %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="{{ url_for('static', filename='js/stream-analysis.js') }}"></script>
@@ -148,8 +149,12 @@
 </div>
 
 <!-- All Planets -->
-<div class="chart-section">
-    <h2>🪐 <i>All Planets</i></h2>
+<div class="chart-section toggleable-section">
+    <button class="section-header" data-section="planets-content" aria-expanded="false" aria-label="Toggle planets section">
+        <span class="toggle-btn collapsed">▶</span>
+        <h2>🪐 <i>All Planets</i></h2>
+    </button>
+    <div id="planets-content" class="section-content collapsed">
     <div class="planets-grid">
         {% for planet_name, planet_data in chart_data.planets.items() %}
         <div class="planet-card">
@@ -190,11 +195,16 @@
         </div>
         {% endfor %}
     </div>
+    </div>
 </div>
 
 <!-- Houses -->
-<div class="chart-section">
-    <h2>🏠 <i>Houses</i></h2>
+<div class="chart-section toggleable-section">
+    <button class="section-header" data-section="houses-content" aria-expanded="false" aria-label="Toggle houses section">
+        <span class="toggle-btn collapsed">▶</span>
+        <h2>🏠 <i>Houses</i></h2>
+    </button>
+    <div id="houses-content" class="section-content collapsed">
     <div class="houses-grid">
         {% for house_number in range(1, 13) %}
         {% set house_data = chart_data.houses[house_number] %}
@@ -257,6 +267,7 @@
             </div>
         </div>
         {% endfor %}
+    </div>
     </div>
 </div>
 
