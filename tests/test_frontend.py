@@ -209,6 +209,58 @@ class TestJavaScriptFunctionality(unittest.TestCase):
         )
         self.assertTrue(os.path.exists(chart_wheel_path), "chart-wheel.js should exist")
 
+    def test_modal_js_functions(self):
+        """Test that modal.js contains required functions"""
+        modal_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'js', 'modal.js')
+
+        if os.path.exists(modal_path):
+            with open(modal_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # Test for main functions
+            self.assertIn('openModal', content)
+            self.assertIn('closeModal', content)
+            self.assertIn('initializeModals', content)
+            
+            # Test for event handling
+            self.assertIn('handleEscapeKey', content)
+            self.assertIn('addEventListener', content)
+            
+            # Test for modal interaction elements
+            self.assertIn('modal-overlay', content)
+            self.assertIn('modal-close', content)
+            
+            # Test for accessibility
+            self.assertIn('overflow', content)  # Body scroll prevention
+
+    def test_section_toggle_js_functions(self):
+        """Test that section-toggle.js contains required functions"""
+        section_toggle_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'js', 'section-toggle.js')
+
+        if os.path.exists(section_toggle_path):
+            with open(section_toggle_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # Test for main functions
+            self.assertIn('initializeToggleSections', content)
+            self.assertIn('restoreSectionStates', content)
+            self.assertIn('updateSectionState', content)
+            
+            # Test for event handling
+            self.assertIn('addEventListener', content)
+            
+            # Test for toggle interaction elements
+            self.assertIn('section-header', content)
+            self.assertIn('toggle-btn', content)
+            self.assertIn('data-section', content)
+            
+            # Test for state management
+            self.assertIn('localStorage', content)
+            self.assertIn('collapsed', content)
+            
+            # Test for accessibility
+            self.assertIn('aria-expanded', content)
+
 
 class TestCSS(unittest.TestCase):
     """Test CSS file structure and key styles"""

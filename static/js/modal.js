@@ -20,6 +20,14 @@ function closeModal(modalId) {
 
 // Initialize modal listeners when DOM is ready
 function initializeModals() {
+    // Open location help modal when button is clicked
+    const locationHelpBtn = document.getElementById('locationHelpBtn');
+    if (locationHelpBtn) {
+        locationHelpBtn.addEventListener('click', function() {
+            openModal('locationHelpModal');
+        });
+    }
+    
     // Close modal when clicking on overlay (outside modal content)
     const overlays = document.querySelectorAll('.modal-overlay');
     overlays.forEach(overlay => {
@@ -41,15 +49,19 @@ function initializeModals() {
         });
     });
     
-    // Close modal on Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const activeModal = document.querySelector('.modal-overlay.active');
-            if (activeModal) {
-                closeModal(activeModal.id);
-            }
+    // Close modal on Escape key (remove old listener first to prevent duplicates)
+    document.removeEventListener('keydown', handleEscapeKey);
+    document.addEventListener('keydown', handleEscapeKey);
+}
+
+// Named function for Escape key handling to allow proper cleanup
+function handleEscapeKey(e) {
+    if (e.key === 'Escape') {
+        const activeModal = document.querySelector('.modal-overlay.active');
+        if (activeModal) {
+            closeModal(activeModal.id);
         }
-    });
+    }
 }
 
 // Initialize when DOM is ready
