@@ -164,7 +164,6 @@ button.loading:hover {
     padding: 20px;
     background: var(--section-bg);
     border-radius: 10px;
-    border-left: 5px solid #667eea;
     transition: background 0.3s ease;
 }
 
