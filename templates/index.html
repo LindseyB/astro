@@ -5,6 +5,7 @@
 <script src="{{ url_for('static', filename='js/music-genre.js') }}"></script>
 <script src="{{ url_for('static', filename='js/form-persistence.js') }}"></script>
 <script src="{{ url_for('static', filename='js/button-loading.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modal.js') }}"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 {% endblock %}
@@ -66,7 +67,10 @@
     
     <!-- Interactive Location Selector -->
     <div class="form-group">
-        <label>📍 Select Birth Location:</label>
+        <label>
+            📍 Select Birth Location:
+            <button type="button" class="help-icon-btn" onclick="openModal('locationHelpModal')" title="Location Help">?</button>
+        </label>
         <div class="location-selector">
             <div class="location-search">
                 <input type="text" id="locationSearch" placeholder="Search for a city or address...">
@@ -109,15 +113,23 @@
     </div>
 </form>
 
-<div class="location-help">
-    <h3>📍 Location Help</h3>
-    <p><strong>🗺️ Using the Interactive Map:</strong></p>
-    <ul>
-        <li>Click anywhere on the map to set your birth location</li>
-        <li>Search for your birth city in the search box above the map</li>
-        <li>The map will automatically detect your current location (if you allow it)</li>
-        <li>Coordinates will be automatically converted to astrology format</li>
-    </ul>
-    <p><small>💡 The map makes it easy to find your exact birth location - just click or search!</small></p>
+<!-- Location Help Modal -->
+<div id="locationHelpModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📍 Location Help</h3>
+            <button class="modal-close" aria-label="Close modal">×</button>
+        </div>
+        <div class="modal-body">
+            <p><strong>🗺️ Using the Interactive Map:</strong></p>
+            <ul>
+                <li>Click anywhere on the map to set your birth location</li>
+                <li>Search for your birth city in the search box above the map</li>
+                <li>The map will automatically detect your current location (if you allow it)</li>
+                <li>Coordinates will be automatically converted to astrology format</li>
+            </ul>
+            <p><small>💡 The map makes it easy to find your exact birth location - just click or search!</small></p>
+        </div>
+    </div>
 </div>
 {% endblock %}
