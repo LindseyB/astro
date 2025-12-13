@@ -761,7 +761,7 @@ input[readonly] {
     top: 20px;
     right: 20px;
     background: rgba(255, 255, 255, 0.95);
-    border: 3px solid #764ba2;
+    border: 1px solid #764ba2;
     border-radius: 50%;
     width: 50px;
     height: 50px;
@@ -779,7 +779,7 @@ input[readonly] {
 
 .dark-mode #darkModeToggle {
     background: rgba(39, 39, 42, 0.95);
-    border: 3px solid #ffffff;
+    border: 1px solid #ffffff;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(255, 255, 255, 0.2);
 }
 
