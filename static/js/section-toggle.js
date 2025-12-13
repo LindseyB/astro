@@ -50,10 +50,12 @@ function restoreSectionStates() {
         const toggleIcon = header.querySelector('.toggle-btn');
         
         if (savedState === 'expanded') {
-            content.classList.remove('collapsed');
-            toggleIcon.classList.remove('collapsed');
-            toggleIcon.textContent = '▼';
-            header.setAttribute('aria-expanded', 'true');
+            if (content && toggleIcon) {
+                content.classList.remove('collapsed');
+                toggleIcon.classList.remove('collapsed');
+                toggleIcon.textContent = '▼';
+                header.setAttribute('aria-expanded', 'true');
+            }
         }
         // Default is already collapsed, no need to do anything
     });

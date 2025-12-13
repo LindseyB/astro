@@ -911,8 +911,8 @@ input[readonly] {
     cursor: pointer;
     color: var(--text-tertiary);
     padding: 0;
-    width: 30px;
-    height: 30px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -947,16 +947,16 @@ input[readonly] {
     background: transparent;
     border: 2px solid var(--border-color);
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    min-height: 24px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     color: var(--text-secondary);
-    font-size: 14px;
+    font-size: 24px; /* Ensures the icon remains visually 24px */
     font-weight: bold;
     font-family: Arial, sans-serif;
     margin-left: 8px;
@@ -1033,7 +1033,7 @@ input[readonly] {
 }
 
 .section-content {
-    max-height: 10000px;
+    max-height: none;
     overflow: hidden;
     transition: max-height 0.5s ease, opacity 0.3s ease, padding 0.3s ease;
     opacity: 1;
