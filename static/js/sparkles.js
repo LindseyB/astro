@@ -5,9 +5,9 @@ function createSparkle() {
     const sparkle = document.createElement('div');
     sparkle.className = 'sparkle';
     
-    // Random sparkle characters
-    const sparkleChars = ['✨', '⭐', '🌟', '💫', '🔮'];
-    sparkle.textContent = sparkleChars[Math.floor(Math.random() * sparkleChars.length)];
+    // Random star characters (matching star-trail)
+    const starChars = ['✦', '✧', '⋆', '✩', '✪', '✫', '✬', '✭', '✮', '✯'];
+    sparkle.textContent = starChars[Math.floor(Math.random() * starChars.length)];
     
     // Random position across the width
     sparkle.style.left = Math.random() * 100 + '%';
@@ -19,6 +19,12 @@ function createSparkle() {
     // Random size
     const size = Math.random() * 15 + 15;
     sparkle.style.fontSize = size + 'px';
+    
+    // Random color (matching star-trail)
+    const colors = ['#FFD700', '#FFA500', '#FF69B4', '#9370DB', '#00CED1', '#FFFFFF', '#FFB6C1'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    sparkle.style.color = color;
+    sparkle.style.textShadow = `0 0 ${size/2}px ${color}`;
     
     // Some sparkles get extra twinkle
     if (Math.random() > 0.7) {

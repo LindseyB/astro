@@ -6,13 +6,14 @@
 <script src="{{ url_for('static', filename='js/form-persistence.js') }}"></script>
 <script src="{{ url_for('static', filename='js/button-loading.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
+<script src="{{ url_for('static', filename='js/timezone-select.js') }}"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 {% endblock %}
 
 {% block content %}
 <h1>🌟 <i>Astro Horoscope</i></h1>
-<p class="intro-text">Enter your birth information to generate your natal chart to get a super chill super accurate horoscope</p>
+<p class="intro-text">Enter your birth information to generate your personalized natal chart and detailed horoscope</p>
 
 <!-- Form data status indicator -->
 <div id="formDataStatus" class="form-data-status">
@@ -31,10 +32,106 @@
     </div>
     
     <div class="form-group">
-        <label for="timezone_offset">Timezone Offset (e.g., -04:00 for EDT, -05:00 for EST):</label>
-        <input type="text" id="timezone_offset" name="timezone_offset" required 
-               placeholder="-04:00" pattern="[+\-]?\d{1,2}:\d{2}">
-        <small class="field-hint">Format: +/-HH:MM (include daylight savings adjustment)</small>
+        <label for="timezone_offset">Timezone:</label>
+        <select id="timezone_offset" name="timezone_offset" required class="timezone-select">
+            <option value="">Select or search for a timezone...</option>
+            <optgroup label="Common US Timezones">
+                <option value="-05:00">Eastern Standard Time (EST) -05:00</option>
+                <option value="-04:00">Eastern Daylight Time (EDT) -04:00</option>
+                <option value="-06:00">Central Standard Time (CST) -06:00</option>
+                <option value="-05:00">Central Daylight Time (CDT) -05:00</option>
+                <option value="-07:00">Mountain Standard Time (MST) -07:00</option>
+                <option value="-06:00">Mountain Daylight Time (MDT) -06:00</option>
+                <option value="-08:00">Pacific Standard Time (PST) -08:00</option>
+                <option value="-07:00">Pacific Daylight Time (PDT) -07:00</option>
+                <option value="-09:00">Alaska Standard Time (AKST) -09:00</option>
+                <option value="-08:00">Alaska Daylight Time (AKDT) -08:00</option>
+                <option value="-10:00">Hawaii-Aleutian Standard Time (HST) -10:00</option>
+            </optgroup>
+            <optgroup label="Europe">
+                <option value="+00:00">Greenwich Mean Time (GMT) +00:00</option>
+                <option value="+01:00">British Summer Time (BST) +01:00</option>
+                <option value="+01:00">Central European Time (CET) +01:00</option>
+                <option value="+02:00">Central European Summer Time (CEST) +02:00</option>
+                <option value="+02:00">Eastern European Time (EET) +02:00</option>
+                <option value="+03:00">Eastern European Summer Time (EEST) +03:00</option>
+            </optgroup>
+            <optgroup label="Asia">
+                <option value="+05:30">India Standard Time (IST) +05:30</option>
+                <option value="+08:00">China Standard Time (CST) +08:00</option>
+                <option value="+09:00">Japan Standard Time (JST) +09:00</option>
+                <option value="+09:00">Korea Standard Time (KST) +09:00</option>
+                <option value="+05:45">Nepal Time (NPT) +05:45</option>
+                <option value="+06:00">Bangladesh Standard Time (BST) +06:00</option>
+                <option value="+07:00">Indochina Time (ICT) +07:00</option>
+            </optgroup>
+            <optgroup label="Australia/Pacific">
+                <option value="+08:00">Australian Western Standard Time (AWST) +08:00</option>
+                <option value="+09:30">Australian Central Standard Time (ACST) +09:30</option>
+                <option value="+10:30">Australian Central Daylight Time (ACDT) +10:30</option>
+                <option value="+10:00">Australian Eastern Standard Time (AEST) +10:00</option>
+                <option value="+11:00">Australian Eastern Daylight Time (AEDT) +11:00</option>
+                <option value="+12:00">New Zealand Standard Time (NZST) +12:00</option>
+                <option value="+13:00">New Zealand Daylight Time (NZDT) +13:00</option>
+            </optgroup>
+            <optgroup label="Americas (Other)">
+                <option value="-03:00">Argentina Time (ART) -03:00</option>
+                <option value="-03:00">Brasilia Time (BRT) -03:00</option>
+                <option value="-05:00">Colombia Time (COT) -05:00</option>
+                <option value="-06:00">Mexico City Time (CST) -06:00</option>
+                <option value="-04:00">Atlantic Standard Time (AST) -04:00</option>
+                <option value="-03:00">Atlantic Daylight Time (ADT) -03:00</option>
+            </optgroup>
+            <optgroup label="Africa/Middle East">
+                <option value="+02:00">South Africa Standard Time (SAST) +02:00</option>
+                <option value="+03:00">East Africa Time (EAT) +03:00</option>
+                <option value="+03:00">Arabia Standard Time (AST) +03:00</option>
+                <option value="+04:00">Gulf Standard Time (GST) +04:00</option>
+            </optgroup>
+            <optgroup label="All UTC Offsets">
+                <option value="-12:00">UTC-12:00</option>
+                <option value="-11:00">UTC-11:00</option>
+                <option value="-10:00">UTC-10:00</option>
+                <option value="-09:30">UTC-09:30</option>
+                <option value="-09:00">UTC-09:00</option>
+                <option value="-08:00">UTC-08:00</option>
+                <option value="-07:00">UTC-07:00</option>
+                <option value="-06:00">UTC-06:00</option>
+                <option value="-05:00">UTC-05:00</option>
+                <option value="-04:30">UTC-04:30</option>
+                <option value="-04:00">UTC-04:00</option>
+                <option value="-03:30">UTC-03:30</option>
+                <option value="-03:00">UTC-03:00</option>
+                <option value="-02:00">UTC-02:00</option>
+                <option value="-01:00">UTC-01:00</option>
+                <option value="+00:00">UTC+00:00</option>
+                <option value="+01:00">UTC+01:00</option>
+                <option value="+02:00">UTC+02:00</option>
+                <option value="+03:00">UTC+03:00</option>
+                <option value="+03:30">UTC+03:30</option>
+                <option value="+04:00">UTC+04:00</option>
+                <option value="+04:30">UTC+04:30</option>
+                <option value="+05:00">UTC+05:00</option>
+                <option value="+05:30">UTC+05:30</option>
+                <option value="+05:45">UTC+05:45</option>
+                <option value="+06:00">UTC+06:00</option>
+                <option value="+06:30">UTC+06:30</option>
+                <option value="+07:00">UTC+07:00</option>
+                <option value="+08:00">UTC+08:00</option>
+                <option value="+08:30">UTC+08:30</option>
+                <option value="+08:45">UTC+08:45</option>
+                <option value="+09:00">UTC+09:00</option>
+                <option value="+09:30">UTC+09:30</option>
+                <option value="+10:00">UTC+10:00</option>
+                <option value="+10:30">UTC+10:30</option>
+                <option value="+11:00">UTC+11:00</option>
+                <option value="+12:00">UTC+12:00</option>
+                <option value="+12:45">UTC+12:45</option>
+                <option value="+13:00">UTC+13:00</option>
+                <option value="+14:00">UTC+14:00</option>
+            </optgroup>
+        </select>
+        <small class="field-hint">Search or select your timezone (include daylight savings adjustment)</small>
     </div>
     
     <div class="form-group">
@@ -69,7 +166,7 @@
     <div class="form-group">
         <label>
             📍 Select Birth Location:
-            <button type="button" class="help-icon-btn" id="locationHelpBtn" title="Location Help">?</button>
+            <button type="button" class="help-icon-btn" id="locationHelpBtn" title="Location Help">❓</button>
         </label>
         <div class="location-selector">
             <div class="location-search">
@@ -85,14 +182,14 @@
         </div>
     </div>
     
-    <div class="form-group">
+    <div class="form-group" style="display: none;">
         <label for="latitude">Latitude (auto-filled from map):</label>
         <input type="text" id="latitude" name="latitude" required 
                placeholder="40n42" readonly>
         <small class="field-hint">Format: DDnMM for North, DDsM for South</small>
     </div>
     
-    <div class="form-group">
+    <div class="form-group" style="display: none;">
         <label for="longitude">Longitude (auto-filled from map):</label>
         <input type="text" id="longitude" name="longitude" required 
                placeholder="74w00" readonly>
