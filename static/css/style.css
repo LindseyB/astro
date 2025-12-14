@@ -99,6 +99,7 @@ input, select {
     box-sizing: border-box;
     background: var(--input-bg);
     color: var(--text-color);
+    font-family: 'Space Mono', monospace;
     transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
@@ -367,23 +368,55 @@ button.loading:hover {
     flex: 1;
     min-width: 200px;
     margin-right: 0;
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+    background: var(--input-bg);
+    color: var(--text-color);
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    font-family: 'Space Mono', monospace;
+}
+
+.location-search input:focus {
+    outline: none;
+    border-color: #667eea;
 }
 
 .location-search button {
-    padding: 8px 15px;
-    background: #667eea;
+    font-family: 'Space Mono', monospace;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    padding: 12px 24px;
     border: none;
-    border-radius: 4px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
     cursor: pointer;
     white-space: nowrap;
     width: auto;
     min-width: auto;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    margin-top: 0;
 }
 
 .location-search button:hover {
-    background: #5a67d8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
+
+.location-search button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
     transform: none;
+}
+
+.location-search button:disabled:hover {
+    transform: none;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 #locationMap {
@@ -696,11 +729,20 @@ input[readonly] {
 
 .other-genre-input input {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
     border: 2px solid var(--border-color);
-    border-radius: 4px;
-    background: var(--input-bg);
+    border-radius: 8px;
+    font-size: 16px;
     box-sizing: border-box;
+    background: var(--input-bg);
+    color: var(--text-color);
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    font-family: 'Space Mono', monospace;
+}
+
+.other-genre-input input:focus {
+    outline: none;
+    border-color: #667eea;
 }
 
 .clear-data-container {
@@ -1048,4 +1090,140 @@ input[readonly] {
     max-height: 0;
     opacity: 0;
     padding: 0;
+}
+
+/* ==========================================
+   Select2 Custom Styling for Timezone Dropdown
+   ========================================== */
+
+/* Main Select2 container */
+.select2-container--default .select2-selection--single {
+    background: var(--input-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    height: 45px;
+    padding: 5px 10px;
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.select2-container--default .select2-selection--single:focus,
+.select2-container--default.select2-container--open .select2-selection--single {
+    border-color: #667eea;
+    outline: none;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--text-color);
+    line-height: 33px;
+    padding-left: 5px;
+    font-family: 'Space Mono', monospace;
+    font-size: 16px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: var(--text-secondary);
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 43px;
+    right: 5px;
+}
+
+/* Dropdown */
+.select2-container--default .select2-dropdown {
+    background: var(--input-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    margin-top: 5px;
+    max-width: 100%;
+}
+
+/* Search box in dropdown */
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    background: var(--input-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-color);
+    font-family: 'Space Mono', monospace;
+    padding: 8px;
+    margin: 8px;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+    border-color: #667eea;
+    outline: none;
+}
+
+/* Dropdown results */
+.select2-container--default .select2-results__option {
+    background: var(--input-bg);
+    color: var(--text-color);
+    padding: 10px 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background: #667eea;
+    color: white;
+}
+
+.select2-container--default .select2-results__option[aria-selected=true] {
+    background: var(--section-bg);
+    color: var(--text-color);
+}
+
+.select2-container--default .select2-results__option[aria-selected=true]:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* Option groups */
+.select2-container--default .select2-results__group {
+    background: var(--section-bg);
+    color: var(--text-secondary);
+    font-weight: bold;
+    padding: 8px 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-top: 1px solid var(--border-color);
+}
+
+.select2-container--default .select2-results__option--group {
+    padding-left: 0;
+}
+
+.select2-container--default .select2-results__options--nested .select2-results__option {
+    padding-left: 20px;
+}
+
+/* Loading state */
+.select2-container--default .select2-results__option--loading {
+    color: var(--text-secondary);
+}
+
+/* No results message */
+.select2-container--default .select2-results__option--no-results {
+    color: var(--text-secondary);
+    background: var(--input-bg);
+}
+
+/* Width fix */
+.select2-container {
+    width: 100% !important;
+}
+
+.timezone-select {
+    width: 100%;
+}
+
+/* Dark mode adjustments */
+.dark-mode .select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: var(--text-color) transparent transparent transparent;
+}
+
+.dark-mode .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+    border-color: transparent transparent var(--text-color) transparent;
 }

@@ -1,6 +1,7 @@
 // Interactive map for location selection using Leaflet
 let map;
 let marker;
+let currentTileLayer;
 
 document.addEventListener('DOMContentLoaded', function() {
     initMap();
@@ -23,6 +24,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Listen for dark mode changes and update map tiles
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.attributeName === 'class') {
+                updateMapTiles();
+            }
+        });
+    });
+    
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class']
+    });
 });
 
 function initMap() {
@@ -35,10 +50,8 @@ function initMap() {
     // Make map globally available for form persistence
     window.map = map;
     
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    // Add appropriate tile layer based on current mode
+    updateMapTiles();
     
     // Add click listener to map
     map.on('click', function(e) {
@@ -140,6 +153,32 @@ function getTimezoneForLocation(lat, lng) {
     // Only update timezone if field is empty or hasn't been manually modified by user
     if (timezoneField && !timezoneField.value && !timezoneField.dataset.userModified) {
         timezoneField.value = offsetString;
+    }
+}
+
+function updateMapTiles() {
+    if (!map) return;
+    
+    // Remove existing tile layer if present
+    if (currentTileLayer) {
+        map.removeLayer(currentTileLayer);
+    }
+    
+    const isDarkMode = document.documentElement.classList.contains('dark-mode');
+    
+    if (isDarkMode) {
+        // Dark mode: Use CartoDB Dark Matter tiles
+        currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap contributors © CARTO',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+    } else {
+        // Light mode: Use standard OpenStreetMap tiles
+        currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
     }
 }
 
