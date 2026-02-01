@@ -18,11 +18,11 @@
         anonymous: true
     };
     
-    const ldClient = window.LDClient.initialize(ldClientId, context, {
-        plugins: [
-            new SessionReplay()
-        ]
-    });
+    const ldClient = window.LDClient.initialize(ldClientId, context);
+    
+    
+    
+    
     
     ldClient.on('ready', () => {
         const showMainCta = ldClient.variation('get-horoscope-main-button-experiment', false);
