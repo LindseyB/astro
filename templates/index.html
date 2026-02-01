@@ -9,6 +9,10 @@
 <script src="{{ url_for('static', filename='js/timezone-select.js') }}"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- LaunchDarkly JS SDK -->
+<script src="https://unpkg.com/launchdarkly-js-client-sdk@3"></script>
+<script src="{{ url_for('static', filename='js/ld-experiment.js') }}"></script>
 {% endblock %}
 
 {% block content %}

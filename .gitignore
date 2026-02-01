@@ -208,3 +208,8 @@ __marimo__/
 
 # Mac stuff
 .DS_Store
+
+# swisseph stuff
+swisseph/sepl_18.se1.*
+swisseph/semo_18.se1.*
+swisseph/seas_18.se1.*
