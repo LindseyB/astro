@@ -2,10 +2,6 @@
 (function() {
     const ldClientId = "692742d0a95e1a0ac789ca56";
     
-    if (!ldClientId) {
-        return;
-    }
-    
     // Wait for LaunchDarkly SDK to be available
     if (typeof window.LDClient === 'undefined') {
         console.warn('LaunchDarkly SDK not loaded');
