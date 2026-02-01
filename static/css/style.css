@@ -458,6 +458,39 @@ input[readonly] {
     min-width: 180px;
 }
 
+/* Main CTA Button - Experiment Variant */
+.button-group button.main-cta {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    font-size: 1.1em;
+    font-weight: 700;
+    padding: 18px 32px;
+    border: 2px solid transparent;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    transform: scale(1);
+    transition: all 0.3s ease;
+}
+
+.button-group button.main-cta:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 28px rgba(102, 126, 234, 0.5);
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.button-group button.main-cta:active {
+    transform: scale(0.98);
+}
+
+.dark-mode .button-group button.main-cta {
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+}
+
+.dark-mode .button-group button.main-cta:hover {
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    box-shadow: 0 12px 28px rgba(124, 58, 237, 0.5);
+}
+
 /* Responsive design for location search */
 @media (max-width: 600px) {
     .location-search {

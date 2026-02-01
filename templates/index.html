@@ -9,6 +9,50 @@
 <script src="{{ url_for('static', filename='js/timezone-select.js') }}"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- LaunchDarkly JS SDK -->
+<script src="https://unpkg.com/launchdarkly-js-client-sdk@3"></script>
+<script>
+    // Initialize LaunchDarkly client and evaluate main CTA button flag
+    const ldClientId = "692742d0a95e1a0ac789ca56";
+    
+    if (ldClientId) {
+        const context = {
+            kind: 'user',
+            key: 'anonymous-' + Math.random().toString(36).substring(7),
+            anonymous: true
+        };
+        
+        const ldClient = window.LDClient.initialize(ldClientId, context, {
+            plugins: [
+                new Observability(),
+                new SessionReplay()
+            ]
+        });
+        
+        ldClient.on('ready', () => {
+            const showMainCta = ldClient.variation('get-horoscope-main-button-experiment', false);
+            
+            if (showMainCta) {
+                const horoscopeButton = document.querySelector('button[formaction="/chart"]');
+                if (horoscopeButton) {
+                    horoscopeButton.classList.add('main-cta');
+                }
+            }
+        });
+        
+        ldClient.on('change:get-horoscope-main-button-experiment', (value) => {
+            const horoscopeButton = document.querySelector('button[formaction="/chart"]');
+            if (horoscopeButton) {
+                if (value) {
+                    horoscopeButton.classList.add('main-cta');
+                } else {
+                    horoscopeButton.classList.remove('main-cta');
+                }
+            }
+        });
+    }
+</script>
 {% endblock %}
 
 {% block content %}
