@@ -110,10 +110,10 @@ input:focus, select:focus {
 
 button {
     font-family: 'Space Mono', monospace; 
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: transparent;
+    color: #667eea;
     padding: 15px 30px;
-    border: none;
+    border: 2px solid #667eea;
     border-radius: 25px;
     font-size: 18px;
     font-weight: bold;
@@ -121,13 +121,14 @@ button {
     width: 100%;
     margin-top: 10px;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: none;
 }
 
 button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #5a67d8;
+    color: #5a67d8;
 }
 
 button:disabled,
@@ -140,7 +141,7 @@ button.loading {
 button:disabled:hover,
 button.loading:hover {
     transform: none;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    background: transparent;
 }
 
 /* Spinner Animation */
@@ -386,10 +387,10 @@ button.loading:hover {
 
 .location-search button {
     font-family: 'Space Mono', monospace;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: transparent;
+    color: #667eea;
     padding: 12px 24px;
-    border: none;
+    border: 2px solid #667eea;
     border-radius: 25px;
     font-size: 16px;
     font-weight: bold;
@@ -398,14 +399,15 @@ button.loading:hover {
     width: auto;
     min-width: auto;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: none;
     margin-top: 0;
 }
 
 .location-search button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #5a67d8;
+    color: #5a67d8;
 }
 
 .location-search button:disabled {
@@ -416,7 +418,7 @@ button.loading:hover {
 
 .location-search button:disabled:hover {
     transform: none;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    background: transparent;
 }
 
 #locationMap {
@@ -489,6 +491,18 @@ input[readonly] {
 .dark-mode .button-group button.main-cta:hover {
     background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
     box-shadow: 0 12px 28px rgba(124, 58, 237, 0.5);
+}
+
+/* Dark mode outline buttons */
+.dark-mode button:not(.main-cta) {
+    color: #a78bfa;
+    border-color: #a78bfa;
+}
+
+.dark-mode button:not(.main-cta):hover {
+    background: rgba(167, 139, 250, 0.1);
+    border-color: #c4b5fd;
+    color: #c4b5fd;
 }
 
 /* Responsive design for location search */
