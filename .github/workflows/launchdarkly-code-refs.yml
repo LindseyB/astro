@@ -1,0 +1,41 @@
+name: 🚩 LaunchDarkly Code References
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+jobs:
+  find-feature-flags:
+    runs-on: ubuntu-latest
+    name: Find LaunchDarkly feature flags in diff
+
+    steps:
+      - name: 🔄 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Find feature flags
+        uses: launchdarkly/find-code-references-in-pull-request@v2
+        id: find-flags
+        with:
+          project-key: default
+          environment-key: production
+          access-token: ${{ secrets.LD_ACCESS_TOKEN }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          create-flag-links: true
+
+      - name: 🏷️ Add label if flags changed
+        if: steps.find-flags.outputs.any-changed == 'true'
+        run: gh pr edit $PR_NUMBER --add-label "feature flags"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      - name: 🏷️ Remove label if no flags changed
+        if: steps.find-flags.outputs.any-changed == 'false'
+        run: gh pr edit $PR_NUMBER --remove-label "feature flags" || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
