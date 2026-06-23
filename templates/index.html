@@ -366,7 +366,7 @@
   // ── Save & continue ───────────────────────────────────────
   document.getElementById('panelSaveBtn').addEventListener('click', function () {
     if (!hasBirthData()) {
-      alert('Please fill in birth date, time, timezone, and location.');
+      showSearchError('Please fill in birth date, time, timezone, and location.');
       return;
     }
     var action = pending || '/chart';
