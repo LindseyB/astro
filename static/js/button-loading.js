@@ -45,4 +45,35 @@ document.addEventListener('DOMContentLoaded', function() {
             clickedButton.innerHTML = '<span class="spinner"></span> Loading...';
         });
     }
+
+    // Index now has multiple forms (main + Ask Anything modal), so wire up Ask Anything too.
+    const askAnythingForm = document.querySelector('#askAnythingModal form');
+    if (askAnythingForm && askAnythingForm !== form) {
+        askAnythingForm.addEventListener('submit', function(e) {
+            const questionInput = askAnythingForm.querySelector('#question_prompt');
+            if (questionInput) {
+                const questionValue = questionInput.value.trim();
+                if (!questionValue) {
+                    e.preventDefault();
+                    questionInput.focus();
+                    questionInput.setCustomValidity('Please enter a question for Ask Anything mode.');
+                    questionInput.reportValidity();
+                    return;
+                }
+                questionInput.setCustomValidity('');
+            }
+
+            const clickedButton = e.submitter;
+            if (!clickedButton || clickedButton.type !== 'submit') {
+                return;
+            }
+
+            clickedButton.disabled = true;
+            clickedButton.classList.add('loading');
+
+            const originalText = clickedButton.innerHTML;
+            clickedButton.setAttribute('data-original-text', originalText);
+            clickedButton.innerHTML = '<span class="spinner"></span> Loading...';
+        });
+    }
 });

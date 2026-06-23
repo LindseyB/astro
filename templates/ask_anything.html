@@ -10,7 +10,7 @@
 <script>
     window.chartDataForStreaming = {
         pageType: 'ask-anything',
-        question: "{{ question | e }}"
+        question: {{ question | tojson }}
     };
 </script>
 {% endif %}

@@ -392,12 +392,11 @@ def stream_ask_anything():
                 yield f"data: {json.dumps({'done': True})}\n\n"
             except Exception as e:
                 logger.error(f"Error in stream_ask_anything: {e}")
-                yield f"data: {json.dumps({'error': str(e)})}\n\n"
-
+                yield f"data: {json.dumps({'error': 'Failed to stream response'})}\n\n"
         return Response(stream_with_context(generate()), mimetype='text/event-stream')
     except Exception as e:
         logger.error(f"ERROR in /stream-ask-anything route: {type(e).__name__}: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Failed to stream response'}), 500
 
 
 @app.route('/music-suggestion', methods=['POST'])
