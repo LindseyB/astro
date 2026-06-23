@@ -421,6 +421,34 @@ class TestStreamingEndpointsSSE(unittest.TestCase):
         self.assertEqual(len(done_messages), 1)
         self.assertTrue(done_messages[0]['done'])
 
+    @patch('routes.stream_calculate_ask_anything')
+    @patch('ai_service.get_client')
+    def test_stream_ask_anything_normalizes_legacy_birth_formats(self, mock_get_client, mock_stream_ask_anything):
+        """Test /stream-ask-anything normalizes legacy timezone and decimal coordinates"""
+        mock_get_client.return_value = MagicMock()
+        mock_stream_ask_anything.return_value = iter(['ok'])
+
+        response = self.app.post('/stream-ask-anything',
+                                data=json.dumps({
+                                    'question': 'Any tips for this week?',
+                                    'birth_date': '1988/08/08',
+                                    'birth_time': '10:30',
+                                    'timezone_offset': '-5',
+                                    'latitude': '51.5',
+                                    'longitude': '-0.1'
+                                }),
+                                content_type='application/json')
+
+        self.assertEqual(response.status_code, 200)
+        mock_stream_ask_anything.assert_called_once_with(
+            'Any tips for this week?',
+            '1988/08/08',
+            '10:30',
+            '-05:00',
+            '51n30',
+            '0w06'
+        )
+
     def test_stream_ask_anything_missing_question(self):
         """Test /stream-ask-anything validates required question field"""
         response = self.app.post('/stream-ask-anything',

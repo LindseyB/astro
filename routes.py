@@ -11,6 +11,7 @@ from chart_data import create_charts, get_main_positions, get_planets_in_houses,
 from ai_service import stream_ai_api
 from lastfm_service import get_top_tracks_by_genre, format_tracks_for_prompt
 import json
+import re
 
 app = Flask(__name__)
 
@@ -29,6 +30,60 @@ def get_user_ip():
     # Fallback to remote_addr
     else:
         return request.remote_addr or '127.0.0.1'
+
+
+def _decimal_to_astro_coord(value, is_latitude):
+    """Convert decimal coordinates to flatlib astro format (e.g., 40n42, 74w00)."""
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return value
+
+    direction = 'n' if is_latitude else 'e'
+    if numeric < 0:
+        direction = 's' if is_latitude else 'w'
+
+    absolute = abs(numeric)
+    degrees = int(absolute)
+    minutes = int(round((absolute - degrees) * 60))
+    if minutes == 60:
+        degrees += 1
+        minutes = 0
+
+    return f"{degrees}{direction}{minutes:02d}"
+
+
+def _normalize_birth_inputs(birth_date, timezone_offset, latitude, longitude):
+    """Normalize legacy input formats used by older saved form data."""
+    if isinstance(birth_date, str):
+        birth_date = birth_date.strip()
+        if '/' in birth_date:
+            birth_date = birth_date.replace('/', '-')
+
+    if isinstance(timezone_offset, str):
+        timezone_offset = timezone_offset.strip()
+        tz_match = re.fullmatch(r'([+-]?)(\d{1,2})', timezone_offset)
+        if tz_match:
+            sign, hours = tz_match.groups()
+            hour_num = int(hours)
+            if sign == '':
+                sign = '-' if timezone_offset.startswith('-') else '+'
+            timezone_offset = f"{sign}{hour_num:02d}:00"
+
+    if isinstance(latitude, str):
+        latitude = latitude.strip().lower()
+    if isinstance(longitude, str):
+        longitude = longitude.strip().lower()
+
+    lat_pattern = r'^\d+[ns]\d{1,2}$'
+    lon_pattern = r'^\d+[we]\d{1,2}$'
+
+    if isinstance(latitude, str) and latitude and not re.fullmatch(lat_pattern, latitude):
+        latitude = _decimal_to_astro_coord(latitude, is_latitude=True)
+    if isinstance(longitude, str) and longitude and not re.fullmatch(lon_pattern, longitude):
+        longitude = _decimal_to_astro_coord(longitude, is_latitude=False)
+
+    return birth_date, timezone_offset, latitude, longitude
 
 
 @app.route('/')
@@ -316,6 +371,10 @@ def ask_anything():
     latitude = request.form.get('latitude', '').strip()
     longitude = request.form.get('longitude', '').strip()
 
+    birth_date_html, timezone_offset, latitude, longitude = _normalize_birth_inputs(
+        birth_date_html, timezone_offset, latitude, longitude
+    )
+
     if not question:
         return render_template('error.html', error="Please enter a question before using Ask Anything mode."), 400
 
@@ -404,6 +463,10 @@ def stream_ask_anything():
         timezone_offset = _norm(data.get('timezone_offset'))
         latitude = _norm(data.get('latitude'))
         longitude = _norm(data.get('longitude'))
+
+        birth_date, timezone_offset, latitude, longitude = _normalize_birth_inputs(
+            birth_date, timezone_offset, latitude, longitude
+        )
 
         if not question:
             return jsonify({'error': 'Missing required field: question'}), 400

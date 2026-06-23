@@ -84,6 +84,7 @@ function initializeModals() {
     const askAnythingForm = document.querySelector('#askAnythingModal form');
     if (askAnythingForm) {
         askAnythingForm.addEventListener('submit', function(e) {
+            const missingField = syncAskAnythingBirthFields();
             if (missingField) {
                 e.preventDefault();
                 closeModal('askAnythingModal');
