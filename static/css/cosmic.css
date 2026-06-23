@@ -665,6 +665,7 @@ a { color: inherit; text-decoration: none; }
 /* Location search within panel */
 .location-search-wrap {
   position: relative; display: flex; gap: 0.5rem;
+  border-radius: calc(var(--radius) / 1.5);
 }
 .location-search-wrap input { flex: 1; }
 .location-search-btn {

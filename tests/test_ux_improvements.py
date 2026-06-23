@@ -299,7 +299,13 @@ class TestFormInputStyling(unittest.TestCase):
         
         css_content = response.data.decode('utf-8')
         self.assertIn('.location-search-wrap', css_content)
-        self.assertIn('border-radius', css_content)
+        selector = '.location-search-wrap {'
+        idx = css_content.find(selector)
+        self.assertGreater(idx, -1, '.location-search-wrap rule not found')
+        block_start = idx + len(selector)
+        block_end = css_content.find('}', block_start)
+        rule_block = css_content[block_start:block_end]
+        self.assertIn('border-radius', rule_block)
 
     def test_other_genre_input_consistent_styling(self):
         """Test that other genre input matches standard inputs"""
