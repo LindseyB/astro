@@ -364,15 +364,23 @@
   });
 
   // ── Save & continue ───────────────────────────────────────
+  function setPanelError(message) {
+    var el = document.getElementById('locationSearchError');
+    if (!el) return;
+    el.textContent = message || '';
+    el.hidden = !message;
+  }
+
   document.getElementById('panelSaveBtn').addEventListener('click', function () {
+    setPanelError('');
     if (!hasBirthData()) {
-      showSearchError('Please fill in birth date, time, timezone, and location.');
+      setPanelError('Please fill in birth date, time, timezone, and location.');
       return;
     }
     var action = pending || '/chart';
     if (action === '/ask-anything') {
       var q = document.getElementById('question_prompt').value.trim();
-      if (!q) { showSearchError('Please enter your question.'); return; }
+      if (!q) { setPanelError('Please enter your question.'); return; }
     }
     closePanel();
     submitToAction(action);
