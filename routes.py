@@ -395,23 +395,35 @@ def stream_ask_anything():
     try:
         data = request.get_json() or {}
         question = (data.get('question') or '').strip()
-        birth_date = data.get('birth_date')
-        birth_time = data.get('birth_time')
-        timezone_offset = data.get('timezone_offset')
-        latitude = data.get('latitude')
-        longitude = data.get('longitude')
+
+        def _norm(v):
+            return v.strip() if isinstance(v, str) else v
+
+        birth_date = _norm(data.get('birth_date'))
+        birth_time = _norm(data.get('birth_time'))
+        timezone_offset = _norm(data.get('timezone_offset'))
+        latitude = _norm(data.get('latitude'))
+        longitude = _norm(data.get('longitude'))
 
         if not question:
             return jsonify({'error': 'Missing required field: question'}), 400
 
-        required_fields = ['birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude']
-        missing_fields = [field for field in required_fields if field not in data or data.get(field) is None or data.get(field) == '']
+        required_fields = {
+            'birth_date': birth_date,
+            'birth_time': birth_time,
+            'timezone_offset': timezone_offset,
+            'latitude': latitude,
+            'longitude': longitude,
+        }
+        missing_fields = [
+            name for name, value in required_fields.items()
+            if value is None or (isinstance(value, str) and value == '')
+        ]
         if missing_fields:
             return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
 
         if birth_date and '-' in birth_date:
             birth_date = birth_date.replace('-', '/')
-
         from ai_service import get_client
         try:
             get_client()

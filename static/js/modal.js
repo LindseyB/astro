@@ -68,7 +68,15 @@ function initializeModals() {
             }
 
             if (missingField) {
-                missingField.reportValidity();
+                if (missingField.id === 'latitude' || missingField.id === 'longitude') {
+                    openModal('locationHelpModal');
+                    const locationSearch = document.getElementById('locationSearch');
+                    if (locationSearch) {
+                        locationSearch.focus();
+                    }
+                } else {
+                    missingField.reportValidity();
+                }
             }
         });
     }
@@ -76,10 +84,19 @@ function initializeModals() {
     const askAnythingForm = document.querySelector('#askAnythingModal form');
     if (askAnythingForm) {
         askAnythingForm.addEventListener('submit', function(e) {
-            const missingField = syncAskAnythingBirthFields();
             if (missingField) {
                 e.preventDefault();
                 closeModal('askAnythingModal');
+
+                if (missingField.id === 'latitude' || missingField.id === 'longitude') {
+                    openModal('locationHelpModal');
+                    const locationSearch = document.getElementById('locationSearch');
+                    if (locationSearch) {
+                        locationSearch.focus();
+                    }
+                    return;
+                }
+
                 missingField.focus();
                 missingField.reportValidity();
             }
