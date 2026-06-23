@@ -1,0 +1,1282 @@
+/* ============================================================
+   COSMIC DESIGN SYSTEM — reference implementation
+   based on issue #77 design spec
+   ============================================================ */
+
+:root {
+  --radius: 0.875rem;
+
+  /* Pearl Lilac (light) */
+  --background: oklch(0.985 0.012 300);
+  --foreground: oklch(0.22 0.08 285);
+  --card: oklch(1 0 0 / 0.75);
+  --muted-foreground: oklch(0.38 0.14 285);
+  --accent: oklch(0.4 0.11 215);
+  --primary: oklch(0.42 0.22 281);
+  --highlight: oklch(0.62 0.25 350);
+  --border: oklch(0.55 0.12 285 / 0.28);
+
+  --gradient-holo: linear-gradient(
+    115deg,
+    #312e81 0%, #134e63 25%, #5b21b6 50%, #134e63 75%, #312e81 100%
+  );
+  --shadow-glow: 0 0 40px -10px oklch(0.42 0.22 281 / 0.35);
+  --shadow-card: 0 20px 60px -20px oklch(0.3 0.15 285 / 0.18);
+  --glass-bg: oklch(1 0 0 / 0.7);
+
+  --starfield:
+    radial-gradient(2px 2px at 12% 18%, oklch(0.42 0.22 281 / 0.45), transparent 50%),
+    radial-gradient(1.5px 1.5px at 78% 33%, oklch(0.5 0.1 215 / 0.5), transparent 50%),
+    radial-gradient(1px 1px at 33% 72%, oklch(0.55 0.16 275 / 0.45), transparent 50%),
+    radial-gradient(2px 2px at 88% 82%, oklch(0.42 0.22 281 / 0.35), transparent 50%),
+    radial-gradient(1.5px 1.5px at 22% 88%, oklch(0.5 0.1 215 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 48% 28%, oklch(0.42 0.22 281 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 64% 58%, oklch(0.5 0.1 215 / 0.4), transparent 50%),
+    radial-gradient(1.5px 1.5px at 8% 52%, oklch(0.55 0.16 275 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 92% 48%, oklch(0.42 0.22 281 / 0.35), transparent 50%),
+    radial-gradient(1px 1px at 42% 92%, oklch(0.5 0.1 215 / 0.35), transparent 50%),
+    radial-gradient(1px 1px at 5% 14%, oklch(0.42 0.22 281 / 0.35), transparent 50%),
+    radial-gradient(1px 1px at 28% 38%, oklch(0.5 0.1 215 / 0.35), transparent 50%),
+    radial-gradient(1px 1px at 57% 47%, oklch(0.55 0.16 275 / 0.35), transparent 50%),
+    radial-gradient(1px 1px at 70% 22%, oklch(0.42 0.22 281 / 0.35), transparent 50%),
+    radial-gradient(1px 1px at 16% 63%, oklch(0.5 0.1 215 / 0.35), transparent 50%),
+    radial-gradient(1px 1px at 81% 64%, oklch(0.55 0.16 275 / 0.35), transparent 50%),
+    radial-gradient(1px 1px at 53% 78%, oklch(0.42 0.22 281 / 0.35), transparent 50%),
+    radial-gradient(1px 1px at 96% 14%, oklch(0.5 0.1 215 / 0.3), transparent 50%),
+    radial-gradient(1px 1px at 38% 6%, oklch(0.55 0.16 275 / 0.3), transparent 50%),
+    radial-gradient(1px 1px at 75% 96%, oklch(0.42 0.22 281 / 0.3), transparent 50%),
+    radial-gradient(circle at 20% 10%, oklch(0.93 0.04 295) 0%, transparent 45%),
+    radial-gradient(circle at 85% 90%, oklch(0.92 0.05 215) 0%, transparent 50%);
+
+  /* Twinkling star layers (two out-of-phase sets) */
+  --twinkle-a:
+    radial-gradient(1.5px 1.5px at 17% 24%, oklch(0.42 0.22 281 / 0.7), transparent 55%),
+    radial-gradient(1px 1px at 61% 16%, oklch(0.5 0.1 215 / 0.7), transparent 55%),
+    radial-gradient(1.5px 1.5px at 83% 41%, oklch(0.55 0.16 275 / 0.65), transparent 55%),
+    radial-gradient(1px 1px at 39% 49%, oklch(0.42 0.22 281 / 0.6), transparent 55%),
+    radial-gradient(1.5px 1.5px at 26% 67%, oklch(0.5 0.1 215 / 0.65), transparent 55%),
+    radial-gradient(1px 1px at 71% 73%, oklch(0.55 0.16 275 / 0.6), transparent 55%),
+    radial-gradient(1.5px 1.5px at 94% 88%, oklch(0.42 0.22 281 / 0.6), transparent 55%),
+    radial-gradient(1px 1px at 7% 91%, oklch(0.5 0.1 215 / 0.6), transparent 55%);
+  --twinkle-b:
+    radial-gradient(1px 1px at 31% 11%, oklch(0.5 0.1 215 / 0.7), transparent 55%),
+    radial-gradient(1.5px 1.5px at 73% 27%, oklch(0.42 0.22 281 / 0.65), transparent 55%),
+    radial-gradient(1px 1px at 52% 38%, oklch(0.55 0.16 275 / 0.6), transparent 55%),
+    radial-gradient(1.5px 1.5px at 14% 44%, oklch(0.5 0.1 215 / 0.65), transparent 55%),
+    radial-gradient(1px 1px at 88% 56%, oklch(0.42 0.22 281 / 0.6), transparent 55%),
+    radial-gradient(1.5px 1.5px at 46% 79%, oklch(0.55 0.16 275 / 0.65), transparent 55%),
+    radial-gradient(1px 1px at 23% 86%, oklch(0.42 0.22 281 / 0.6), transparent 55%),
+    radial-gradient(1.5px 1.5px at 67% 94%, oklch(0.5 0.1 215 / 0.6), transparent 55%);
+
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.dark, html.dark {
+  --background: oklch(0.16 0.06 285);
+  --foreground: oklch(0.97 0.02 300);
+  --card: oklch(0.22 0.07 285 / 0.55);
+  --muted-foreground: oklch(0.78 0.04 290);
+  --accent: oklch(0.86 0.12 220);
+  --primary: oklch(0.79 0.13 295);
+  --highlight: oklch(0.74 0.26 345);
+  --border: oklch(0.78 0.1 290 / 0.22);
+
+  --gradient-holo: linear-gradient(
+    115deg,
+    #c4b5fd 0%, #a5f3fc 25%, #67e8f9 50%, #818cf8 75%, #c4b5fd 100%
+  );
+  --shadow-glow: 0 0 40px -10px oklch(0.86 0.12 220 / 0.45);
+  --glass-bg: oklch(0.22 0.07 285 / 0.45);
+
+  --starfield:
+    radial-gradient(2px 2px at 12% 18%, oklch(0.97 0.02 300 / 0.9), transparent 50%),
+    radial-gradient(1.5px 1.5px at 78% 33%, oklch(0.86 0.12 220 / 0.8), transparent 50%),
+    radial-gradient(1px 1px at 33% 72%, oklch(0.97 0.02 300 / 0.7), transparent 50%),
+    radial-gradient(2px 2px at 88% 82%, oklch(0.79 0.13 295 / 0.7), transparent 50%),
+    radial-gradient(1px 1px at 55% 12%, oklch(0.97 0.02 300 / 0.6), transparent 50%),
+    radial-gradient(1.5px 1.5px at 22% 88%, oklch(0.86 0.12 220 / 0.6), transparent 50%),
+    radial-gradient(1px 1px at 48% 28%, oklch(0.97 0.02 300 / 0.6), transparent 50%),
+    radial-gradient(1px 1px at 64% 58%, oklch(0.86 0.12 220 / 0.6), transparent 50%),
+    radial-gradient(1.5px 1.5px at 8% 52%, oklch(0.79 0.13 295 / 0.6), transparent 50%),
+    radial-gradient(1px 1px at 92% 48%, oklch(0.97 0.02 300 / 0.5), transparent 50%),
+    radial-gradient(1px 1px at 42% 92%, oklch(0.86 0.12 220 / 0.5), transparent 50%),
+    radial-gradient(1px 1px at 5% 14%, oklch(0.97 0.02 300 / 0.5), transparent 50%),
+    radial-gradient(1px 1px at 28% 38%, oklch(0.86 0.12 220 / 0.5), transparent 50%),
+    radial-gradient(1px 1px at 57% 47%, oklch(0.79 0.13 295 / 0.5), transparent 50%),
+    radial-gradient(1px 1px at 70% 22%, oklch(0.97 0.02 300 / 0.5), transparent 50%),
+    radial-gradient(1px 1px at 16% 63%, oklch(0.86 0.12 220 / 0.5), transparent 50%),
+    radial-gradient(1px 1px at 81% 64%, oklch(0.79 0.13 295 / 0.5), transparent 50%),
+    radial-gradient(1px 1px at 53% 78%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 96% 14%, oklch(0.86 0.12 220 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 38% 6%, oklch(0.79 0.13 295 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 75% 96%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 3% 32%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 19% 5%, oklch(0.86 0.12 220 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 34% 54%, oklch(0.79 0.13 295 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 45% 36%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 60% 8%, oklch(0.86 0.12 220 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 63% 68%, oklch(0.79 0.13 295 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 78% 50%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 87% 30%, oklch(0.86 0.12 220 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 9% 76%, oklch(0.79 0.13 295 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 30% 84%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 49% 64%, oklch(0.86 0.12 220 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 66% 88%, oklch(0.79 0.13 295 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 91% 78%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 12% 40%, oklch(0.86 0.12 220 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 2% 8%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 7% 22%, oklch(0.86 0.12 220 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 11% 58%, oklch(0.79 0.13 295 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 14% 84%, oklch(0.97 0.02 300 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 18% 33%, oklch(0.86 0.12 220 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 21% 71%, oklch(0.79 0.13 295 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 24% 14%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 27% 48%, oklch(0.86 0.12 220 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 31% 96%, oklch(0.79 0.13 295 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 35% 26%, oklch(0.97 0.02 300 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 37% 73%, oklch(0.86 0.12 220 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 41% 17%, oklch(0.79 0.13 295 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 43% 58%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 47% 89%, oklch(0.86 0.12 220 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 51% 31%, oklch(0.79 0.13 295 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 54% 9%, oklch(0.97 0.02 300 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 56% 53%, oklch(0.86 0.12 220 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 59% 82%, oklch(0.79 0.13 295 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 62% 24%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 65% 44%, oklch(0.86 0.12 220 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 68% 12%, oklch(0.79 0.13 295 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 69% 75%, oklch(0.97 0.02 300 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 72% 35%, oklch(0.86 0.12 220 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 74% 62%, oklch(0.79 0.13 295 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 77% 18%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 79% 88%, oklch(0.86 0.12 220 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 82% 42%, oklch(0.79 0.13 295 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 84% 7%, oklch(0.97 0.02 300 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 86% 70%, oklch(0.86 0.12 220 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 89% 21%, oklch(0.79 0.13 295 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 90% 55%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 93% 87%, oklch(0.86 0.12 220 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 95% 38%, oklch(0.79 0.13 295 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 97% 67%, oklch(0.97 0.02 300 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 99% 4%, oklch(0.86 0.12 220 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 4% 45%, oklch(0.79 0.13 295 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 6% 92%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 13% 12%, oklch(0.86 0.12 220 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 17% 67%, oklch(0.79 0.13 295 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 23% 38%, oklch(0.97 0.02 300 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 29% 60%, oklch(0.86 0.12 220 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 33% 4%, oklch(0.79 0.13 295 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 39% 44%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 46% 68%, oklch(0.86 0.12 220 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 52% 20%, oklch(0.79 0.13 295 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 58% 38%, oklch(0.97 0.02 300 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 64% 80%, oklch(0.86 0.12 220 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 71% 52%, oklch(0.79 0.13 295 / 0.4), transparent 50%),
+    radial-gradient(1px 1px at 83% 60%, oklch(0.97 0.02 300 / 0.45), transparent 50%),
+    radial-gradient(1px 1px at 94% 50%, oklch(0.86 0.12 220 / 0.4), transparent 50%),
+    radial-gradient(circle at 20% 10%, oklch(0.32 0.1 285) 0%, transparent 45%),
+    radial-gradient(circle at 85% 90%, oklch(0.28 0.1 220) 0%, transparent 50%);
+
+  /* Twinkling star layers (two out-of-phase sets) */
+  --twinkle-a:
+    radial-gradient(1.5px 1.5px at 17% 24%, oklch(0.97 0.02 300 / 0.95), transparent 55%),
+    radial-gradient(1px 1px at 61% 16%, oklch(0.86 0.12 220 / 0.9), transparent 55%),
+    radial-gradient(1.5px 1.5px at 83% 41%, oklch(0.79 0.13 295 / 0.85), transparent 55%),
+    radial-gradient(1px 1px at 39% 49%, oklch(0.97 0.02 300 / 0.8), transparent 55%),
+    radial-gradient(1.5px 1.5px at 26% 67%, oklch(0.86 0.12 220 / 0.85), transparent 55%),
+    radial-gradient(1px 1px at 71% 73%, oklch(0.97 0.02 300 / 0.8), transparent 55%),
+    radial-gradient(1.5px 1.5px at 94% 88%, oklch(0.79 0.13 295 / 0.8), transparent 55%),
+    radial-gradient(1px 1px at 7% 91%, oklch(0.86 0.12 220 / 0.8), transparent 55%);
+  --twinkle-b:
+    radial-gradient(1px 1px at 31% 11%, oklch(0.86 0.12 220 / 0.9), transparent 55%),
+    radial-gradient(1.5px 1.5px at 73% 27%, oklch(0.97 0.02 300 / 0.85), transparent 55%),
+    radial-gradient(1px 1px at 52% 38%, oklch(0.79 0.13 295 / 0.8), transparent 55%),
+    radial-gradient(1.5px 1.5px at 14% 44%, oklch(0.86 0.12 220 / 0.85), transparent 55%),
+    radial-gradient(1px 1px at 88% 56%, oklch(0.97 0.02 300 / 0.8), transparent 55%),
+    radial-gradient(1.5px 1.5px at 46% 79%, oklch(0.79 0.13 295 / 0.85), transparent 55%),
+    radial-gradient(1px 1px at 23% 86%, oklch(0.97 0.02 300 / 0.8), transparent 55%),
+    radial-gradient(1.5px 1.5px at 67% 94%, oklch(0.86 0.12 220 / 0.8), transparent 55%);
+}
+
+/* ---------- Base reset ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  background-image: var(--starfield);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Twinkling stars — fixed full-viewport overlays (no layout impact) */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-attachment: fixed;
+  will-change: opacity;
+}
+body::before {
+  background-image: var(--twinkle-a);
+  animation: twinkle 4s ease-in-out infinite;
+}
+body::after {
+  background-image: var(--twinkle-b);
+  animation: twinkle 5.5s ease-in-out infinite;
+  animation-delay: -2.5s;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; }
+  50%      { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after { animation: none; opacity: 0.6; }
+}
+
+/* Shooting stars — fixed overlay container, streaks across the sky */
+.shooting-stars {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+.shooting-star {
+  position: absolute;
+  width: 110px;
+  height: 1.5px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--foreground) 60%, var(--foreground));
+  opacity: 0;
+  filter: drop-shadow(0 0 6px var(--accent));
+  transform: rotate(20deg);
+  transform-origin: right center;
+  animation: shoot 9s linear infinite;
+}
+.shooting-star::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--foreground);
+  box-shadow: 0 0 8px 2px var(--accent);
+  transform: translateY(-50%);
+}
+.shooting-star:nth-child(1) { top: 12%; left: 4%;  animation-delay: 1s; }
+.shooting-star:nth-child(2) { top: 28%; left: 1%;  animation-delay: 4s; animation-duration: 11s; }
+.shooting-star:nth-child(3) { top: 6%;  left: 18%; animation-delay: 7s; animation-duration: 8s; }
+@keyframes shoot {
+  0%       { opacity: 0; transform: translate(0, 0) rotate(20deg); }
+  3%       { opacity: 1; }
+  18%      { opacity: 1; }
+  28%      { opacity: 0; transform: translate(420px, 150px) rotate(20deg); }
+  100%     { opacity: 0; transform: translate(420px, 150px) rotate(20deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shooting-stars { display: none; }
+}
+/* Shooting stars are a night-sky effect — dark mode only */
+html:not(.dark) .shooting-stars { display: none; }
+
+/* Light-mode flowing gradient background (animated) */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -2;
+  background: linear-gradient(
+    115deg,
+    #e9d5ff 0%, #c7d2fe 10%, #a5f3fc 20%, #fbcfe8 30%, #bae6fd 40%,
+    #ddd6fe 50%, #c4b5fd 60%, #a5f3fc 70%, #fbcfe8 80%, #c7d2fe 90%, #e9d5ff 100%
+  );
+  background-size: 220% 220%;
+  filter: blur(55px) saturate(1.15);
+  animation: aurora-flow 22s ease infinite;
+  /* Pinch the glow toward the top of the page, fading out lower down */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 16%, transparent 50%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 16%, transparent 50%);
+}
+@keyframes aurora-flow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+/* Dark mode keeps the deep starfield — no flowing gradient */
+.dark .aurora-bg,
+html.dark .aurora-bg { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .aurora-bg { animation: none; }
+}
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+
+.muted { color: var(--muted-foreground); }
+
+/* ---------- Utilities ---------- */
+.text-holo {
+  background: var(--gradient-holo);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: holo-shift 8s ease-in-out infinite;
+}
+@keyframes holo-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}
+
+.chrome-border {
+  position: relative;
+  background-clip: padding-box;
+  border: 1px solid transparent;
+}
+.chrome-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--gradient-holo);
+  background-size: 200% 200%;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  animation: holo-shift 10s ease-in-out infinite;
+}
+
+/* ---------- Header ---------- */
+.site-header {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  max-width: 72rem; margin: 0 auto;
+}
+.logo {
+  display: inline-flex; align-items: baseline; gap: 0.5rem;
+  font-family: var(--font-display); font-weight: 700; font-size: 1.05rem;
+}
+.logo-mark { color: var(--accent); }
+.logo-dim  { color: var(--muted-foreground); font-weight: 500; }
+
+.header-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+.icon-btn {
+  width: 38px; height: 38px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px;
+  background: var(--glass-bg);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: box-shadow 200ms ease;
+}
+.icon-btn:hover { box-shadow: var(--shadow-glow); }
+
+/* Dark mode sun/moon swap */
+.icon-btn .icon-moon { display: none; }
+.dark .icon-btn .icon-sun  { display: none; }
+.dark .icon-btn .icon-moon { display: inline; }
+
+.pill-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 0.95rem;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: var(--primary);
+  border: 0;
+  cursor: pointer;
+  box-shadow: var(--shadow-glow);
+  transition: opacity 150ms ease;
+}
+.pill-btn:hover { opacity: 0.88; }
+.dark .pill-btn { color: oklch(0.18 0.07 285); }
+
+/* ---------- Layout ---------- */
+.page-container {
+  position: relative; z-index: 10;
+  max-width: 72rem; margin: 0 auto;
+  padding: 0 1rem 6rem;
+}
+@media (min-width: 640px) { .page-container { padding: 0 1.5rem 6rem; } }
+
+/* ---------- Hero ---------- */
+.hero {
+  padding: 1.5rem 0 3rem;
+}
+@media (min-width: 640px) { .hero { padding: 2.5rem 0 4rem; } }
+.hero h1 {
+  max-width: 48rem;
+  font-size: clamp(2.75rem, 6vw, 4.75rem);
+  font-weight: 700;
+  line-height: 0.95;
+}
+.lede {
+  margin-top: 1.25rem;
+  max-width: 36rem;
+  color: var(--muted-foreground);
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+
+/* ---------- Bento grid ---------- */
+.bento {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-auto-rows: minmax(180px, auto);
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .bento { grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+  .tile-lg   { grid-column: span 2; grid-row: span 2; }
+  .tile-wide { grid-column: span 2; }
+}
+
+.tile {
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: space-between;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  cursor: pointer;
+  border: none;
+  background: none;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  color: var(--foreground);
+  width: 100%;
+}
+@media (min-width: 640px) { .tile { padding: 1.75rem; } }
+.tile:hover { transform: translateY(-4px); box-shadow: var(--shadow-glow); }
+.tile:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.tile-top {
+  position: relative;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.tile-icon { color: var(--accent); }
+.tile-arrow {
+  color: var(--muted-foreground);
+  transition: color 200ms ease, transform 200ms ease;
+}
+.tile:hover .tile-arrow {
+  color: var(--foreground);
+  transform: translate(2px, -2px);
+}
+
+.tile-body { position: relative; margin-top: 2rem; }
+.eyebrow {
+  font-family: var(--font-display);
+  color: var(--accent);
+  font-size: 0.625rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.tile h2 {
+  margin-top: 0.5rem;
+  font-size: 1.5rem; line-height: 1.15; font-weight: 700;
+}
+@media (min-width: 640px) { .tile h2 { font-size: 1.875rem; } }
+.blurb {
+  margin-top: 0.5rem;
+  max-width: 22rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+/* Decorative corner glow on each tile */
+.tile-glow {
+  position: absolute; top: -6rem; right: -6rem;
+  width: 14rem; height: 14rem;
+  border-radius: 999px;
+  filter: blur(60px);
+  opacity: 0.3;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+.tile:hover .tile-glow { opacity: 0.5; }
+.glow-1 { background: linear-gradient(135deg, #c4b5fd, #67e8f9); }
+.glow-2 { background: linear-gradient(135deg, #818cf8, #c4b5fd); }
+.glow-3 { background: linear-gradient(135deg, #67e8f9, #a5f3fc); }
+.glow-4 { background: linear-gradient(135deg, #a5f3fc, #818cf8); }
+
+/* ---------- Footer ---------- */
+.page-foot {
+  margin-top: 4rem;
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   BIRTH INFO SLIDE-OVER PANEL
+   ============================================================ */
+.panel-overlay {
+  position: fixed; inset: 0;
+  background: oklch(0 0 0 / 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 40;
+  opacity: 0; pointer-events: none;
+  transition: opacity 250ms ease;
+}
+.panel-overlay.open { opacity: 1; pointer-events: auto; }
+
+.birth-panel {
+  position: fixed; top: 0; right: 0;
+  height: 100dvh; width: min(480px, 100vw);
+  background: var(--background);
+  border-left: 1px solid var(--border);
+  z-index: 50;
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+.birth-panel.open { transform: translateX(0); }
+
+.panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 1.125rem; font-weight: 700;
+}
+.panel-close {
+  width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  transition: background 150ms, color 150ms;
+}
+.panel-close:hover {
+  background: var(--glass-bg);
+  color: var(--foreground);
+}
+
+.panel-body {
+  flex: 1; overflow-y: auto;
+  padding: 1.5rem;
+  display: flex; flex-direction: column; gap: 1.25rem;
+}
+
+.panel-footer {
+  display: flex; gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* ---------- Panel form fields ---------- */
+.field-group {
+  display: flex; flex-direction: column; gap: 0.375rem;
+}
+.field-group label {
+  font-family: var(--font-display);
+  font-size: 0.75rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.field-group input,
+.field-group select,
+.field-group textarea {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) / 1.5);
+  padding: 0.6rem 0.85rem;
+  font-family: var(--font-sans); font-size: 0.9rem;
+  color: var(--foreground);
+  transition: border-color 150ms, box-shadow 150ms;
+  backdrop-filter: blur(8px);
+}
+.field-group input:focus,
+.field-group select:focus,
+.field-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px oklch(from var(--primary) l c h / 0.18);
+}
+.field-group input::placeholder,
+.field-group textarea::placeholder {
+  color: var(--muted-foreground);
+}
+.field-group textarea { resize: vertical; min-height: 80px; }
+
+/* Native date/time picker icons are removed from the keyboard tab order.
+   The indicator is a closed shadow-DOM part, so it can't be made
+   non-focusable while visible — hiding it drops it from the tab order so
+   keyboard users tab straight through the field. */
+.field-group input[type="date"]::-webkit-calendar-picker-indicator,
+.field-group input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+.field-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+}
+
+/* Location search within panel */
+.location-search-wrap {
+  position: relative; display: flex; gap: 0.5rem;
+  border-radius: calc(var(--radius) / 1.5);
+}
+.location-search-wrap input { flex: 1; }
+.location-search-btn {
+  padding: 0.6rem 1rem;
+  background: var(--primary); color: #fff;
+  border: none; border-radius: calc(var(--radius) / 1.5);
+  font-family: var(--font-mono); font-size: 0.75rem;
+  cursor: pointer; white-space: nowrap;
+  transition: opacity 150ms;
+}
+.dark .location-search-btn { color: oklch(0.18 0.07 285); }
+.location-search-btn:hover { opacity: 0.85; }
+
+.location-search-error {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--destructive, oklch(0.62 0.22 25));
+}
+
+#locationMap {
+  height: 220px;
+  border-radius: calc(var(--radius) / 1.5);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.location-coords {
+  display: flex; gap: 0.5rem;
+}
+.location-coords input { font-family: var(--font-mono); font-size: 0.8rem; }
+
+/* Genre "other" reveal */
+#other_genre_div { display: none; }
+#other_genre_div.visible { display: block; }
+
+/* ---------- Panel buttons ---------- */
+.btn-primary {
+  flex: 1;
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px;
+  font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.04em;
+  color: #fff; background: var(--primary); border: none;
+  cursor: pointer; box-shadow: var(--shadow-glow);
+  transition: opacity 150ms;
+}
+.btn-primary:hover { opacity: 0.88; }
+.dark .btn-primary { color: oklch(0.18 0.07 285); }
+
+.btn-ghost {
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px;
+  font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+.btn-ghost:hover { background: var(--glass-bg); color: var(--foreground); }
+
+/* Ask anything question textarea in panel */
+.question-section {
+  display: flex; flex-direction: column; gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.question-section-heading {
+  font-family: var(--font-display);
+  font-size: 0.8rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* ============================================================
+   READING PAGE (chart.html)
+   ============================================================ */
+.reading-page {
+  min-height: 100dvh;
+  display: flex; flex-direction: column;
+}
+
+.reading-header {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  max-width: 72rem; margin: 0 auto;
+  width: 100%;
+}
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  transition: color 150ms;
+}
+.back-link:hover { color: var(--foreground); }
+
+.reading-main {
+  flex: 1;
+  max-width: 52rem; margin: 0 auto;
+  width: 100%;
+  padding: 2rem 1.25rem 4rem;
+  display: flex; flex-direction: column; gap: 2.5rem;
+}
+@media (min-width: 640px) { .reading-main { padding: 3rem 1.5rem 5rem; } }
+
+.reading-eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.625rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--accent); margin: 0;
+}
+.reading-heading {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700; line-height: 0.95;
+  margin: 0.5rem 0 0;
+}
+.reading-subtitle {
+  color: var(--muted-foreground); margin: 0.75rem 0 0;
+  font-size: 1rem;
+}
+
+.chart-info-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(12px);
+  font-family: var(--font-mono); font-size: 0.75rem;
+}
+.using-label {
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.chart-marker {
+  color: var(--accent); font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  background: oklch(from var(--accent) l c h / 0.12);
+  border-radius: 0.375rem;
+}
+
+.reading-content {
+  font-size: 1rem; line-height: 1.75;
+  color: var(--foreground); min-height: 8rem;
+}
+.reading-content p { margin-bottom: 1em; }
+.reading-content strong { color: var(--accent); }
+.streaming-indicator {
+  color: var(--muted-foreground); font-style: italic;
+  display: flex; align-items: center; gap: 0.5rem; min-height: 8rem;
+}
+
+/* Custom, colorful text-selection highlight */
+::selection { background: var(--highlight); color: #fff; }
+::-moz-selection { background: var(--highlight); color: #fff; }
+
+/* Streamed song suggestion callout */
+#music-suggestion-placeholder:not(:empty) {
+  margin-top: 1.5rem;
+  padding: 0.95rem 1.15rem;
+  border-radius: var(--radius);
+  background: oklch(from var(--highlight) l c h / 0.12);
+  border: 1px solid oklch(from var(--highlight) l c h / 0.4);
+  border-left: 3px solid var(--highlight);
+  backdrop-filter: blur(8px);
+}
+#music-suggestion-placeholder p {
+  margin: 0; line-height: 1.6;
+  font-size: 0.95rem; color: var(--foreground);
+}
+#music-suggestion-placeholder strong { color: var(--highlight); }
+.typing-cursor {
+  color: var(--highlight); font-weight: 700; margin-left: 1px;
+  animation: cursor-blink 1s steps(2, start) infinite;
+}
+@keyframes cursor-blink { to { visibility: hidden; } }
+
+/* Listening section */
+.listening-section {
+  display: flex; flex-direction: column; gap: 1.25rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+.listening-header { display: flex; gap: 1rem; align-items: flex-start; }
+.listening-icon {
+  width: 28px; height: 28px; stroke: var(--accent); stroke-width: 1.5; fill: none;
+  flex-shrink: 0; margin-top: 0.125rem;
+}
+.listening-title {
+  font-size: 1.75rem; font-weight: 700; margin: 0;
+}
+.listening-subtitle {
+  color: var(--muted-foreground); font-size: 0.875rem; margin: 0.25rem 0 0;
+}
+
+.prompts-row {
+  display: flex; flex-wrap: wrap; gap: 0.625rem;
+}
+.prompt-btn {
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-sans); font-size: 0.875rem;
+  color: var(--foreground); cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: box-shadow 150ms, border-color 150ms;
+}
+.prompt-btn:hover { box-shadow: var(--shadow-glow); border-color: var(--primary); }
+
+.ask-input-group {
+  display: flex; gap: 0.625rem;
+}
+.ask-input {
+  flex: 1;
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.7rem 1rem;
+  font-family: var(--font-sans); font-size: 0.9rem;
+  color: var(--foreground);
+  backdrop-filter: blur(12px);
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.ask-input::placeholder { color: var(--muted-foreground); }
+.ask-input:focus { outline: none; border-color: var(--primary); box-shadow: var(--shadow-glow); }
+
+.send-btn {
+  width: 44px; height: 44px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 999px;
+  background: var(--primary); border: none; color: #fff;
+  cursor: pointer;
+  box-shadow: var(--shadow-glow);
+  transition: opacity 150ms;
+}
+.send-btn:hover { opacity: 0.85; }
+.dark .send-btn { color: oklch(0.18 0.07 285); }
+.send-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+.reading-nav {
+  display: flex; flex-wrap: wrap; gap: 1rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+.nav-link {
+  font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.04em;
+  color: var(--muted-foreground); text-decoration: none;
+  transition: color 150ms;
+}
+.nav-link:hover { color: var(--foreground); }
+
+/* ============================================================
+   ASK THE STARS / CHAT PAGE (ask_anything.html)
+   ============================================================ */
+.feature-head {
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.feature-head .reading-heading { margin: 0.25rem 0 0; }
+.subtitle {
+  color: var(--muted-foreground);
+  font-size: 1.05rem; line-height: 1.5;
+  max-width: 34rem;
+}
+
+.chat-panel {
+  display: flex; flex-direction: column;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.chat-scroll {
+  flex: 1;
+  display: flex; flex-direction: column; gap: 1.25rem;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+@media (min-width: 640px) { .chat-scroll { padding: 2rem; } }
+
+/* Empty state */
+.chat-empty {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 0.75rem; padding: 2rem 1rem;
+}
+.chat-empty .ring {
+  width: 56px; height: 56px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--glass-bg); color: var(--accent);
+}
+.chat-empty h2 { font-size: 1.75rem; font-weight: 700; }
+.chat-empty .hint { color: var(--muted-foreground); font-size: 0.875rem; }
+.suggestions { display: flex; flex-wrap: wrap; gap: 0.625rem; justify-content: center; margin-top: 0.5rem; }
+.suggestion {
+  background: var(--glass-bg);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-sans); font-size: 0.875rem;
+  color: var(--foreground); cursor: pointer;
+  transition: box-shadow 150ms;
+}
+.suggestion:hover { box-shadow: var(--shadow-glow); }
+
+/* Messages */
+.msg-user {
+  align-self: flex-end;
+  max-width: 85%;
+  padding: 0.7rem 1rem;
+  border-radius: 1.1rem 1.1rem 0.25rem 1.1rem;
+  background: var(--primary); color: #fff;
+  font-size: 0.95rem; line-height: 1.5;
+}
+.dark .msg-user { color: oklch(0.18 0.07 285); }
+
+.msg-ai {
+  position: relative;
+  align-self: flex-start;
+  max-width: 92%;
+  padding: 1rem 1.15rem;
+  border-radius: 1.1rem 1.1rem 1.1rem 0.25rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+.msg-ai .tag {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-family: var(--font-mono); font-size: 0.72rem;
+  letter-spacing: 0.04em; color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+.msg-ai .analysis-content {
+  font-size: 0.95rem; line-height: 1.7; color: var(--foreground);
+}
+.msg-ai .analysis-content p { margin-bottom: 0.75em; }
+.msg-ai .analysis-content strong { color: var(--accent); }
+.copy-btn-float { position: absolute; }
+.msg-ai .copy-btn-float { top: 0.75rem; right: 0.75rem; }
+
+/* Composer */
+.chat-form {
+  display: flex; align-items: flex-end; gap: 0.625rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+}
+.chat-input {
+  flex: 1;
+  resize: none;
+  max-height: 9rem;
+  box-sizing: border-box;
+  overflow-y: hidden;
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.7rem 1rem;
+  font-family: var(--font-sans); font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--foreground);
+  backdrop-filter: blur(12px);
+  transition: border-color 150ms, box-shadow 150ms;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.chat-input::-webkit-scrollbar { width: 8px; }
+.chat-input::-webkit-scrollbar-thumb {
+  background: var(--border); border-radius: 4px;
+}
+.chat-input::-webkit-scrollbar-track { background: transparent; }
+.chat-input::placeholder { color: var(--muted-foreground); }
+.chat-input:focus { outline: none; border-color: var(--primary); box-shadow: var(--shadow-glow); }
+
+/* ============================================================
+   SELECT2 OVERRIDE (keeps the dropdown themed)
+   ============================================================ */
+.select2-container--default .select2-selection--single {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) / 1.5);
+  height: auto;
+  padding: 0.6rem 0.85rem;
+  color: var(--foreground);
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  color: var(--foreground);
+  line-height: normal;
+}
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+  color: var(--muted-foreground);
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+  border-color: var(--foreground) transparent transparent transparent;
+}
+.select2-dropdown {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) / 1.5);
+}
+.select2-container--default .select2-results__option {
+  color: var(--foreground);
+}
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background: var(--highlight);
+  color: #fff;
+}
+.select2-search--dropdown .select2-search__field {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  border-radius: calc(var(--radius) / 2);
+}
+
+/* ============================================================
+   LEGACY COMPAT — suppress old CSS conflicts on index page
+   ============================================================ */
+body.index-page #darkModeToggle { display: none; }
+body.index-page .container > h1:first-of-type { display: none; }
+
+/* ============================================================
+   FULL BIRTH CHART (full_chart.html)
+   ============================================================ */
+.container {
+  max-width: 72rem;
+  margin: 0 auto;
+  width: 100%;
+  padding: 1.25rem 1.25rem 4rem;
+  display: flex; flex-direction: column;
+}
+@media (min-width: 640px) { .container { padding: 1.75rem 1.5rem 5rem; } }
+
+.feature-head { margin-top: 1.25rem; }
+.feature-head h1 {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 700; line-height: 1.04;
+  margin: 0.35rem 0 0;
+  max-width: 18ch;
+}
+.feature-head .subtitle { margin-top: 0.75rem; }
+
+/* Generic glass card panel */
+.panel {
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+@media (min-width: 640px) { .panel { padding: 1.75rem; } }
+.panel--analysis { margin-top: 2rem; }
+.panel--houses { margin-top: 1.5rem; }
+
+.section-cap {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; margin-bottom: 1rem;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem; font-weight: 700;
+  letter-spacing: -0.01em; margin: 0;
+}
+.panel--houses .section-title,
+.panel .section-title:first-child { margin-bottom: 1rem; }
+
+.copy-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2.1rem; height: 2.1rem; padding: 0; border-radius: 999px;
+  color: var(--muted-foreground);
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  cursor: pointer; backdrop-filter: blur(12px);
+  transition: color 150ms, box-shadow 150ms;
+  flex-shrink: 0;
+}
+.copy-chip:hover { color: var(--foreground); box-shadow: var(--shadow-glow); }
+.copy-chip svg { width: 16px; height: 16px; }
+
+/* ---------- Ask the stars modal ---------- */
+.ask-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  align-items: center; justify-content: center; padding: 1.25rem;
+  background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(4px);
+}
+.ask-modal-overlay.open { display: flex; }
+.ask-modal {
+  position: relative; width: 100%; max-width: 30rem;
+  padding: 1.85rem 1.75rem; border-radius: var(--radius);
+  background: var(--glass-bg); backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+.ask-modal .eyebrow { margin: 0; }
+.ask-modal h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2rem); font-weight: 700;
+  line-height: 1.05; margin: 0.35rem 0 0.4rem;
+}
+.ask-modal-sub {
+  color: var(--muted-foreground); margin: 0 0 1.1rem; font-size: 0.95rem;
+}
+.ask-modal-input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) / 1.5);
+  padding: 0.7rem 0.9rem;
+  font-family: var(--font-sans); font-size: 0.95rem;
+  color: var(--foreground);
+  resize: vertical; min-height: 90px;
+  transition: border-color 150ms, box-shadow 150ms;
+  backdrop-filter: blur(8px);
+}
+.ask-modal-input:focus {
+  outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 3px oklch(from var(--primary) l c h / 0.18);
+}
+.ask-modal-input::placeholder { color: var(--muted-foreground); }
+.ask-modal-submit { width: 100%; margin-top: 1.1rem; }
+.ask-modal-close {
+  position: absolute; top: 0.85rem; right: 1rem;
+  width: 2rem; height: 2rem; display: inline-flex;
+  align-items: center; justify-content: center;
+  background: transparent; border: none; cursor: pointer;
+  font-size: 1.5rem; line-height: 1; color: var(--muted-foreground);
+  transition: color 150ms;
+}
+.ask-modal-close:hover { color: var(--foreground); }
+
+/* Wheel + placements grid */
+.chart-grid {
+  display: grid; grid-template-columns: 1fr; gap: 1.5rem;
+  margin-top: 2rem;
+}
+@media (min-width: 900px) {
+  .chart-grid { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+
+.panel--wheel { display: flex; align-items: center; justify-content: center; }
+.wheel-wrap {
+  width: 100%; max-width: 420px;
+  aspect-ratio: 1 / 1;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--foreground);
+}
+.wheel-wrap canvas,
+.wheel-wrap svg { width: 100%; height: 100%; display: block; }
+
+/* Big three */
+.big-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.big-cell {
+  padding: 0.9rem 0.6rem; border-radius: 0.9rem;
+  text-align: center; background: var(--glass-bg); backdrop-filter: blur(12px);
+}
+.big-cell .label {
+  font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted-foreground);
+}
+.big-cell .value {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 1.1rem; margin-top: 0.3rem;
+}
+.big-cell small {
+  display: block; margin-top: 0.35rem;
+  font-size: 0.7rem; line-height: 1.3;
+}
+
+/* Mercury retrograde notice */
+.mercury-warning {
+  margin-top: 0; padding: 0.9rem 1.15rem;
+  border-radius: var(--radius);
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  text-align: left;
+  font-size: 0.92rem; color: var(--foreground);
+}
+.mercury-warning strong { color: var(--accent); }
+
+/* Placement / house tables */
+.placements { width: 100%; overflow-x: auto; }
+.placements table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.placements thead th {
+  text-align: left;
+  font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted-foreground);
+  font-weight: 500; padding: 0 0.6rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+.placements tbody td {
+  padding: 0.6rem; border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.placements tbody tr:last-child td { border-bottom: none; }
+.placements td.muted { color: var(--muted-foreground); }
+.glyph {
+  display: inline-flex; width: 1.4em; justify-content: center;
+  margin-right: 0.4rem; color: var(--accent);
+}
+
+.house-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.6rem; height: 1.6rem; border-radius: 999px;
+  background: oklch(from var(--accent) l c h / 0.14);
+  color: var(--accent); font-family: var(--font-mono); font-size: 0.76rem;
+  margin-right: 0.5rem;
+}
+.house-name { font-size: 0.85rem; }
+.planet-chip {
+  display: inline-block; margin: 0.15rem 0.25rem 0.15rem 0;
+  padding: 0.15rem 0.5rem; border-radius: 999px;
+  background: var(--glass-bg); border: 1px solid var(--border);
+  font-size: 0.72rem; white-space: nowrap;
+}

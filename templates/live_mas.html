@@ -37,57 +37,86 @@
 <!-- Sparkle Animation Container -->
 <div class="sparkle-container" id="sparkleContainer"></div>
 
-<h1>🔔 <i>Your Cosmic Taco Bell Order</i></h1>
+<div class="reading-page">
+  <header class="reading-header">
+    <a href="/" class="back-link">← back to main</a>
+    <div class="header-actions">
+      <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
 
-<!-- Taco Bell Order Analysis Section -->
-<div class="analysis-section" 
-     data-sun="{{ chart_data.sun }}" 
-     data-moon="{{ chart_data.moon }}" 
-     data-ascendant="{{ chart_data.ascendant }}">
-    <h2>🌮 <i>Your Personalized Taco Bell Order</i></h2>
-    <div class="analysis-content" id="analysisContent">
+  <main class="reading-main">
+    <div class="reading-title-section">
+      <p class="reading-eyebrow">COSMIC CRAVINGS</p>
+      <h1 class="reading-heading">Live Más, written in the stars</h1>
+      <p class="reading-subtitle">Your Taco Bell order for tonight 🌮🔔</p>
+    </div>
+
+    <div class="chart-info-bar">
+      <span class="using-label">USING</span>
+      <span class="chart-marker">{{ chart_data.sun }} ☉</span>
+      <span class="chart-marker">{{ chart_data.moon }} ☽</span>
+      <span class="chart-marker">{{ chart_data.ascendant }} ⬆</span>
+    </div>
+
+    <!-- Taco Bell Order Analysis -->
+    <section class="analysis-section"
+         data-sun="{{ chart_data.sun }}"
+         data-moon="{{ chart_data.moon }}"
+         data-ascendant="{{ chart_data.ascendant }}">
+      <div class="section-cap">
+        <h2 class="section-title">🌮 Your personalized order</h2>
+        <button id="copyAnalysisBtn" class="copy-chip" onclick="copyAnalysis()" title="Copy your Taco Bell order" aria-label="Copy your Taco Bell order">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+      <div class="reading-content" id="analysisContent">
         {% if streaming %}
-        <!-- Content will be loaded via streaming JavaScript -->
+        <div class="streaming-indicator"><p>✨ Consulting the cosmic menu…</p></div>
         {% else %}
         {{ chart_data.taco_bell_order | markdown | safe }}
         {% endif %}
+      </div>
+    </section>
+
+    <!-- Mercury Retrograde Status -->
+    {% if chart_data.mercury_retrograde %}
+    <div class="mercury-warning">
+      ⚠️ <strong>Mercury is in retrograde!</strong> Double-check your Taco Bell order before placing it!
     </div>
-    <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()" title="Copy your Taco Bell order">
-        📋
-    </button>
+    {% endif %}
+
+    <!-- Bottom navigation -->
+    <div class="reading-nav">
+      <a href="/chart" class="nav-link" onclick="submitForm(event, '/chart')">today's reading</a>
+      <a href="/full-chart" class="nav-link" onclick="submitForm(event, '/full-chart')">view full chart</a>
+      <a href="/" class="nav-link">another reading</a>
+    </div>
+
+    <!-- Hidden form for navigation -->
+    <form id="navForm" method="POST" style="display: none;">
+      <input type="hidden" name="birth_date" value="{{ form_data.birth_date }}">
+      <input type="hidden" name="birth_time" value="{{ form_data.birth_time }}">
+      <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
+      <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
+      <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
+      <input type="hidden" name="music_genre" value="{{ form_data.music_genre }}">
+      <input type="hidden" name="other_genre" value="{{ form_data.other_genre }}">
+    </form>
+  </main>
 </div>
 
-<!-- Main Signs -->
-<div class="chart-section">
-    <h2><i>Your Cosmic Trinity</i></h2>
-    <div class="main-signs">
-        <div class="sign-card">
-            <h3>☀️ Sun Sign</h3>
-            <p><strong>{{ chart_data.sun }}</strong></p>
-            <small>Your core identity</small>
-        </div>
-        <div class="sign-card">
-            <h3>🌙 Moon Sign</h3>
-            <p><strong>{{ chart_data.moon }}</strong></p>
-            <small>Your emotional nature</small>
-        </div>
-        <div class="sign-card">
-            <h3>⬆️ Rising Sign</h3>
-            <p><strong>{{ chart_data.ascendant }}</strong></p>
-            <small>Your outer personality</small>
-        </div>
-    </div>
-</div>
-
-<!-- Mercury Retrograde Status -->
-{% if chart_data.mercury_retrograde %}
-<div class="mercury-warning">
-    ⚠️ <strong>Mercury is in retrograde!</strong> Double-check your Taco Bell order before placing it!
-</div>
-{% endif %}
-<div class="navigation-links">
-    <a href="/" class="back-link">← Get another horoscope</a>
-</div>
+<script>
+function submitForm(e, action) {
+    e.preventDefault();
+    var form = document.getElementById('navForm');
+    form.action = action;
+    form.submit();
+}
+</script>
 {% endblock %}
 
 

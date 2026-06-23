@@ -12,8 +12,13 @@ from ai_service import stream_ai_api
 from lastfm_service import get_top_tracks_by_genre, format_tracks_for_prompt
 import json
 import re
+import os
 
 app = Flask(__name__)
+
+# In development, disable static file caching so CSS/JS edits show on reload
+if os.environ.get('FLASK_ENV') == 'development' or os.environ.get('FLASK_DEBUG') == '1':
+    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 # Add markdown filter to convert markdown to HTML
 app.template_filter('markdown')(markdown_filter)
@@ -229,6 +234,11 @@ def full_chart():
     # Get user IP and check feature flag
     user_ip = get_user_ip()
     show_chart_wheel = should_show_chart_wheel(user_ip)
+
+    # In local development without LaunchDarkly configured, show the chart wheel
+    # so the full natal chart visualization can be previewed.
+    if not show_chart_wheel and app.debug and not os.environ.get('LAUNCHDARKLY_SDK_KEY'):
+        show_chart_wheel = True
 
     try:
         logger.info(f"Rendering full chart placeholder for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")

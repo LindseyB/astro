@@ -146,11 +146,11 @@ class TestChartWheelJavaScript(unittest.TestCase):
         )
 
         if os.path.exists(chart_wheel_path):
-            with open(chart_wheel_path, 'r') as f:
+            with open(chart_wheel_path, 'r', encoding='utf-8') as f:
                 content = f.read()
 
             # Check for zodiac symbols constant
-            self.assertIn('ZODIAC_SYMBOLS', content)
+            self.assertIn('ZODIAC_SYMBOLS', content)  # noqa
             self.assertIn('Aries', content)
             self.assertIn('♈', content)
             
@@ -170,7 +170,7 @@ class TestChartWheelJavaScript(unittest.TestCase):
         )
 
         if os.path.exists(chart_wheel_path):
-            with open(chart_wheel_path, 'r') as f:
+            with open(chart_wheel_path, 'r', encoding='utf-8') as f:
                 content = f.read()
 
             # Core drawing methods
@@ -198,7 +198,7 @@ class TestChartWheelJavaScript(unittest.TestCase):
         )
 
         if os.path.exists(chart_wheel_path):
-            with open(chart_wheel_path, 'r') as f:
+            with open(chart_wheel_path, 'r', encoding='utf-8') as f:
                 content = f.read()
 
             # Check that Ascendant is referenced in calculations
@@ -216,7 +216,7 @@ class TestChartWheelJavaScript(unittest.TestCase):
         )
 
         if os.path.exists(chart_wheel_path):
-            with open(chart_wheel_path, 'r') as f:
+            with open(chart_wheel_path, 'r', encoding='utf-8') as f:
                 content = f.read()
 
             # Check for major aspects

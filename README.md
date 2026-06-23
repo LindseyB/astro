@@ -22,10 +22,13 @@ A web-based astrological horoscope for only the chillest of humans
 2. Select the "Codespaces" tab
 3. Click "Create codespace on main"
 4. Set your Anthropic API key:
+
 ```bash
 export ANTHROPIC_TOKEN="your-api-key-here"
 ```
+
 5. Run the app:
+
 ```bash
 python main.py
 ```
@@ -35,16 +38,33 @@ The environment will automatically set up Python 3.10 and install all dependenci
 ### Option 2: Local Setup
 
 1. Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Set your Anthropic API key:
+2. Set your Anthropic API key. The easiest way for local development is a `.env` file (loaded automatically on startup):
+
 ```bash
-export ANTHROPIC_TOKEN="your-api-key-here"
+cp .env.example .env        # macOS/Linux
+# Copy-Item .env.example .env  # Windows PowerShell
+```
+
+Then open `.env` and set your key (get one at https://console.anthropic.com/):
+
+```
+ANTHROPIC_TOKEN=your-api-key-here
+```
+
+`.env` is git-ignored, so your key stays out of version control. Alternatively, you can export it in your shell instead of using a file:
+
+```bash
+export ANTHROPIC_TOKEN="your-api-key-here"          # macOS/Linux
+# $env:ANTHROPIC_TOKEN = "your-api-key-here"        # Windows PowerShell
 ```
 
 3. Run the Flask app:
+
 ```bash
 python run.py
 ```
@@ -124,12 +144,26 @@ Skip the tacos if you’re working late, triple up on sides if you’re friendsh
 #LuncheonLagoon #MainCharacterMeal 🌊🦀🪐🔥
 ```
 
+## Screenshots
 
-
-## Screenshot
-
+### Home — light
 <div align="center">
-  <img src="images/screenshot.png" alt="Astro Horoscope Screenshot showing an example horoscope with the three main signs" width="400">
+  <img src="docs/screenshots/home-light.png" alt="Home page in light mode showing bento-style grid of ritual tiles" width="600">
+</div>
+
+### Home — dark
+<div align="center">
+  <img src="docs/screenshots/home-dark.png" alt="Home page in dark mode showing bento-style grid of ritual tiles" width="600">
+</div>
+
+### Birth info panel
+<div align="center">
+  <img src="docs/screenshots/birth-panel.png" alt="Birth info slide-in panel with location search and inline error message" width="400">
+</div>
+
+### Ask the stars
+<div align="center">
+  <img src="docs/screenshots/ask-anything.png" alt="Ask the stars modal with auto-growing textarea" width="400">
 </div>
 
 ## Development
@@ -152,6 +186,3 @@ make test-coverage
 make test-unit
 make test-frontend
 ```
-
-
-

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Your Cosmic Chart - Astro Horoscope{% endblock %}
+{% block title %}Your Reading - Astro Horoscope{% endblock %}
 
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
@@ -11,18 +11,6 @@
 <script src="{{ url_for('static', filename='js/stream-analysis.js') }}"></script>
 {% endif %}
 <script>
-    // Pass chart data to JavaScript for music suggestion
-    window.chartDataForMusic = {
-        birthDate: "{{ form_data.birth_date }}",
-        birthTime: "{{ form_data.birth_time }}",
-        timezoneOffset: "{{ form_data.timezone_offset }}",
-        latitude: "{{ form_data.latitude }}",
-        longitude: "{{ form_data.longitude }}",
-        musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
-    };
-    
-    {% if streaming %}
-    // Pass chart data for streaming analysis
     window.chartDataForStreaming = {
         pageType: 'chart',
         birthDate: "{{ form_data.birth_date }}",
@@ -32,91 +20,191 @@
         longitude: "{{ form_data.longitude }}",
         musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
     };
-    {% endif %}
 </script>
 {% endblock %}
 
-{% block og_title %}{{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆ - Astro Horoscope{%
-endblock %}
-{% block og_description %}Your personalized astrological chart reveals {{ chart_data.sun }} sun, {{ chart_data.moon }}
-moon, and {{ chart_data.ascendant }} rising. Discover your cosmic vibes with AI-powered insights! ✨{% endblock %}
-
-{% block twitter_title %}My Astrological Chart: {{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant
-}} ⬆{% endblock %}
-{% block twitter_description %}Just got my cosmic vibe check! {{ chart_data.sun }} sun, {{ chart_data.moon }} moon, {{
-chart_data.ascendant }} rising. Check yours out too! ✨🌙⭐{% endblock %}
-
-{% block meta_description %}Personalized astrological chart showing {{ chart_data.sun }} sun sign, {{ chart_data.moon }}
-moon sign, and {{ chart_data.ascendant }} rising sign with AI-powered cosmic insights.{% endblock %}
+{% block og_title %}{{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆ - Astro Horoscope{% endblock %}
+{% block og_description %}Your personalized astrological chart reveals {{ chart_data.sun }} sun, {{ chart_data.moon }} moon, and {{ chart_data.ascendant }} rising. Discover your cosmic vibes with AI-powered insights! ✨{% endblock %}
+{% block twitter_title %}My Astrological Chart: {{ chart_data.sun }} ☉ {{ chart_data.moon }} ☽ {{ chart_data.ascendant }} ⬆{% endblock %}
+{% block twitter_description %}Just got my cosmic vibe check! {{ chart_data.sun }} sun, {{ chart_data.moon }} moon, {{ chart_data.ascendant }} rising. Check yours out too! ✨🌙⭐{% endblock %}
+{% block meta_description %}Personalized astrological chart showing {{ chart_data.sun }} sun sign, {{ chart_data.moon }} moon sign, and {{ chart_data.ascendant }} rising sign with AI-powered cosmic insights.{% endblock %}
 
 {% block content %}
 {% if streaming %}
 <script>document.body.dataset.streaming = 'true';</script>
 {% endif %}
-<!-- Sparkle Animation Container -->
-<div class="sparkle-container" id="sparkleContainer"></div>
+<script>
+    // Seed localStorage with THIS reading's birth info so the home page
+    // (and "ask the stars") reflects the current chart rather than any
+    // stale, previously saved values.
+    (function () {
+        var mg = {{ form_data.music_genre | tojson }};
+        var otherGenre = {{ form_data.other_genre | tojson }};
+        var isOther = !!(otherGenre && otherGenre.trim());
+        var data = {
+            birth_date: {{ form_data.birth_date | tojson }},
+            birth_time: {{ form_data.birth_time | tojson }},
+            timezone_offset: {{ form_data.timezone_offset | tojson }},
+            latitude: {{ form_data.latitude | tojson }},
+            longitude: {{ form_data.longitude | tojson }},
+            music_genre: isOther ? 'other' : (mg || 'any'),
+            other_genre: isOther ? otherGenre : ''
+        };
+        try {
+            localStorage.setItem('astro_form_data', JSON.stringify({ data: data, timestamp: Date.now() }));
+            if (data.timezone_offset) {
+                localStorage.setItem('timezone_offset', data.timezone_offset);
+            }
+        } catch (e) { /* ignore storage errors */ }
+    })();
+</script>
+<script>
+    // Pass chart data to JavaScript for the streamed song suggestion
+    window.chartDataForMusic = {
+        birthDate: "{{ form_data.birth_date }}",
+        birthTime: "{{ form_data.birth_time }}",
+        timezoneOffset: "{{ form_data.timezone_offset }}",
+        latitude: "{{ form_data.latitude }}",
+        longitude: "{{ form_data.longitude }}",
+        musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
+    };
+</script>
+<div class="reading-page">
+    <!-- Header with back button and theme toggle -->
+    <header class="reading-header">
+        <a href="/" class="back-link">← back to main</a>
+        <div class="header-actions">
+            <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
+                <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+        </div>
+    </header>
 
-<h1>🌟 <i>Astro Horoscope</i></h1>
+    <!-- Main reading section -->
+    <main class="reading-main">
+        <!-- Title Section -->
+        <div class="reading-title-section">
+            <p class="reading-eyebrow">COSMIC WISDOM</p>
+            <h1 class="reading-heading">Today, in three breaths</h1>
+            <p class="reading-subtitle">A reading for the next 24 hours</p>
+        </div>
 
-<!-- AI Astrology Analysis Section -->
-<div class="analysis-section" data-sun="{{ chart_data.sun }}" data-moon="{{ chart_data.moon }}"
-    data-ascendant="{{ chart_data.ascendant }}">
-    <div class="analysis-content" id="analysisContent">
-        {% if streaming %}
-        <!-- Content will be loaded via streaming JavaScript -->
-        {% else %}
-        {{ chart_data.astrology_analysis | markdown | safe }}
+        <!-- Chart info bar -->
+        <div class="chart-info-bar">
+            <span class="using-label">USING</span>
+            <span class="chart-marker">{{ chart_data.sun }} ☉</span>
+            <span class="chart-marker">{{ chart_data.moon }} ☽</span>
+            <span class="chart-marker">{{ chart_data.ascendant }} ⬆</span>
+        </div>
+
+        <!-- Mercury Retrograde Status -->
+        {% if chart_data.mercury_retrograde %}
+        <div class="mercury-warning">
+            ⚠️ <strong>Mercury is in retrograde!</strong> Expect crossed wires and second-guessing today — double-check your messages and big decisions.
+        </div>
         {% endif %}
-        <!-- Music Suggestion (loaded async, appears inline at the end) -->
-        <div id="music-suggestion-placeholder" data-chart-type="daily"></div>
-    </div>
-    <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()"
-        title="Copy your horoscope">
-        📋
-    </button>
+
+        <!-- Reading Content -->
+        <div class="reading-content" id="analysisContent">
+            {% if streaming %}
+            <div class="streaming-indicator">
+                <p>✨ Reading your cosmic energy...</p>
+            </div>
+            {% else %}
+            {{ chart_data.astrology_analysis | markdown | safe }}
+            {% endif %}
+        </div>
+
+        <!-- The Sky is Listening Section -->
+        <section class="listening-section">
+            <div class="listening-header">
+                <svg class="listening-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M19 14c1.49-1.46 3-3.72 3-7a7 7 0 0 0-7-7 7 7 0 0 0-7 7c0 3.28 1.51 5.54 3 7m5 2v4m-3 0h6"></path>
+                </svg>
+                <div>
+                    <h2 class="listening-title">The sky is listening</h2>
+                    <p class="listening-subtitle">Try one of these, or write your own:</p>
+                </div>
+            </div>
+
+            <!-- Prompt buttons -->
+            <div class="prompts-row">
+                <button class="prompt-btn" onclick="askPrompt('What should I avoid today?')">What should I avoid today?</button>
+                <button class="prompt-btn" onclick="askPrompt('Best time to text my ex?')">Best time to text my ex?</button>
+                <button class="prompt-btn" onclick="askPrompt('Explain my moon sign.')">Explain my moon sign.</button>
+            </div>
+
+            <!-- Ask anything input -->
+            <div class="ask-input-group">
+                <input type="text" class="ask-input" id="askInput" placeholder="Ask anything..." />
+                <button class="send-btn" onclick="sendQuestion()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Bottom navigation -->
+        <div class="reading-nav">
+            <a href="/full-chart" class="nav-link" onclick="submitForm(event, '/full-chart')">view full chart</a>
+            <a href="/live-mas" class="nav-link" onclick="submitForm(event, '/live-mas')">cosmic cravings 🌮</a>
+            <a href="/" class="nav-link">another reading</a>
+        </div>
+
+        <!-- Hidden form for navigation -->
+        <form id="navForm" method="POST" style="display: none;">
+            <input type="hidden" name="birth_date" value="{{ form_data.birth_date }}">
+            <input type="hidden" name="birth_time" value="{{ form_data.birth_time }}">
+            <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
+            <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
+            <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
+            <input type="hidden" name="music_genre" value="{{ form_data.music_genre }}">
+            <input type="hidden" name="other_genre" value="{{ form_data.other_genre }}">
+        </form>
+    </main>
 </div>
 
-<div class="chart-section">
-    <h2><i>Your Main Signs</i></h2>
-    <div class="main-signs">
-        <div class="sign-card">
-            <h3>☀️ Sun Sign</h3>
-            <p><strong>{{ chart_data.sun }}</strong></p>
-            <small>Your core identity</small>
-        </div>
-        <div class="sign-card">
-            <h3>🌙 Moon Sign</h3>
-            <p><strong>{{ chart_data.moon }}</strong></p>
-            <small>Your emotional nature</small>
-        </div>
-        <div class="sign-card">
-            <h3>⬆️ Ascendant</h3>
-            <p><strong>{{ chart_data.ascendant }}</strong></p>
-            <small>Your outer personality</small>
-        </div>
-    </div>
-</div>
+<script>
+// ── Listening-section helpers ─────────────────────────────────
+function askPrompt(prompt) {
+    document.getElementById('askInput').value = prompt;
+    sendQuestion();
+}
 
-<!-- Mercury Retrograde Warning (if applicable) -->
-{% if chart_data.mercury_retrograde %}
-<div class="chart-section">
-    <div class="mercury-status mercury-retrograde">
-        ⚠️ Mercury is currently retrograde!
-    </div>
-</div>
-{% endif %}
+function sendQuestion() {
+    const question = document.getElementById('askInput').value;
+    if (question.trim()) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/ask-anything';
+        const fields = {
+            question_prompt: question,
+            birth_date: {{ form_data.birth_date | tojson }},
+            birth_time: {{ form_data.birth_time | tojson }},
+            timezone_offset: {{ form_data.timezone_offset | tojson }},
+            latitude: {{ form_data.latitude | tojson }},
+            longitude: {{ form_data.longitude | tojson }}
+        };
+        for (const name in fields) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = fields[name];
+            form.appendChild(input);
+        }
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
 
-<div class="navigation-links">
-    <a href="/" class="back-link">← Get another horoscope</a>
-    <form action="/full-chart" method="POST" style="display: inline;">
-        <input type="hidden" name="birth_date" value="{{ form_data.birth_date }}">
-        <input type="hidden" name="birth_time" value="{{ form_data.birth_time }}">
-        <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
-        <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
-        <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
-        <input type="hidden" name="music_genre" value="{{ form_data.music_genre }}">
-        <input type="hidden" name="other_genre" value="{{ form_data.other_genre }}">
-        <button type="submit">View Full Chart 📊</button>
-    </form>
-</div>
+function submitForm(e, action) {
+    e.preventDefault();
+    document.getElementById('navForm').action = action;
+    document.getElementById('navForm').submit();
+}
+</script>
+
 {% endblock %}

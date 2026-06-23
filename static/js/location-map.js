@@ -164,7 +164,8 @@ function updateMapTiles() {
         map.removeLayer(currentTileLayer);
     }
     
-    const isDarkMode = document.documentElement.classList.contains('dark-mode');
+    const isDarkMode = document.documentElement.classList.contains('dark') ||
+        document.documentElement.classList.contains('dark-mode');
     
     if (isDarkMode) {
         // Dark mode: Use CartoDB Dark Matter tiles
@@ -190,7 +191,7 @@ function searchLocation() {
     if (!searchValue) return;
     
     // Show loading state
-    const searchButton = document.querySelector('.location-search button');
+    const searchButton = document.querySelector('.location-search-btn');
     const originalText = searchButton.textContent;
     searchButton.textContent = 'Searching...';
     searchButton.disabled = true;
@@ -198,8 +199,14 @@ function searchLocation() {
     // Use Nominatim API for geocoding
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchValue)}&limit=1`;
     
+    clearSearchError();
     fetch(url)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Geocoding request failed (${response.status})`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data && data.length > 0) {
                 const result = data[0];
@@ -209,16 +216,31 @@ function searchLocation() {
                 map.setView([lat, lng], 10);
                 setLocationFromMap({ lat: lat, lng: lng });
             } else {
-                alert('Location not found. Please try a different search term.');
+                showSearchError('Location not found. Try a different search term.');
             }
         })
         .catch(error => {
             console.error('Geocoding error:', error);
-            alert('Error searching for location. Please try again.');
+            showSearchError('Could not search right now. Please try again.');
         })
         .finally(() => {
             // Reset button state
             searchButton.textContent = originalText;
             searchButton.disabled = false;
         });
+}
+
+// Show / clear an inline search error message (replaces blocking alerts).
+function showSearchError(message) {
+    const el = document.getElementById('locationSearchError');
+    if (!el) return;
+    el.textContent = message;
+    el.hidden = false;
+}
+
+function clearSearchError() {
+    const el = document.getElementById('locationSearchError');
+    if (!el) return;
+    el.textContent = '';
+    el.hidden = true;
 }

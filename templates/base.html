@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,24 +34,46 @@
     <link rel="manifest" href="{{ url_for('static', filename='icons/site.webmanifest') }}" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <!-- Select2 for searchable dropdowns -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cosmic.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- Dark mode script loaded early to prevent flash -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/sparkles.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/star-trail.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/button-effect.css') }}">
+    <!-- Dark mode: apply class before paint to prevent flash -->
+    <script>
+      (function() {
+        var saved = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
     {% block extra_scripts %}{% endblock %}
 </head>
 <body>
-    <!-- Dark Mode Toggle Button -->
-    <button id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
-    
-    <div class="container">
-        {% block content %}{% endblock %}
+    <div class="aurora-bg" aria-hidden="true"></div>
+    <div class="shooting-stars" aria-hidden="true">
+      <span class="shooting-star"></span>
+      <span class="shooting-star"></span>
+      <span class="shooting-star"></span>
     </div>
+    {% block content %}{% endblock %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Shared theme toggle: attaches to #themeToggle on any page that has it -->
+    <script>
+      (function () {
+        var toggle = document.getElementById('themeToggle');
+        if (!toggle) return;
+        toggle.addEventListener('click', function () {
+          var root = document.documentElement;
+          root.classList.toggle('dark');
+          localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
+        });
+      })();
+    </script>
+    {% block page_scripts %}{% endblock %}
 </body>
 </html>

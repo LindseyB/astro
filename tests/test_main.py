@@ -26,10 +26,11 @@ class TestAstroApp(unittest.TestCase):
         """Test index includes Ask Anything input and action button"""
         response = self.app.get('/')
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'id="askAnythingBtn"', response.data)
-        self.assertIn(b'id="askAnythingModal"', response.data)
+        # Check for Ask Anything card and birth info panel (new bento design)
+        self.assertIn(b'Ask the stars', response.data)
+        self.assertIn(b'id="birthPanel"', response.data)
         self.assertIn(b'name="question_prompt"', response.data)
-        self.assertIn(b'action="/ask-anything"', response.data)
+        self.assertIn(b'data-action="/ask-anything"', response.data)
 
     def test_ask_anything_route_valid_question(self):
         """Test ask-anything placeholder page renders for valid question"""
@@ -42,7 +43,7 @@ class TestAstroApp(unittest.TestCase):
             'longitude': '74w00'
         })
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Ask Anything', response.data)
+        self.assertIn(b'Ask the', response.data)
         self.assertIn(b'document.body.dataset.streaming', response.data)
 
     def test_ask_anything_route_missing_question(self):
@@ -369,16 +370,17 @@ class TestIntegration(unittest.TestCase):
         self.assertIn(b'Complete Natal Chart', response.data)
         self.assertIn(b'Gemini', response.data)
 
-        # Check for planet descriptions
-        self.assertIn(b'Your core identity', response.data)
-        self.assertIn(b'Your emotions', response.data)
+        # Check for placements table
+        self.assertIn(b'Placements', response.data)
+        self.assertIn(b'>Sun<', response.data)
+        self.assertIn(b'>Moon<', response.data)
 
-        # Check for house descriptions
-        self.assertIn(b'1st House', response.data)
-        self.assertIn(b'Self & Identity', response.data)
+        # Check for houses table
+        self.assertIn(b'Houses', response.data)
+        self.assertIn(b'Self &amp; Identity', response.data)
 
         # Check for astrology analysis section
-        self.assertIn(b'Complete Chart Analysis', response.data)
+        self.assertIn(b'Chart analysis', response.data)
 
 
 class TestFormPersistenceIntegration(unittest.TestCase):
@@ -472,14 +474,13 @@ class TestFormPersistenceIntegration(unittest.TestCase):
         response = self.app.get('/')
         self.assertEqual(response.status_code, 200)
 
-        # Check for form persistence elements
-        self.assertIn(b'id="formDataStatus"', response.data)
-        self.assertIn(b'id="resetFormBtn"', response.data)
-        self.assertIn(b'Clear Saved Data', response.data)
+        # Check for form persistence elements (form fields)
+        self.assertIn(b'id="birth_date"', response.data)
+        self.assertIn(b'id="clearDataBtn"', response.data)
+        self.assertIn(b'Clear data', response.data)
 
         # Check for location map elements
         self.assertIn(b'id="locationMap"', response.data)
-        self.assertIn(b'id="locationDisplay"', response.data)
         self.assertIn(b'id="locationSearch"', response.data)
 
 
