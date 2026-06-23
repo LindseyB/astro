@@ -62,8 +62,10 @@ class TestTemplates(unittest.TestCase):
 
         # Check for streaming setup
         self.assertIn(b'document.body.dataset.streaming', response.data)
-        self.assertIn(b'sparkleContainer', response.data)
+        self.assertIn(b'reading-page', response.data)
         self.assertIn(b'stream-analysis.js', response.data)
+        self.assertIn(b'Today, in three breaths', response.data)
+        self.assertIn(b'The sky is listening', response.data)
 
     def test_full_chart_template_structure(self):
         """Test full chart template structure with streaming placeholder"""
