@@ -205,3 +205,34 @@ def stream_calculate_full_chart(birth_date, birth_time, timezone_offset, latitud
     except Exception as e:
         logger.error(f"Error streaming full chart calculation: {e}")
         yield f"**Cosmic Note:** The AI astrologer is taking a cosmic tea break. ☕ You're as special and unique as the stars! 🔮"
+
+
+def stream_calculate_ask_anything(question):
+    """
+    Stream a general purpose answer for free-form questions.
+
+    Args:
+        question (str): User's free-form question
+
+    Yields:
+        str: Text chunks from AI streaming response
+    """
+    user_prompt = (
+        "Answer this question clearly and directly in a chill, friendly way. "
+        "Be concise and practical, and use short bullets when useful. "
+        "If the question is ambiguous, make a reasonable assumption and state it briefly.\n\n"
+        f"Question: {question}"
+    )
+
+    system_content = (
+        "You are a cool, casual expert who keeps things concise and easy to follow. "
+        "Use a chill tone, light emoji usage when it fits, and practical guidance. "
+        "Avoid em dashes (—) in your responses."
+    )
+
+    try:
+        for chunk in stream_ai_api(system_content, user_prompt, temperature=0.6):
+            yield chunk
+    except Exception as e:
+        logger.error(f"Error streaming ask-anything response: {e}")
+        yield "**Cosmic Note:** The AI astrologer is taking a cosmic tea break. ☕ Trust your intuition today! 🔮"

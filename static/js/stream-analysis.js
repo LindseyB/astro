@@ -21,17 +21,18 @@
         if (window.marked && fullText) {
             analysisContainer.innerHTML = marked.parse(fullText);
         }
-        
-        // Re-add music suggestion placeholder and trigger loading
-        const musicPlaceholder = document.createElement('div');
-        musicPlaceholder.id = 'music-suggestion-placeholder';
-        const chartType = chartData.pageType === 'chart' ? 'daily' : (chartData.pageType === 'full-chart' ? 'natal' : 'live-mas');
-        musicPlaceholder.setAttribute('data-chart-type', chartType);
-        analysisContainer.appendChild(musicPlaceholder);
-        
-        // Trigger music suggestion loading if function exists
-        if (typeof loadMusicSuggestion === 'function' && window.chartDataForMusic) {
-            loadMusicSuggestion(window.chartDataForMusic, chartType);
+
+        // Only horoscope/full-chart pages load the async music suggestion.
+        if (chartData.pageType === 'chart' || chartData.pageType === 'full-chart') {
+            const musicPlaceholder = document.createElement('div');
+            musicPlaceholder.id = 'music-suggestion-placeholder';
+            const chartType = chartData.pageType === 'chart' ? 'daily' : 'natal';
+            musicPlaceholder.setAttribute('data-chart-type', chartType);
+            analysisContainer.appendChild(musicPlaceholder);
+
+            if (typeof loadMusicSuggestion === 'function' && window.chartDataForMusic) {
+                loadMusicSuggestion(window.chartDataForMusic, chartType);
+            }
         }
     }
     
@@ -60,7 +61,9 @@
         }
     
     // Show loading state
-    analysisContainer.innerHTML = '<p style="font-style: italic;">✨ Consulting the stars...</p>';
+    analysisContainer.innerHTML = chartData.pageType === 'ask-anything'
+        ? '<p style="font-style: italic;">💬 Thinking about your question...</p>'
+        : '<p style="font-style: italic;">✨ Consulting the stars...</p>';
     
     // Determine endpoint based on page type
     let endpoint;
@@ -70,10 +73,23 @@
         endpoint = '/stream-full-chart-analysis';
     } else if (chartData.pageType === 'live-mas') {
         endpoint = '/stream-live-mas-analysis';
+    } else if (chartData.pageType === 'ask-anything') {
+        endpoint = '/stream-ask-anything';
     } else {
         console.error('Unknown page type:', chartData.pageType);
         return;
     }
+
+    const requestPayload = chartData.pageType === 'ask-anything'
+        ? { question: chartData.question }
+        : {
+            birth_date: chartData.birthDate,
+            birth_time: chartData.birthTime,
+            timezone_offset: chartData.timezoneOffset,
+            latitude: chartData.latitude,
+            longitude: chartData.longitude,
+            music_genre: chartData.musicGenre
+        };
     
     // Start streaming
     fetch(endpoint, {
@@ -81,14 +97,7 @@
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            birth_date: chartData.birthDate,
-            birth_time: chartData.birthTime,
-            timezone_offset: chartData.timezoneOffset,
-            latitude: chartData.latitude,
-            longitude: chartData.longitude,
-            music_genre: chartData.musicGenre
-        })
+        body: JSON.stringify(requestPayload)
     })
     .then(response => {
         if (!response.ok) {

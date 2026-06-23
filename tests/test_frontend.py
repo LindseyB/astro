@@ -85,6 +85,14 @@ class TestTemplates(unittest.TestCase):
             self.assertIn(b'document.body.dataset.streaming', response.data)
             self.assertIn(b'stream-analysis.js', response.data)
 
+    def test_ask_anything_template_structure(self):
+        """Test ask-anything template structure with streaming placeholder"""
+        response = self.app.post('/ask-anything', data={'question_prompt': 'How do I focus better?'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'document.body.dataset.streaming', response.data)
+        self.assertIn(b'stream-analysis.js', response.data)
+        self.assertIn(b'pageType: \'ask-anything\'', response.data)
+
 
 class TestErrorHandling(unittest.TestCase):
     """Test error handling and edge cases"""
@@ -176,7 +184,7 @@ class TestJavaScriptFunctionality(unittest.TestCase):
         chart_wheel_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'js', 'chart-wheel.js')
 
         if os.path.exists(chart_wheel_path):
-            with open(chart_wheel_path, 'r') as f:
+            with open(chart_wheel_path, 'r', encoding='utf-8', errors='ignore') as f:
                 content = f.read()
 
             # Test for main class

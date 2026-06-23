@@ -5,7 +5,7 @@ Flask application and route handlers
 from flask import Flask, render_template, request, Response, stream_with_context, jsonify
 from config import logger, HOUSE_NAMES
 from formatters import markdown_filter, prepare_music_genre_text, format_planets_for_api
-from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas
+from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas, stream_calculate_ask_anything
 from launchdarkly_service import should_show_chart_wheel
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets, get_full_chart_structure
 from ai_service import stream_ai_api
@@ -306,6 +306,17 @@ def live_mas():
             return render_template('error.html', error="Something went wrong while calculating your Taco Bell order. Please check your birth information and try again.")
 
 
+@app.route('/ask-anything', methods=['POST'])
+def ask_anything():
+    """Render Ask Anything placeholder page immediately"""
+    question = request.form.get('question_prompt', '').strip()
+
+    if not question:
+        return render_template('error.html', error="Please enter a question before using Ask Anything mode."), 400
+
+    return render_template('ask_anything.html', question=question, streaming=True)
+
+
 @app.route('/stream-live-mas-analysis', methods=['POST'])
 def stream_live_mas_analysis():
     """Stream Taco Bell order analysis"""
@@ -352,6 +363,40 @@ def stream_live_mas_analysis():
     except Exception as e:
         logger.error(f"ERROR in /stream-live-mas-analysis route: {type(e).__name__}: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/stream-ask-anything', methods=['POST'])
+def stream_ask_anything():
+    """Stream free-form Ask Anything responses"""
+    try:
+        data = request.get_json() or {}
+        question = (data.get('question') or '').strip()
+
+        if not question:
+            return jsonify({'error': 'Missing required field: question'}), 400
+
+        from ai_service import get_client
+        try:
+            get_client()
+        except ValueError as e:
+            logger.error(f"AI service not available: {e}")
+            return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
+
+        logger.info("Streaming ask-anything response")
+
+        def generate():
+            try:
+                for chunk in stream_calculate_ask_anything(question):
+                    if chunk:
+                        yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+                yield f"data: {json.dumps({'done': True})}\n\n"
+            except Exception as e:
+                logger.error(f"Error in stream_ask_anything: {e}")
+                yield f"data: {json.dumps({'error': 'Failed to stream response'})}\n\n"
+        return Response(stream_with_context(generate()), mimetype='text/event-stream')
+    except Exception as e:
+        logger.error(f"ERROR in /stream-ask-anything route: {type(e).__name__}: {str(e)}")
+        return jsonify({'error': 'Failed to stream response'}), 500
 
 
 @app.route('/music-suggestion', methods=['POST'])

@@ -90,7 +90,7 @@ label {
     color: var(--text-tertiary);
 }
 
-input, select {
+input, select, textarea {
     width: 100%;
     padding: 10px;
     border: 2px solid var(--border-color);
@@ -103,7 +103,7 @@ input, select {
     transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
-input:focus, select:focus {
+input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: #667eea;
 }
@@ -460,6 +460,17 @@ input[readonly] {
     min-width: 180px;
 }
 
+.button-group.mode-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.button-group.mode-buttons button {
+    min-width: 0;
+    margin-top: 0;
+}
+
 /* Main CTA Button - Experiment Variant */
 .button-group button.main-cta {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -527,6 +538,10 @@ input[readonly] {
     
     .button-group button {
         width: 100%;
+    }
+
+    .button-group.mode-buttons {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -790,6 +805,11 @@ input[readonly] {
 .other-genre-input input:focus {
     outline: none;
     border-color: #667eea;
+}
+
+.question-group textarea {
+    resize: vertical;
+    min-height: 90px;
 }
 
 .clear-data-container {

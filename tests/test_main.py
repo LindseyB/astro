@@ -22,6 +22,28 @@ class TestAstroApp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Astro Horoscope', response.data)
 
+    def test_index_has_ask_anything_mode_controls(self):
+        """Test index includes Ask Anything input and action button"""
+        response = self.app.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'id="askAnythingBtn"', response.data)
+        self.assertIn(b'id="askAnythingModal"', response.data)
+        self.assertIn(b'name="question_prompt"', response.data)
+        self.assertIn(b'action="/ask-anything"', response.data)
+
+    def test_ask_anything_route_valid_question(self):
+        """Test ask-anything placeholder page renders for valid question"""
+        response = self.app.post('/ask-anything', data={'question_prompt': 'What should I cook tonight?'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Ask Anything', response.data)
+        self.assertIn(b'document.body.dataset.streaming', response.data)
+
+    def test_ask_anything_route_missing_question(self):
+        """Test ask-anything route validates question input"""
+        response = self.app.post('/ask-anything', data={'question_prompt': '   '})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Please enter a question', response.data)
+
     def test_chart_route_missing_data(self):
         """Test chart route with missing form data"""
         response = self.app.post('/chart', data={})
