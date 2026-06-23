@@ -228,10 +228,10 @@ def stream_calculate_ask_anything(question, birth_date, birth_time, timezone_off
     current_planets = get_current_planets(today_chart)
 
     user_prompt = (
-        "Answer this question clearly and directly in a chill, friendly way. "
-        "Be concise and practical, and use short bullets when useful. "
-        "Use the astrological context below to personalize your answer. "
-        "If the question is ambiguous, make a reasonable assumption and state it briefly.\n\n"
+        "Based on this person's chart, give them a confident, direct take on their question. "
+        "Tell them what their chart reveals about this situation or decision. Be witty, fun, and definitive. "
+        "Use short bullets where useful. Don't hedge or suggest they trust their own intuition instead – "
+        "give them the astrological answer based on what the chart says!\n\n"
         f"Question: {question}\n\n"
         f"Chart Data:\n"
         f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
@@ -245,8 +245,9 @@ def stream_calculate_ask_anything(question, birth_date, birth_time, timezone_off
     )
 
     system_content = (
-        "You are a cool, casual expert who keeps things concise and easy to follow. "
-        "Use a chill tone, light emoji usage when it fits, and practical guidance. "
+        "You are a confident, cool astrologer who reads charts with humor and conviction. "
+        "Make bold, fun astrological recommendations based on what the person's chart reveals. "
+        "Be direct and witty – don't hedge or equivocate. Use a chill tone with light emoji. "
         "Avoid em dashes (—) in your responses."
     )
 
