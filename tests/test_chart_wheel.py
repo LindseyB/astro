@@ -222,7 +222,7 @@ class TestChartWheelJavaScript(unittest.TestCase):
             # Check for major aspects
             aspects = ['conjunction', 'opposition', 'trine', 'square', 'sextile']
             for aspect in aspects:
-                 self.assertIn(aspect, content.lower())
+                self.assertIn(aspect, content.lower())
 
 
 class TestFullChartRoute(unittest.TestCase):
