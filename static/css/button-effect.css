@@ -6,7 +6,7 @@
 /* Low-specificity position hint: any button class that sets its own
    position (e.g. absolutely-positioned close/copy buttons) overrides
    this, so the shine always anchors to the button itself. */
-button {
+:where(button) {
   position: relative;
 }
 
