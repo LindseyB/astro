@@ -1,268 +1,373 @@
 {% extends "base.html" %}
 
 {% block extra_scripts %}
-<script src="{{ url_for('static', filename='js/location-map.js') }}"></script>
-<script src="{{ url_for('static', filename='js/music-genre.js') }}"></script>
-<script src="{{ url_for('static', filename='js/form-persistence.js') }}"></script>
-<script src="{{ url_for('static', filename='js/button-loading.js') }}"></script>
-<script src="{{ url_for('static', filename='js/modal.js') }}"></script>
-<script src="{{ url_for('static', filename='js/timezone-select.js') }}"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- LaunchDarkly JS SDK -->
-<script src="https://unpkg.com/launchdarkly-js-client-sdk@3"></script>
-<script src="{{ url_for('static', filename='js/ld-experiment.js') }}"></script>
 {% endblock %}
 
 {% block content %}
+<!-- Header -->
+<header class="site-header">
+  <a href="/" class="logo">
+    <span class="logo-mark">✦</span>
+    <span class="logo-text">astro-horoscope<span class="logo-dim">.lol</span></span>
+  </a>
+  <div class="header-actions">
+    <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
+      <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <button id="birthInfoBtn" class="pill-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+      Birth info
+    </button>
+  </div>
+</header>
+
+<!-- Main -->
+<main class="page-container">
+  <section class="hero">
+    <h1>Your <span class="text-holo">cosmic vibe</span> check.</h1>
+    <p class="lede">Four small rituals. One chart. <span class="muted">Add your birth info up top to begin.</span></p>
+  </section>
+
+  <!-- Hidden master form — tiles submit this -->
+  <form id="masterForm" method="POST" action="/chart" style="display:none;">
+    <input type="hidden" id="f_birth_date"       name="birth_date">
+    <input type="hidden" id="f_birth_time"        name="birth_time">
+    <input type="hidden" id="f_timezone_offset"   name="timezone_offset">
+    <input type="hidden" id="f_latitude"          name="latitude">
+    <input type="hidden" id="f_longitude"         name="longitude">
+    <input type="hidden" id="f_music_genre"       name="music_genre">
+    <input type="hidden" id="f_other_genre"       name="other_genre">
+    <input type="hidden" id="f_question_prompt"   name="question_prompt">
+  </form>
+
+  <section class="bento">
+    <!-- Today's reading — large 2×2 -->
+    <button type="button" class="tile glass chrome-border tile-lg" data-action="/chart">
+      <span class="tile-glow glow-1" aria-hidden="true"></span>
+      <div class="tile-top">
+        <svg class="tile-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="tile-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </div>
+      <div class="tile-body">
+        <p class="eyebrow">daily</p>
+        <h2>Today's reading</h2>
+        <p class="blurb">A short, specific horoscope tuned to your chart and the current sky.</p>
+      </div>
+    </button>
+
+    <!-- Full birth chart — wide 2×1 -->
+    <button type="button" class="tile glass chrome-border tile-wide" data-action="/full-chart">
+      <span class="tile-glow glow-2" aria-hidden="true"></span>
+      <div class="tile-top">
+        <svg class="tile-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 10l-5 3.6L16.5 20 12 16.6 7.5 20 9 13.6 4 10l6.1-1.2z"/></svg>
+        <svg class="tile-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </div>
+      <div class="tile-body">
+        <p class="eyebrow">natal</p>
+        <h2>Full birth chart</h2>
+        <p class="blurb">Wheel, placements, houses — the whole picture.</p>
+      </div>
+    </button>
+
+    <!-- Taco Bell -->
+    <button type="button" class="tile glass chrome-border" data-action="/live-mas">
+      <span class="tile-glow glow-3" aria-hidden="true"></span>
+      <div class="tile-top">
+        <svg class="tile-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+        <svg class="tile-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </div>
+      <div class="tile-body">
+        <p class="eyebrow">cosmic cravings</p>
+        <h2>Your Taco Bell order</h2>
+        <p class="blurb">Determined entirely by your chart. Trust it.</p>
+      </div>
+    </button>
+
+    <!-- Ask the stars -->
+    <button type="button" class="tile glass chrome-border" data-action="/ask-anything" id="askStarsTile">
+      <span class="tile-glow glow-4" aria-hidden="true"></span>
+      <div class="tile-top">
+        <svg class="tile-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/><path d="M9.5 10h.01M12 10h.01M14.5 10h.01"/></svg>
+        <svg class="tile-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </div>
+      <div class="tile-body">
+        <p class="eyebrow">chat</p>
+        <h2>Ask the stars</h2>
+        <p class="blurb">Anything. The current sky will answer.</p>
+      </div>
+    </button>
+  </section>
+
+  <footer class="page-foot">✦ &nbsp; built under a waxing crescent &nbsp; ✦</footer>
+</main>
+
+<!-- ===== Birth Info Panel ===== -->
+<div class="panel-overlay" id="panelOverlay"></div>
+<aside class="birth-panel" id="birthPanel" aria-label="Birth information">
+  <div class="panel-header">
+    <span class="panel-title">Birth info</span>
+    <button class="panel-close" id="panelClose" aria-label="Close panel">×</button>
+  </div>
+
+  <div class="panel-body" id="panelBody">
+    <div class="field-row">
+      <div class="field-group">
+        <label for="birth_date">Date</label>
+        <input type="date" id="birth_date" name="birth_date">
+      </div>
+      <div class="field-group">
+        <label for="birth_time">Time</label>
+        <input type="time" id="birth_time" name="birth_time">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="timezone_offset">Timezone</label>
+      <select id="timezone_offset" name="timezone_offset" class="timezone-select">
+        <option value="">Select or search...</option>
+        <optgroup label="Common US Timezones">
+          <option value="-05:00">Eastern Standard Time (EST) -05:00</option>
+          <option value="-04:00">Eastern Daylight Time (EDT) -04:00</option>
+          <option value="-06:00">Central Standard Time (CST) -06:00</option>
+          <option value="-05:00">Central Daylight Time (CDT) -05:00</option>
+          <option value="-07:00">Mountain Standard Time (MST) -07:00</option>
+          <option value="-06:00">Mountain Daylight Time (MDT) -06:00</option>
+          <option value="-08:00">Pacific Standard Time (PST) -08:00</option>
+          <option value="-07:00">Pacific Daylight Time (PDT) -07:00</option>
+          <option value="-09:00">Alaska Standard Time (AKST) -09:00</option>
+          <option value="-10:00">Hawaii-Aleutian Standard Time (HST) -10:00</option>
+        </optgroup>
+        <optgroup label="Europe">
+          <option value="+00:00">Greenwich Mean Time (GMT) +00:00</option>
+          <option value="+01:00">British Summer Time (BST) +01:00</option>
+          <option value="+01:00">Central European Time (CET) +01:00</option>
+          <option value="+02:00">Central European Summer Time (CEST) +02:00</option>
+          <option value="+02:00">Eastern European Time (EET) +02:00</option>
+          <option value="+03:00">Eastern European Summer Time (EEST) +03:00</option>
+        </optgroup>
+        <optgroup label="Asia">
+          <option value="+05:30">India Standard Time (IST) +05:30</option>
+          <option value="+08:00">China Standard Time (CST) +08:00</option>
+          <option value="+09:00">Japan Standard Time (JST) +09:00</option>
+          <option value="+09:00">Korea Standard Time (KST) +09:00</option>
+          <option value="+05:45">Nepal Time (NPT) +05:45</option>
+          <option value="+07:00">Indochina Time (ICT) +07:00</option>
+        </optgroup>
+        <optgroup label="Australia/Pacific">
+          <option value="+08:00">Australian Western Standard Time (AWST) +08:00</option>
+          <option value="+09:30">Australian Central Standard Time (ACST) +09:30</option>
+          <option value="+10:00">Australian Eastern Standard Time (AEST) +10:00</option>
+          <option value="+11:00">Australian Eastern Daylight Time (AEDT) +11:00</option>
+          <option value="+12:00">New Zealand Standard Time (NZST) +12:00</option>
+        </optgroup>
+        <optgroup label="Americas (Other)">
+          <option value="-03:00">Argentina Time (ART) -03:00</option>
+          <option value="-03:00">Brasilia Time (BRT) -03:00</option>
+          <option value="-05:00">Colombia Time (COT) -05:00</option>
+          <option value="-04:00">Atlantic Standard Time (AST) -04:00</option>
+        </optgroup>
+        <optgroup label="Africa/Middle East">
+          <option value="+02:00">South Africa Standard Time (SAST) +02:00</option>
+          <option value="+03:00">East Africa Time (EAT) +03:00</option>
+          <option value="+03:00">Arabia Standard Time (AST) +03:00</option>
+          <option value="+04:00">Gulf Standard Time (GST) +04:00</option>
+        </optgroup>
+        <optgroup label="All UTC Offsets">
+          <option value="-12:00">UTC-12:00</option><option value="-11:00">UTC-11:00</option>
+          <option value="-10:00">UTC-10:00</option><option value="-09:30">UTC-09:30</option>
+          <option value="-09:00">UTC-09:00</option><option value="-08:00">UTC-08:00</option>
+          <option value="-07:00">UTC-07:00</option><option value="-06:00">UTC-06:00</option>
+          <option value="-05:00">UTC-05:00</option><option value="-04:30">UTC-04:30</option>
+          <option value="-04:00">UTC-04:00</option><option value="-03:30">UTC-03:30</option>
+          <option value="-03:00">UTC-03:00</option><option value="-02:00">UTC-02:00</option>
+          <option value="-01:00">UTC-01:00</option><option value="+00:00">UTC+00:00</option>
+          <option value="+01:00">UTC+01:00</option><option value="+02:00">UTC+02:00</option>
+          <option value="+03:00">UTC+03:00</option><option value="+03:30">UTC+03:30</option>
+          <option value="+04:00">UTC+04:00</option><option value="+04:30">UTC+04:30</option>
+          <option value="+05:00">UTC+05:00</option><option value="+05:30">UTC+05:30</option>
+          <option value="+05:45">UTC+05:45</option><option value="+06:00">UTC+06:00</option>
+          <option value="+06:30">UTC+06:30</option><option value="+07:00">UTC+07:00</option>
+          <option value="+08:00">UTC+08:00</option><option value="+09:00">UTC+09:00</option>
+          <option value="+09:30">UTC+09:30</option><option value="+10:00">UTC+10:00</option>
+          <option value="+10:30">UTC+10:30</option><option value="+11:00">UTC+11:00</option>
+          <option value="+12:00">UTC+12:00</option><option value="+13:00">UTC+13:00</option>
+          <option value="+14:00">UTC+14:00</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <!-- Location -->
+    <div class="field-group">
+      <label>Birth Location</label>
+      <div class="location-search-wrap">
+        <input type="text" id="locationSearch" placeholder="Search city or address…">
+        <button type="button" class="location-search-btn" onclick="searchLocation()">Search</button>
+      </div>
+      <div id="locationMap" style="margin-top:0.5rem;"></div>
+      <div class="location-coords" style="margin-top:0.5rem;">
+        <input type="text" id="latitude" name="latitude" placeholder="Latitude" readonly>
+        <input type="text" id="longitude" name="longitude" placeholder="Longitude" readonly>
+      </div>
+    </div>
+
+    <!-- Music Genre -->
+    <div class="field-group">
+      <label for="music_genre">Music Genre (optional)</label>
+      <select id="music_genre" name="music_genre" onchange="toggleOtherGenre()">
+        <option value="any">Any Genre</option>
+        <option value="pop">Pop</option>
+        <option value="rock">Rock</option>
+        <option value="hip-hop">Hip-Hop/Rap</option>
+        <option value="r&b">R&amp;B/Soul</option>
+        <option value="indie">Indie</option>
+        <option value="electronic">Electronic/EDM</option>
+        <option value="folk">Folk/Acoustic</option>
+        <option value="jazz">Jazz</option>
+        <option value="classical">Classical</option>
+        <option value="country">Country</option>
+        <option value="other">Other (specify)</option>
+      </select>
+      <div id="other_genre_div">
+        <input type="text" id="other_genre" name="other_genre" placeholder="Specify your preferred genre…" style="margin-top:0.5rem;">
+      </div>
+    </div>
+
+    <!-- Ask Anything question (only shown for that tile) -->
+    <div class="question-section" id="questionSection" style="display:none;">
+      <p class="question-section-heading">Your question</p>
+      <div class="field-group">
+        <textarea id="question_prompt" name="question_prompt" placeholder="What do you want to know?" rows="3"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-footer">
+    <button class="btn-ghost" id="clearDataBtn">Clear data</button>
+    <button class="btn-primary" id="panelSaveBtn">Save &amp; continue →</button>
+  </div>
+</aside>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/location-map.js') }}"></script>
+<script src="{{ url_for('static', filename='js/music-genre.js') }}"></script>
+<script src="{{ url_for('static', filename='js/form-persistence.js') }}"></script>
+<script src="{{ url_for('static', filename='js/timezone-select.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
+<!-- LaunchDarkly JS SDK -->
+<script src="https://unpkg.com/launchdarkly-js-client-sdk@3"></script>
+<script src="{{ url_for('static', filename='js/ld-experiment.js') }}"></script>
+
 <script>
-    document.body.dataset.disableTrail = 'true';
-    document.body.classList.add('index-page');
-</script>
+(function () {
+  // ── Theme toggle ─────────────────────────────────────────
+  var root = document.documentElement;
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    root.classList.toggle('dark');
+    localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
+  });
 
-<div class="home-page">
-    <!-- Hero Section -->
-    <div class="hero-section">
-        <div class="hero-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M12 2v20M2 12h20"></path>
-                <circle cx="12" cy="5" r="1.5"></circle>
-                <circle cx="19" cy="12" r="1.5"></circle>
-                <circle cx="12" cy="19" r="1.5"></circle>
-                <circle cx="5" cy="12" r="1.5"></circle>
-            </svg>
-        </div>
-        <h1 class="hero-title">Your cosmic vibe check</h1>
-        <p class="hero-subtitle">Your short ritual, one check. Reading in 3 min</p>
-    </div>
+  // ── Panel open / close ────────────────────────────────────
+  var overlay  = document.getElementById('panelOverlay');
+  var panel    = document.getElementById('birthPanel');
+  var openBtn  = document.getElementById('birthInfoBtn');
+  var closeBtn = document.getElementById('panelClose');
+  var pending  = null; // action URL queued while panel was opened
 
-    <!-- Form Container -->
-    <form action="/chart" method="POST" class="birth-data-form">
-        <!-- Compact Birth Info Section -->
-        <div class="form-section compact">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="birth_date">Birth Date</label>
-                    <input type="date" id="birth_date" name="birth_date" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="birth_time">Birth Time</label>
-                    <input type="time" id="birth_time" name="birth_time" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="timezone_offset">Timezone</label>
-                    <select id="timezone_offset" name="timezone_offset" required class="timezone-select">
-                        <option value="">Select timezone...</option>
-                        <optgroup label="Common US Timezones">
-                            <option value="-05:00">EST -05:00</option>
-                            <option value="-04:00">EDT -04:00</option>
-                            <option value="-06:00">CST -06:00</option>
-                            <option value="-05:00">CDT -05:00</option>
-                            <option value="-07:00">MST -07:00</option>
-                            <option value="-06:00">MDT -06:00</option>
-                            <option value="-08:00">PST -08:00</option>
-                            <option value="-07:00">PDT -07:00</option>
-                        </optgroup>
-                        <optgroup label="Europe">
-                            <option value="+00:00">GMT +00:00</option>
-                            <option value="+01:00">CET +01:00</option>
-                            <option value="+02:00">CEST +02:00</option>
-                        </optgroup>
-                        <optgroup label="Asia">
-                            <option value="+05:30">IST +05:30</option>
-                            <option value="+08:00">CST +08:00</option>
-                            <option value="+09:00">JST +09:00</option>
-                        </optgroup>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Location Section -->
-            <div class="location-section">
-                <label>📍 Birth Location</label>
-                <div class="location-selector">
-                    <input type="text" id="locationSearch" placeholder="Search city or address..." class="location-input">
-                    <div id="locationMap" class="location-map"></div>
-                </div>
-                <input type="hidden" id="latitude" name="latitude" required>
-                <input type="hidden" id="longitude" name="longitude" required>
-            </div>
-
-            <!-- Music Genre (Optional) -->
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="music_genre">🎵 Music Genre (Optional)</label>
-                    <select id="music_genre" name="music_genre" onchange="toggleOtherGenre()">
-                        <option value="any">Any Genre</option>
-                        <option value="pop">Pop</option>
-                        <option value="rock">Rock</option>
-                        <option value="indie">Indie</option>
-                        <option value="jazz">Jazz</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <div id="other_genre_div" class="other-genre-input" style="display: none;">
-                    <input type="text" id="other_genre" name="other_genre" placeholder="Specify genre...">
-                </div>
-            </div>
-        </div>
-
-        <!-- 4-Card Grid -->
-        <div class="mode-grid">
-            <!-- Card 1: Full Birth Chart -->
-            <button type="submit" formaction="/full-chart" class="mode-card" data-mode="full-chart">
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <circle cx="12" cy="12" r="4"></circle>
-                        <path d="M12 2v4M12 18v4M2 12h4m12 0h4"></path>
-                    </svg>
-                </div>
-                <h3 class="card-title">Full birth chart</h3>
-                <p class="card-description">Complete breakdown of your natal chart with all planetary placements</p>
-                <span class="card-arrow">→</span>
-            </button>
-
-            <!-- Card 2: Today's Reading -->
-            <button type="submit" formaction="/chart" class="mode-card" data-mode="chart">
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M3 12h18M3 6h18M3 18h18"></path>
-                        <circle cx="12" cy="12" r="1"></circle>
-                    </svg>
-                </div>
-                <h3 class="card-title">Today's reading</h3>
-                <p class="card-description">Personalized horoscope and cosmic guidance for the next 24 hours</p>
-                <span class="card-arrow">→</span>
-            </button>
-
-            <!-- Card 3: Cosmic Cravings -->
-            <button type="submit" formaction="/live-mas" class="mode-card" data-mode="live-mas">
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M6 9l6-6 6 6H6z"></path>
-                        <path d="M6 15l6 6 6-6"></path>
-                        <circle cx="12" cy="12" r="1"></circle>
-                    </svg>
-                </div>
-                <h3 class="card-title">Your Taco Bell order</h3>
-                <p class="card-description">What cosmic cravings align with your astrological energy today</p>
-                <span class="card-arrow">→</span>
-            </button>
-
-            <!-- Card 4: Ask the Stars -->
-            <button type="button" class="mode-card" data-mode="ask-anything" onclick="handleAskAnything(event)">
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <circle cx="12" cy="12" r="1"></circle>
-                        <path d="M12 1v6m0 6v6"></path>
-                        <path d="M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24"></path>
-                        <path d="M1 12h6m6 0h6"></path>
-                    </svg>
-                </div>
-                <h3 class="card-title">Ask the stars</h3>
-                <p class="card-description">Any question answered through the lens of your astrological chart</p>
-                <span class="card-arrow">→</span>
-            </button>
-        </div>
-
-        <!-- Footer Actions -->
-        <div class="home-footer">
-            <button type="button" id="resetFormBtn" class="footer-btn secondary" title="Clear all saved form data">
-                Clear Saved Data
-            </button>
-            <p class="footer-text">✨ <strong>BUILT UNDER A WAXING CRESCENT</strong> ✨</p>
-        </div>
-    </form>
-
-    <!-- Location Help Modal -->
-    <div id="locationHelpModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>📍 Location Help</h3>
-                <button class="modal-close" aria-label="Close modal">×</button>
-            </div>
-            <div class="modal-body">
-                <p><strong>🗺️ Using the Interactive Map:</strong></p>
-                <ul>
-                    <li>Click anywhere on the map to set your birth location</li>
-                    <li>Search for your birth city in the search box</li>
-                    <li>Coordinates will be automatically converted to astrology format</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Ask Anything Modal -->
-    <div id="askAnythingModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>💬 Ask Anything</h3>
-                <button class="modal-close" aria-label="Close modal">×</button>
-            </div>
-            <div class="modal-body">
-                <form action="/ask-anything" method="POST">
-                    <div class="form-group question-group">
-                        <label for="question_prompt">Your question:</label>
-                        <textarea id="question_prompt" name="question_prompt" rows="4" placeholder="What do you want to know?" required></textarea>
-                    </div>
-                    <input type="hidden" id="ask_birth_date" name="birth_date">
-                    <input type="hidden" id="ask_birth_time" name="birth_time">
-                    <input type="hidden" id="ask_timezone_offset" name="timezone_offset">
-                    <input type="hidden" id="ask_latitude" name="latitude">
-                    <input type="hidden" id="ask_longitude" name="longitude">
-                    <button type="submit">Get Answer 💬</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-// Validate birth data before allowing mode submission
-function handleAskAnything(event) {
-    event.preventDefault();
-    
-    const birthDate = document.getElementById('birth_date').value;
-    const birthTime = document.getElementById('birth_time').value;
-    const timezoneOffset = document.getElementById('timezone_offset').value;
-    const latitude = document.getElementById('latitude').value;
-    const longitude = document.getElementById('longitude').value;
-    
-    if (!birthDate || !birthTime || !timezoneOffset || !latitude || !longitude) {
-        alert('Please fill in all birth information first');
-        return;
+  function openPanel(action) {
+    pending = action || null;
+    panel.classList.add('open');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    // show/hide question textarea
+    var qSection = document.getElementById('questionSection');
+    if (action === '/ask-anything') {
+      qSection.style.display = '';
+    } else {
+      qSection.style.display = 'none';
     }
-    
-    // Populate ask-anything modal with birth data
-    document.getElementById('ask_birth_date').value = birthDate;
-    document.getElementById('ask_birth_time').value = birthTime;
-    document.getElementById('ask_timezone_offset').value = timezoneOffset;
-    document.getElementById('ask_latitude').value = latitude;
-    document.getElementById('ask_longitude').value = longitude;
-    
-    // Open modal
-    document.getElementById('askAnythingModal').classList.add('active');
-}
+  }
 
-// Modal close handlers
-document.querySelectorAll('.modal-close').forEach(btn => {
-    btn.addEventListener('click', function() {
-        this.closest('.modal-overlay').classList.remove('active');
-    });
-});
+  function closePanel() {
+    panel.classList.remove('open');
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    pending = null;
+  }
 
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', function(e) {
-        if (e.target === this) {
-            this.classList.remove('active');
-        }
+  openBtn.addEventListener('click', function () { openPanel(null); });
+  closeBtn.addEventListener('click', closePanel);
+  overlay.addEventListener('click', closePanel);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closePanel();
+  });
+
+  // ── Tile clicks ───────────────────────────────────────────
+  document.querySelectorAll('.tile[data-action]').forEach(function (tile) {
+    tile.addEventListener('click', function () {
+      var action = tile.dataset.action;
+      if (!hasBirthData()) {
+        openPanel(action);
+        return;
+      }
+      if (action === '/ask-anything' && !document.getElementById('question_prompt').value.trim()) {
+        openPanel(action);
+        return;
+      }
+      submitToAction(action);
     });
-});
+  });
+
+  // ── Save & continue ───────────────────────────────────────
+  document.getElementById('panelSaveBtn').addEventListener('click', function () {
+    if (!hasBirthData()) {
+      alert('Please fill in birth date, time, timezone, and location.');
+      return;
+    }
+    var action = pending || '/chart';
+    if (action === '/ask-anything') {
+      var q = document.getElementById('question_prompt').value.trim();
+      if (!q) { alert('Please enter your question.'); return; }
+    }
+    closePanel();
+    submitToAction(action);
+  });
+
+  // ── Clear data ────────────────────────────────────────────
+  document.getElementById('clearDataBtn').addEventListener('click', function () {
+    localStorage.removeItem('astro-form-data');
+    ['birth_date','birth_time','timezone_offset','latitude','longitude','music_genre','other_genre','question_prompt']
+      .forEach(function(id){ var el = document.getElementById(id); if(el) el.value = ''; });
+  });
+
+  // ── Helpers ───────────────────────────────────────────────
+  function hasBirthData() {
+    return !!(
+      document.getElementById('birth_date').value &&
+      document.getElementById('birth_time').value &&
+      document.getElementById('timezone_offset').value &&
+      document.getElementById('latitude').value &&
+      document.getElementById('longitude').value
+    );
+  }
+
+  function submitToAction(action) {
+    var form = document.getElementById('masterForm');
+    form.action = action;
+    document.getElementById('f_birth_date').value     = document.getElementById('birth_date').value;
+    document.getElementById('f_birth_time').value     = document.getElementById('birth_time').value;
+    document.getElementById('f_timezone_offset').value= document.getElementById('timezone_offset').value;
+    document.getElementById('f_latitude').value       = document.getElementById('latitude').value;
+    document.getElementById('f_longitude').value      = document.getElementById('longitude').value;
+    document.getElementById('f_music_genre').value    = document.getElementById('music_genre').value;
+    document.getElementById('f_other_genre').value    = document.getElementById('other_genre').value || '';
+    document.getElementById('f_question_prompt').value= document.getElementById('question_prompt').value || '';
+    form.submit();
+  }
+})();
 </script>
-
 {% endblock %}

@@ -30,8 +30,10 @@
      */
     function applyDarkMode(isDark) {
         if (isDark) {
+            document.documentElement.classList.add('dark');
             document.documentElement.classList.add('dark-mode');
         } else {
+            document.documentElement.classList.remove('dark');
             document.documentElement.classList.remove('dark-mode');
         }
         
@@ -55,9 +57,11 @@
      * Toggle dark mode and save preference
      */
     function toggleDarkMode() {
-        const isDark = !document.documentElement.classList.contains('dark-mode');
+        const isDark = !document.documentElement.classList.contains('dark');
         applyDarkMode(isDark);
         localStorage.setItem(STORAGE_KEY, isDark);
+        // Also write the 'theme' key used by the inline head script
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
     }
     
     /**
