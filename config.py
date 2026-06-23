@@ -7,7 +7,7 @@ import logging
 # else reads them (e.g. ai_service.py reading ANTHROPIC_TOKEN at import time).
 try:
     from dotenv import load_dotenv
-    load_dotenv(override=True)
+    load_dotenv()
 except ImportError:
     # python-dotenv is optional; env vars can still be set in the shell.
     pass

@@ -17,7 +17,7 @@ import os
 app = Flask(__name__)
 
 # In development, disable static file caching so CSS/JS edits show on reload
-if os.environ.get('FLASK_ENV') == 'development' or os.environ.get('FLASK_DEBUG'):
+if os.environ.get('FLASK_ENV') == 'development' or os.environ.get('FLASK_DEBUG') == '1':
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 # Add markdown filter to convert markdown to HTML
