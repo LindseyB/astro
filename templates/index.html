@@ -372,7 +372,7 @@
     var action = pending || '/chart';
     if (action === '/ask-anything') {
       var q = document.getElementById('question_prompt').value.trim();
-      if (!q) { alert('Please enter your question.'); return; }
+      if (!q) { showSearchError('Please enter your question.'); return; }
     }
     closePanel();
     submitToAction(action);
