@@ -1,0 +1,709 @@
+/* ============================================================
+   ASTRO HOROSCOPE - DESIGN SYSTEM
+   Issue #77: Bento Grid Layout Redesign
+   ============================================================ */
+
+/* ============================================================
+   1. FONT IMPORTS
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ============================================================
+   2. DESIGN TOKENS & COLOR SYSTEM
+   ============================================================ */
+:root {
+    /* ---- Typography Tokens ---- */
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-sans: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* ---- Dark Theme (Primary) ---- */
+    --color-cyan: #00CED1;
+    --color-cyan-bright: #00FFFF;
+    --color-cyan-glow: rgba(0, 206, 209, 0.15);
+    --color-purple: #9333ea;
+    --color-purple-dark: #6b21a8;
+    --color-navy-base: #1a1a2e;
+    --color-navy-deep: #16213e;
+    --color-card-dark: #18181b;
+    --color-card-lighter: #1a1a24;
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #a1a1aa;
+    --color-text-tertiary: #71717a;
+    --color-border-dark: #27272a;
+    --color-selection: #ea66cd;
+    --color-error: #ef4444;
+    --color-success: #10b981;
+
+    /* ---- Light Theme Variables ---- */
+    --color-bg-light: #f0f9ff;
+    --color-card-light: #ffffff;
+    --color-text-dark: #1a1a1a;
+    --color-text-gray: #4b5563;
+    --color-border-light: #e5e7eb;
+
+    /* ---- Spacing Scale ---- */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 20px;
+    --spacing-xl: 24px;
+    --spacing-2xl: 32px;
+
+    /* ---- Border Radius ---- */
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+
+    /* ---- Shadows ---- */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+    --shadow-cyan-glow: 0 8px 24px var(--color-cyan-glow);
+    --shadow-cyan-hover: 0 12px 32px rgba(0, 206, 209, 0.2);
+
+    /* ---- Transitions ---- */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================
+   3. RESET & BASE STYLES
+   ============================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--color-text-primary);
+    background: linear-gradient(135deg, var(--color-navy-base) 0%, var(--color-navy-deep) 100%);
+    min-height: 100vh;
+    transition: background var(--transition-base), color var(--transition-base);
+    position: relative;
+}
+
+body.light-mode {
+    background: linear-gradient(135deg, var(--color-bg-light) 0%, #ffffff 100%);
+    color: var(--color-text-dark);
+}
+
+::selection {
+    background: var(--color-selection);
+    color: var(--color-text-primary);
+}
+
+::-moz-selection {
+    background: var(--color-selection);
+    color: var(--color-text-primary);
+}
+
+/* ============================================================
+   4. TYPOGRAPHY
+   ============================================================ */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: var(--spacing-lg);
+}
+
+h2 {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    margin-bottom: var(--spacing-md);
+}
+
+h3 {
+    font-size: clamp(1.25rem, 3vw, 2rem);
+    margin-bottom: var(--spacing-md);
+}
+
+/* Eyebrow/Label Text */
+.eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--color-cyan);
+    margin-bottom: var(--spacing-sm);
+}
+
+body.light-mode .eyebrow {
+    color: var(--color-purple);
+}
+
+/* ============================================================
+   5. LAYOUT SYSTEM - BENTO GRID
+   ============================================================ */
+.container {
+    max-width: 100%;
+    width: 100%;
+    padding: var(--spacing-lg);
+    margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 834px;
+        padding: var(--spacing-2xl);
+    }
+}
+
+@media (min-width: 1440px) {
+    .container {
+        max-width: 1440px;
+    }
+}
+
+/* Bento Grid Container */
+.bento-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-2xl);
+}
+
+/* Mobile: Single column */
+@media (max-width: 767px) {
+    .bento-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+}
+
+/* Tablet: 2-column grid */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-lg);
+    }
+
+    .bento-grid > .large {
+        grid-column: 1 / -1;
+    }
+
+    .bento-grid > .wide {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Desktop: Full bento grid */
+@media (min-width: 1200px) {
+    .bento-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-lg);
+        grid-auto-rows: minmax(250px, auto);
+    }
+
+    .bento-grid > .large {
+        grid-column: span 2;
+        grid-row: span 2;
+    }
+
+    .bento-grid > .wide {
+        grid-column: 1 / -1;
+    }
+
+    .bento-grid > .tall {
+        grid-row: span 2;
+    }
+}
+
+/* ============================================================
+   6. TILE / CARD COMPONENT
+   ============================================================ */
+.tile {
+    background: var(--color-card-dark);
+    border: 2px solid var(--color-cyan);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    transition: all var(--transition-base);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+body.light-mode .tile {
+    background: var(--color-card-light);
+    border-color: var(--color-purple);
+}
+
+.tile:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-cyan-hover);
+    border-color: var(--color-cyan-bright);
+}
+
+body.light-mode .tile:hover {
+    box-shadow: 0 12px 32px rgba(147, 51, 234, 0.15);
+    border-color: var(--color-purple-dark);
+}
+
+/* Tile Header */
+.tile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-sm);
+}
+
+.tile-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+/* lucide-react icons via SVG */
+.tile-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: var(--color-cyan);
+    stroke-width: 1.5;
+}
+
+body.light-mode .tile-icon svg {
+    stroke: var(--color-purple);
+}
+
+.tile-external-link {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    transition: color var(--transition-fast);
+}
+
+.tile-external-link:hover {
+    color: var(--color-cyan);
+}
+
+body.light-mode .tile-external-link:hover {
+    color: var(--color-purple);
+}
+
+/* Tile Content */
+.tile-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+    word-break: break-word;
+}
+
+body.light-mode .tile-title {
+    color: var(--color-text-dark);
+}
+
+.tile-description {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    margin: 0;
+    flex-grow: 1;
+}
+
+body.light-mode .tile-description {
+    color: var(--color-text-gray);
+}
+
+/* ============================================================
+   7. BUTTONS & INPUTS
+   ============================================================ */
+button {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    text-decoration: none;
+}
+
+/* Primary Button */
+.btn-primary {
+    background: var(--color-purple);
+    color: white;
+    border: 2px solid var(--color-purple);
+}
+
+.btn-primary:hover {
+    background: var(--color-purple-dark);
+    border-color: var(--color-purple-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Secondary Button (Outline) */
+.btn-secondary {
+    background: transparent;
+    color: var(--color-cyan);
+    border: 2px solid var(--color-cyan);
+}
+
+.btn-secondary:hover {
+    background: rgba(0, 206, 209, 0.1);
+    box-shadow: var(--shadow-cyan-glow);
+}
+
+body.light-mode .btn-secondary {
+    color: var(--color-purple);
+    border-color: var(--color-purple);
+}
+
+body.light-mode .btn-secondary:hover {
+    background: rgba(147, 51, 234, 0.05);
+}
+
+/* Ghost Button */
+.btn-ghost {
+    background: transparent;
+    color: var(--color-text-primary);
+    border: 2px solid transparent;
+    padding: 10px 16px;
+}
+
+.btn-ghost:hover {
+    background: rgba(0, 206, 209, 0.1);
+    border-color: var(--color-cyan);
+}
+
+body.light-mode .btn-ghost {
+    color: var(--color-text-dark);
+}
+
+body.light-mode .btn-ghost:hover {
+    background: rgba(147, 51, 234, 0.05);
+    border-color: var(--color-purple);
+}
+
+/* Icon Button */
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--color-card-lighter);
+    color: var(--color-cyan);
+    border: 2px solid var(--color-cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background: rgba(0, 206, 209, 0.1);
+}
+
+/* Text Input */
+input[type="text"],
+input[type="date"],
+input[type="time"],
+textarea,
+select {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    background: var(--color-card-lighter);
+    color: var(--color-text-primary);
+    border: 2px solid var(--color-cyan);
+    border-radius: var(--radius-lg);
+    padding: 12px 16px;
+    transition: all var(--transition-fast);
+}
+
+body.light-mode input[type="text"],
+body.light-mode input[type="date"],
+body.light-mode input[type="time"],
+body.light-mode textarea,
+body.light-mode select {
+    background: var(--color-card-light);
+    color: var(--color-text-dark);
+    border-color: var(--color-purple);
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--color-cyan-bright);
+    box-shadow: 0 0 0 3px var(--color-cyan-glow);
+}
+
+body.light-mode input[type="text"]:focus,
+body.light-mode input[type="date"]:focus,
+body.light-mode input[type="time"]:focus,
+body.light-mode textarea:focus,
+body.light-mode select:focus {
+    border-color: var(--color-purple-dark);
+    box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.15);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ============================================================
+   8. SLIDE-OVER / DRAWER PANEL
+   ============================================================ */
+.drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    pointer-events: none;
+}
+
+.drawer-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.drawer-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--color-card-dark);
+    z-index: 100;
+    transform: translateX(100%);
+    transition: transform var(--transition-base);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+}
+
+body.light-mode .drawer-panel {
+    background: var(--color-card-light);
+}
+
+.drawer-panel.active {
+    transform: translateX(0);
+}
+
+@media (min-width: 768px) {
+    .drawer-panel {
+        width: 420px;
+    }
+}
+
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-xl);
+    border-bottom: 2px solid var(--color-border-dark);
+    flex-shrink: 0;
+}
+
+body.light-mode .drawer-header {
+    border-bottom-color: var(--color-border-light);
+}
+
+.drawer-close {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-size: 24px;
+    transition: color var(--transition-fast);
+}
+
+.drawer-close:hover {
+    color: var(--color-cyan);
+}
+
+.drawer-content {
+    flex: 1;
+    padding: var(--spacing-xl);
+    overflow-y: auto;
+}
+
+.drawer-footer {
+    padding: var(--spacing-xl);
+    border-top: 2px solid var(--color-border-dark);
+    display: flex;
+    gap: var(--spacing-md);
+    flex-shrink: 0;
+}
+
+body.light-mode .drawer-footer {
+    border-top-color: var(--color-border-light);
+}
+
+/* ============================================================
+   9. UTILITY CLASSES
+   ============================================================ */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.gap-md {
+    gap: var(--spacing-md);
+}
+
+.gap-lg {
+    gap: var(--spacing-lg);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-secondary {
+    color: var(--color-text-secondary);
+}
+
+/* ============================================================
+   10. RESPONSIVE UTILITIES
+   ============================================================ */
+@media (max-width: 767px) {
+    .hidden-mobile {
+        display: none !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .hidden-tablet-up {
+        display: none !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    .hidden-desktop {
+        display: none !important;
+    }
+}
+
+/* ============================================================
+   11. ANIMATIONS
+   ============================================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn var(--transition-base) ease-out;
+}
+
+.slide-in-right {
+    animation: slideInRight var(--transition-base) ease-out;
+}
+
+/* ============================================================
+   12. ACCESSIBILITY
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+    .tile {
+        border-width: 3px;
+    }
+
+    button {
+        border-width: 2px;
+    }
+}
+
+/* Focus visible for keyboard navigation */
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--color-cyan);
+    outline-offset: 2px;
+}
+
+body.light-mode button:focus-visible,
+body.light-mode input:focus-visible,
+body.light-mode a:focus-visible {
+    outline-color: var(--color-purple);
+}

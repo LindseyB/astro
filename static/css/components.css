@@ -1,0 +1,417 @@
+/* ============================================================
+   CHART PAGE SPECIFIC COMPONENTS
+   ============================================================ */
+
+/* ============================================================
+   Hero Section
+   ============================================================ */
+.hero-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-2xl);
+    padding-bottom: var(--spacing-xl);
+    border-bottom: 2px solid var(--color-cyan);
+}
+
+body.light-mode .hero-section {
+    border-bottom-color: var(--color-purple);
+}
+
+.hero-content h1 {
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--color-text-primary);
+}
+
+body.light-mode .hero-content h1 {
+    color: var(--color-text-dark);
+}
+
+.main-signs-inline {
+    display: flex;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.sign-badge {
+    background: rgba(0, 206, 209, 0.1);
+    border: 1px solid var(--color-cyan);
+    border-radius: var(--radius-lg);
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-cyan);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+body.light-mode .sign-badge {
+    background: rgba(147, 51, 234, 0.05);
+    border-color: var(--color-purple);
+    color: var(--color-purple);
+}
+
+.btn-edit-chart {
+    flex-shrink: 0;
+    background: transparent;
+    color: var(--color-cyan);
+}
+
+body.light-mode .btn-edit-chart {
+    color: var(--color-purple);
+}
+
+.btn-edit-chart:hover {
+    background: rgba(0, 206, 209, 0.1);
+    transform: scale(1.1);
+}
+
+body.light-mode .btn-edit-chart:hover {
+    background: rgba(147, 51, 234, 0.05);
+}
+
+/* ============================================================
+   Tile Content Variants
+   ============================================================ */
+.tile-analysis-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 500px;
+}
+
+.tile-analysis-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tile-analysis-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.tile-analysis-content::-webkit-scrollbar-thumb {
+    background: var(--color-cyan);
+    border-radius: 3px;
+}
+
+.tile-analysis-content::-webkit-scrollbar-thumb:hover {
+    background: var(--color-cyan-bright);
+}
+
+.analysis-text {
+    line-height: 1.8;
+    color: var(--color-text-secondary);
+}
+
+body.light-mode .analysis-text {
+    color: var(--color-text-gray);
+}
+
+.analysis-text p {
+    margin: 0 0 var(--spacing-md) 0;
+}
+
+.analysis-text ul,
+.analysis-text ol {
+    margin: 0 0 var(--spacing-md) var(--spacing-lg);
+    padding: 0;
+}
+
+.analysis-text li {
+    margin-bottom: var(--spacing-sm);
+}
+
+.analysis-text strong {
+    color: var(--color-cyan);
+}
+
+body.light-mode .analysis-text strong {
+    color: var(--color-purple);
+}
+
+.streaming-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: var(--color-text-secondary);
+    font-style: italic;
+}
+
+/* ============================================================
+   Prompts / Buttons Grid
+   ============================================================ */
+.prompts-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.btn-prompt {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--color-cyan);
+    background: transparent;
+    color: var(--color-cyan);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.light-mode .btn-prompt {
+    border-color: var(--color-purple);
+    color: var(--color-purple);
+}
+
+.btn-prompt:hover {
+    background: rgba(0, 206, 209, 0.15);
+    border-color: var(--color-cyan-bright);
+}
+
+body.light-mode .btn-prompt:hover {
+    background: rgba(147, 51, 234, 0.1);
+    border-color: var(--color-purple-dark);
+}
+
+/* ============================================================
+   Form Groups in Drawer
+   ============================================================ */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-group label {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+body.light-mode .form-group label {
+    color: var(--color-text-dark);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    font-family: var(--font-sans);
+}
+
+/* ============================================================
+   Footer Section
+   ============================================================ */
+.footer-section {
+    padding: var(--spacing-xl) 0;
+    border-top: 1px solid var(--color-border-dark);
+    color: var(--color-text-secondary);
+}
+
+body.light-mode .footer-section {
+    border-top-color: var(--color-border-light);
+}
+
+.footer-section p {
+    margin: 0;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+/* ============================================================
+   Responsive Adjustments
+   ============================================================ */
+@media (max-width: 767px) {
+    .hero-section {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .main-signs-inline {
+        width: 100%;
+    }
+
+    .tile-analysis-content {
+        max-height: 400px;
+    }
+
+    .prompts-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .bento-grid {
+        gap: var(--spacing-sm);
+    }
+
+    .tile {
+        padding: var(--spacing-md);
+    }
+
+    .tile-title {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+
+    .main-signs-inline {
+        flex-wrap: wrap;
+    }
+
+    .tile:nth-child(n+3) {
+        min-height: 280px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .hero-section {
+        margin-bottom: var(--spacing-2xl);
+    }
+
+    .main-signs-inline {
+        margin-top: var(--spacing-md);
+    }
+
+    .tile.large {
+        min-height: auto;
+    }
+
+    .tile {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .tile-title {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .tile-description {
+        flex-grow: 1;
+        margin-bottom: var(--spacing-md);
+    }
+}
+
+/* ============================================================
+   Link Styling within Tiles
+   ============================================================ */
+a {
+    color: var(--color-cyan);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+body.light-mode a {
+    color: var(--color-purple);
+}
+
+a:hover {
+    color: var(--color-cyan-bright);
+    text-decoration: underline;
+}
+
+body.light-mode a:hover {
+    color: var(--color-purple-dark);
+}
+
+/* ============================================================
+   Index Page Specific (Form Layout)
+   ============================================================ */
+.index-page .container {
+    background: transparent;
+    padding: var(--spacing-2xl) var(--spacing-lg);
+}
+
+.index-page form {
+    background: var(--color-card-dark);
+    border: 2px solid var(--color-cyan);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xl);
+    margin-top: var(--spacing-2xl);
+}
+
+body.light-mode .index-page form {
+    background: var(--color-card-light);
+    border-color: var(--color-purple);
+}
+
+.index-page .flow-step {
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border-dark);
+}
+
+body.light-mode .index-page .flow-step {
+    border-bottom-color: var(--color-border-light);
+}
+
+.index-page .flow-step:last-of-type {
+    border-bottom: none;
+}
+
+.index-page .step-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+body.light-mode .index-page .step-title {
+    color: var(--color-text-dark);
+}
+
+.index-page .button-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+@media (max-width: 767px) {
+    .index-page .button-group {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================
+   Dark/Light Mode Smooth Transitions
+   ============================================================ */
+body.dark-mode {
+    background: linear-gradient(135deg, var(--color-navy-base) 0%, var(--color-navy-deep) 100%);
+    color: var(--color-text-primary);
+}
+
+body.light-mode {
+    background: linear-gradient(135deg, var(--color-bg-light) 0%, #ffffff 100%);
+    color: var(--color-text-dark);
+}
+
+/* ============================================================
+   Print Styles
+   ============================================================ */
+@media print {
+    .btn-edit-chart,
+    .drawer-overlay,
+    .drawer-panel,
+    button.btn-secondary,
+    button.btn-ghost {
+        display: none !important;
+    }
+
+    .tile {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
