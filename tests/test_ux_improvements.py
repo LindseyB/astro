@@ -255,8 +255,14 @@ class TestSearchButtonStyling(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         
         css_content = response.data.decode('utf-8')
-        # Should have border-radius similar to main buttons
-        self.assertIn('border-radius', css_content)
+        # Should have border-radius within the .location-search-btn rule block
+        selector = '.location-search-btn {'
+        idx = css_content.find(selector)
+        self.assertGreater(idx, -1, '.location-search-btn rule not found')
+        block_start = idx + len(selector)
+        block_end = css_content.find('}', block_start)
+        rule_block = css_content[block_start:block_end]
+        self.assertIn('border-radius', rule_block)
 
     def test_search_button_has_hover_effects(self):
         """Test that search button has hover transform effect"""
