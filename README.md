@@ -144,10 +144,26 @@ Skip the tacos if you’re working late, triple up on sides if you’re friendsh
 #LuncheonLagoon #MainCharacterMeal 🌊🦀🪐🔥
 ```
 
-## Screenshot
+## Screenshots
 
+### Home — light
 <div align="center">
-  <img src="images/screenshot.png" alt="Astro Horoscope Screenshot showing an example horoscope with the three main signs" width="400">
+  <img src="docs/screenshots/home-light.png" alt="Home page in light mode showing bento-style grid of ritual tiles" width="600">
+</div>
+
+### Home — dark
+<div align="center">
+  <img src="docs/screenshots/home-dark.png" alt="Home page in dark mode showing bento-style grid of ritual tiles" width="600">
+</div>
+
+### Birth info panel
+<div align="center">
+  <img src="docs/screenshots/birth-panel.png" alt="Birth info slide-in panel with location search and inline error message" width="400">
+</div>
+
+### Ask the stars
+<div align="center">
+  <img src="docs/screenshots/ask-anything.png" alt="Ask the stars modal with auto-growing textarea" width="400">
 </div>
 
 ## Development
