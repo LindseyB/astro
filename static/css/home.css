@@ -1,0 +1,638 @@
+/* ============================================================
+   HOME PAGE STYLES - Issue #77 Design
+   ============================================================ */
+
+/* ============================================================
+   Page Layout
+   ============================================================ */
+.home-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #ffffff;
+    font-family: 'DM Sans', sans-serif;
+    padding: 40px 24px;
+}
+
+@media (min-width: 768px) {
+    .home-page {
+        padding: 60px 40px;
+    }
+}
+
+/* ============================================================
+   Hero Section
+   ============================================================ */
+.hero-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 48px;
+    text-align: center;
+}
+
+.hero-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00CED1;
+    opacity: 0.8;
+}
+
+.hero-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    fill: none;
+}
+
+.hero-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(32px, 8vw, 48px);
+    font-weight: 700;
+    color: #00CED1;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.hero-subtitle {
+    font-size: 16px;
+    color: #a1a1aa;
+    margin: 0;
+}
+
+/* ============================================================
+   Birth Data Form
+   ============================================================ */
+.birth-data-form {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+/* ============================================================
+   Form Section
+   ============================================================ */
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px;
+    background: rgba(0, 206, 209, 0.05);
+    border: 1px solid rgba(0, 206, 209, 0.2);
+    border-radius: 12px;
+}
+
+.form-section.compact {
+    gap: 16px;
+}
+
+/* ============================================================
+   Form Rows & Groups
+   ============================================================ */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select {
+    background: #18181b;
+    border: 2px solid #00CED1;
+    color: #ffffff;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 150ms;
+}
+
+.form-group input::placeholder {
+    color: #71717a;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #00FFFF;
+    box-shadow: 0 0 12px rgba(0, 206, 209, 0.3);
+}
+
+.form-group input::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.2);
+}
+
+/* ============================================================
+   Location Section
+   ============================================================ */
+.location-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.location-section label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.location-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.location-input {
+    background: #18181b;
+    border: 2px solid #00CED1;
+    color: #ffffff;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 150ms;
+}
+
+.location-input::placeholder {
+    color: #71717a;
+}
+
+.location-input:focus {
+    outline: none;
+    border-color: #00FFFF;
+    box-shadow: 0 0 12px rgba(0, 206, 209, 0.3);
+}
+
+.location-map {
+    height: 300px;
+    border-radius: 8px;
+    border: 2px solid rgba(0, 206, 209, 0.3);
+    overflow: hidden;
+}
+
+/* ============================================================
+   Other Genre Input
+   ============================================================ */
+.other-genre-input {
+    margin-top: 8px;
+}
+
+.other-genre-input input {
+    background: #18181b;
+    border: 2px solid #00CED1;
+    color: #ffffff;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    width: 100%;
+    transition: all 150ms;
+}
+
+.other-genre-input input::placeholder {
+    color: #71717a;
+}
+
+.other-genre-input input:focus {
+    outline: none;
+    border-color: #00FFFF;
+    box-shadow: 0 0 12px rgba(0, 206, 209, 0.3);
+}
+
+/* ============================================================
+   Mode Grid (4 Cards)
+   ============================================================ */
+.mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+@media (min-width: 1200px) {
+    .mode-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .mode-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================
+   Mode Card
+   ============================================================ */
+.mode-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px;
+    background: #18181b;
+    border: 2px solid #00CED1;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 200ms;
+    text-align: left;
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+}
+
+.mode-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0, 206, 209, 0.1) 0%, transparent 100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms;
+}
+
+.mode-card:hover {
+    border-color: #00FFFF;
+    background: rgba(0, 206, 209, 0.1);
+    box-shadow: 0 0 24px rgba(0, 206, 209, 0.2), inset 0 0 24px rgba(0, 206, 209, 0.05);
+    transform: translateY(-4px);
+}
+
+.mode-card:hover::before {
+    opacity: 1;
+}
+
+.mode-card:active {
+    transform: translateY(-2px);
+}
+
+.card-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00CED1;
+    opacity: 0.8;
+    margin-bottom: 4px;
+}
+
+.card-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    fill: none;
+}
+
+.card-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.card-description {
+    font-size: 14px;
+    color: #a1a1aa;
+    margin: 0;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.card-arrow {
+    font-size: 14px;
+    color: #00CED1;
+    opacity: 0.6;
+    align-self: flex-end;
+    transition: all 200ms;
+    margin-top: auto;
+}
+
+.mode-card:hover .card-arrow {
+    opacity: 1;
+    transform: translateX(4px);
+}
+
+/* ============================================================
+   Home Footer
+   ============================================================ */
+.home-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 32px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(0, 206, 209, 0.2);
+}
+
+.footer-btn {
+    background: transparent;
+    border: 2px solid #71717a;
+    color: #a1a1aa;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 150ms;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.footer-btn:hover {
+    border-color: #a1a1aa;
+    color: #ffffff;
+}
+
+.footer-btn.secondary {
+    min-width: 160px;
+}
+
+.footer-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #00CED1;
+    margin: 0;
+    opacity: 0.7;
+}
+
+/* ============================================================
+   Modal Overlay
+   ============================================================ */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #18181b;
+    border: 2px solid #00CED1;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(0, 206, 209, 0.2);
+}
+
+.modal-header h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    font-size: 24px;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 150ms;
+}
+
+.modal-close:hover {
+    color: #00CED1;
+}
+
+.modal-body {
+    padding: 24px;
+    color: #a1a1aa;
+}
+
+.modal-body p {
+    margin: 0 0 12px 0;
+    line-height: 1.6;
+}
+
+.modal-body ul {
+    margin: 12px 0 0 20px;
+    padding: 0;
+    list-style: none;
+}
+
+.modal-body li {
+    margin-bottom: 8px;
+}
+
+.modal-body li::before {
+    content: '• ';
+    color: #00CED1;
+    margin-right: 8px;
+}
+
+/* ============================================================
+   Question Group (in Ask Anything Modal)
+   ============================================================ */
+.question-group textarea {
+    background: #27272a;
+    border: 2px solid #00CED1;
+    color: #ffffff;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    resize: vertical;
+    transition: all 150ms;
+}
+
+.question-group textarea::placeholder {
+    color: #71717a;
+}
+
+.question-group textarea:focus {
+    outline: none;
+    border-color: #00FFFF;
+    box-shadow: 0 0 12px rgba(0, 206, 209, 0.3);
+}
+
+/* ============================================================
+   Form Buttons in Modal
+   ============================================================ */
+.modal-body button[type="submit"] {
+    background: #9333ea;
+    border: none;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 150ms;
+    font-family: 'DM Sans', sans-serif;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.modal-body button[type="submit"]:hover {
+    background: #7e22ce;
+    box-shadow: 0 0 16px rgba(147, 51, 234, 0.4);
+}
+
+/* ============================================================
+   Light Mode Support
+   ============================================================ */
+body.light-mode .home-page {
+    background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+    color: #1a1a1a;
+}
+
+body.light-mode .hero-title {
+    color: #9333ea;
+}
+
+body.light-mode .hero-icon {
+    color: #9333ea;
+}
+
+body.light-mode .form-section {
+    background: rgba(147, 51, 234, 0.05);
+    border-color: rgba(147, 51, 234, 0.2);
+}
+
+body.light-mode .form-group label {
+    color: #1a1a1a;
+}
+
+body.light-mode .form-group input,
+body.light-mode .form-group select,
+body.light-mode .location-input {
+    background: #ffffff;
+    border-color: #9333ea;
+    color: #1a1a1a;
+}
+
+body.light-mode .form-group input::placeholder,
+body.light-mode .location-input::placeholder {
+    color: #b0b0b0;
+}
+
+body.light-mode .form-group input:focus,
+body.light-mode .form-group select:focus,
+body.light-mode .location-input:focus {
+    border-color: #7e22ce;
+    box-shadow: 0 0 12px rgba(147, 51, 234, 0.3);
+}
+
+body.light-mode .mode-card {
+    background: #ffffff;
+    border-color: #9333ea;
+}
+
+body.light-mode .mode-card:hover {
+    border-color: #7e22ce;
+    background: rgba(147, 51, 234, 0.05);
+    box-shadow: 0 0 24px rgba(147, 51, 234, 0.2), inset 0 0 24px rgba(147, 51, 234, 0.03);
+}
+
+body.light-mode .card-icon {
+    color: #9333ea;
+}
+
+body.light-mode .card-title {
+    color: #1a1a1a;
+}
+
+body.light-mode .card-description {
+    color: #4b5563;
+}
+
+body.light-mode .card-arrow {
+    color: #9333ea;
+}
+
+body.light-mode .footer-text {
+    color: #9333ea;
+}
+
+body.light-mode .modal-content {
+    background: #ffffff;
+    border-color: #9333ea;
+}
+
+body.light-mode .modal-header {
+    border-bottom-color: rgba(147, 51, 234, 0.2);
+}
+
+body.light-mode .modal-header h3 {
+    color: #1a1a1a;
+}
+
+body.light-mode .modal-body {
+    color: #4b5563;
+}
+
+body.light-mode .question-group textarea {
+    background: #f3f4f6;
+    border-color: #9333ea;
+    color: #1a1a1a;
+}
+
+body.light-mode .question-group textarea::placeholder {
+    color: #b0b0b0;
+}
+
+body.light-mode .question-group textarea:focus {
+    border-color: #7e22ce;
+    box-shadow: 0 0 12px rgba(147, 51, 234, 0.3);
+}
