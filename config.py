@@ -2,6 +2,16 @@
 Configuration and constants for the astrology application
 """
 import logging
+
+# Load environment variables from a .env file (if present) before anything
+# else reads them (e.g. ai_service.py reading ANTHROPIC_TOKEN at import time).
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    # python-dotenv is optional; env vars can still be set in the shell.
+    pass
+
 from flatlib import const
 
 # Configure logging

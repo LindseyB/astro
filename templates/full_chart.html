@@ -61,217 +61,165 @@
 {% if streaming %}
 <script>document.body.dataset.streaming = 'true';</script>
 {% endif %}
-<!-- Sparkle Animation Container -->
-<div class="sparkle-container" id="sparkleContainer"></div>
+{% set planet_glyphs = {'Sun': '☉', 'Moon': '☽', 'Mercury': '☿', 'Venus': '♀', 'Mars': '♂', 'Jupiter': '♃', 'Saturn': '♄', 'Uranus': '♅', 'Neptune': '♆', 'Pluto': '♇', 'Chiron': '⚷', 'North Node': '☊', 'South Node': '☋'} %}
+{% set sign_glyphs = {'Aries': '♈', 'Taurus': '♉', 'Gemini': '♊', 'Cancer': '♋', 'Leo': '♌', 'Virgo': '♍', 'Libra': '♎', 'Scorpio': '♏', 'Sagittarius': '♐', 'Capricorn': '♑', 'Aquarius': '♒', 'Pisces': '♓'} %}
+{% set house_titles = {1: 'Self & Identity', 2: 'Money & Values', 3: 'Communication', 4: 'Home & Family', 5: 'Creativity & Romance', 6: 'Health & Work', 7: 'Partnerships', 8: 'Transformation', 9: 'Philosophy & Travel', 10: 'Career & Reputation', 11: 'Friends & Hopes', 12: 'Spirituality'} %}
 
-<h1>🌟 <i>Your Complete Natal Chart</i></h1>
-
-<!-- AI Astrology Analysis Section -->
-<div class="analysis-section" 
-     data-sun="{{ chart_data.sun }}" 
-     data-moon="{{ chart_data.moon }}" 
-     data-ascendant="{{ chart_data.ascendant }}">
-    <h2>🔮 <i>Your Complete Chart Analysis</i></h2>
-    <div class="analysis-content" id="analysisContent">
-        {% if streaming %}
-        <!-- Content will be loaded via streaming JavaScript -->
-        {% else %}
-        {{ chart_data.astrology_analysis | markdown | safe }}
-        {% endif %}
-        <!-- Music Suggestion (loaded async, appears inline at the end) -->
-        <div id="music-suggestion-placeholder" data-chart-type="natal"></div>
-    </div>
-    <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()" title="Copy your chart analysis">
-        📋
+<header class="site-header">
+  <a href="/" class="logo">
+    <span class="logo-mark">✦</span>
+    <span class="logo-text">astro-horoscope<span class="logo-dim">.lol</span></span>
+  </a>
+  <div class="header-actions">
+    <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
+      <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
-</div>
+  </div>
+</header>
 
-<!-- Chart Wheel Visualization -->
-{% if show_chart_wheel %}
-<div class="chart-wheel-container">
-    <h2>🌟 <i>Your Astrological Chart</i></h2>
-    <div class="chart-wheel-wrapper">
+<main class="container">
+  <a href="/" class="back-link">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Back to main
+  </a>
+
+  <header class="feature-head">
+    <p class="eyebrow">natal chart</p>
+    <h1>The whole sky, <span class="text-holo">the second you arrived.</span></h1>
+    <p class="subtitle">Sun, moon, rising, plus every planet and where it landed.</p>
+  </header>
+
+  <!-- AI Astrology Analysis -->
+  <section class="analysis-section chrome-border glass panel panel--analysis"
+       data-sun="{{ chart_data.sun }}"
+       data-moon="{{ chart_data.moon }}"
+       data-ascendant="{{ chart_data.ascendant }}">
+    <div class="section-cap">
+      <h3 class="section-title">Chart analysis</h3>
+      <button id="copyAnalysisBtn" class="copy-chip" onclick="copyAnalysis()" title="Copy your chart analysis" aria-label="Copy your chart analysis">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+    </div>
+    <div class="reading-content analysis-content" id="analysisContent">
+      {% if streaming %}
+      <div class="streaming-indicator"><p>✨ Reading your cosmic energy…</p></div>
+      {% else %}
+      {{ chart_data.astrology_analysis | markdown | safe }}
+      {% endif %}
+      <div id="music-suggestion-placeholder" data-chart-type="natal"></div>
+    </div>
+  </section>
+
+  <!-- Chart wheel + placements -->
+  <section class="chart-grid">
+    <div class="chrome-border glass panel panel--wheel">
+      <div class="wheel-wrap" aria-label="Zodiac wheel">
+        {% if show_chart_wheel %}
         <canvas id="chartWheel"></canvas>
+        {% else %}
+        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="holo" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#c4b5fd"/>
+              <stop offset="50%" stop-color="#67e8f9"/>
+              <stop offset="100%" stop-color="#818cf8"/>
+            </linearGradient>
+          </defs>
+          <circle cx="200" cy="200" r="190" fill="none" stroke="url(#holo)" stroke-width="1.5"/>
+          <circle cx="200" cy="200" r="150" fill="none" stroke="currentColor" stroke-opacity="0.25"/>
+          <circle cx="200" cy="200" r="80" fill="none" stroke="currentColor" stroke-opacity="0.25"/>
+          <g stroke="currentColor" stroke-opacity="0.2">
+            <line x1="200" y1="10" x2="200" y2="390"/>
+            <line x1="10" y1="200" x2="390" y2="200"/>
+            <line x1="60" y1="60" x2="340" y2="340"/>
+            <line x1="340" y1="60" x2="60" y2="340"/>
+            <line x1="105" y1="22" x2="295" y2="378"/>
+            <line x1="295" y1="22" x2="105" y2="378"/>
+            <line x1="22" y1="105" x2="378" y2="295"/>
+            <line x1="22" y1="295" x2="378" y2="105"/>
+          </g>
+          <g fill="currentColor" font-family="Space Grotesk, system-ui, sans-serif" font-size="16" text-anchor="middle">
+            <text x="200" y="30">♈</text><text x="290" y="55">♉</text><text x="350" y="120">♊</text>
+            <text x="375" y="205">♋</text><text x="350" y="290">♌</text><text x="290" y="355">♍</text>
+            <text x="200" y="380">♎</text><text x="110" y="355">♏</text><text x="50" y="290">♐</text>
+            <text x="25" y="205">♑</text><text x="50" y="120">♒</text><text x="110" y="55">♓</text>
+          </g>
+        </svg>
+        {% endif %}
+      </div>
     </div>
-    <div class="chart-legend">
-        <div class="legend-section">
-            <strong>Planets:</strong>
-            <div class="legend-item">
-                <span class="legend-symbol" style="color: #FDB813;">☉</span> Sun
-                <span class="legend-symbol" style="color: #8B7355;">☽</span> Moon
-                <span class="legend-symbol" style="color: #4A90E2;">☿</span> Mercury
-                <span class="legend-symbol" style="color: #E74C3C;">♀</span> Venus
-                <span class="legend-symbol" style="color: #C0392B;">♂</span> Mars
-                <span class="legend-symbol" style="color: #F39C12;">♃</span> Jupiter
-            </div>
-            <div class="legend-item">
-                <span class="legend-symbol" style="color: #7F8C8D;">♄</span> Saturn
-                <span class="legend-symbol" style="color: #16A085;">♅</span> Uranus
-                <span class="legend-symbol" style="color: #2980B9;">♆</span> Neptune
-                <span class="legend-symbol" style="color: #34495E;">♇</span> Pluto
-                <span class="legend-symbol" style="color: #9B59B6;">⚷</span> Chiron
-            </div>
-        </div>
-        <div class="legend-section">
-            <strong>Aspects:</strong>
-            <div class="legend-item">
-                <span class="aspect-line" style="background: #FF6B6B;"></span> Conjunction (0°)
-                <span class="aspect-line" style="background: #3498DB;"></span> Trine (120°)
-                <span class="aspect-line" style="background: #E67E22;"></span> Square (90°)
-                <span class="aspect-line" style="background: #E74C3C;"></span> Opposition (180°)
-                <span class="aspect-line" style="background: #9B59B6;"></span> Sextile (60°)
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
 
-<!-- Main Signs -->
-<div class="chart-section">
-    <h2><i>Your Main Signs</i></h2>
-    <div class="main-signs">
-        <div class="sign-card">
-            <h3>☀️ Sun Sign</h3>
-            <p><strong>{{ chart_data.sun }}</strong></p>
-            <small>Your core identity</small>
+    <div class="chrome-border glass panel">
+      <div class="big-row">
+        <div class="big-cell chrome-border">
+          <div class="label">Sun</div>
+          <div class="value text-holo">{{ chart_data.sun }}</div>
         </div>
-        <div class="sign-card">
-            <h3>🌙 Moon Sign</h3>
-            <p><strong>{{ chart_data.moon }}</strong></p>
-            <small>Your emotional nature</small>
+        <div class="big-cell chrome-border">
+          <div class="label">Moon</div>
+          <div class="value text-holo">{{ chart_data.moon }}</div>
         </div>
-        <div class="sign-card">
-            <h3>⬆️ Ascendant</h3>
-            <p><strong>{{ chart_data.ascendant }}</strong></p>
-            <small>Your outer personality</small>
+        <div class="big-cell chrome-border">
+          <div class="label">Rising</div>
+          <div class="value text-holo">{{ chart_data.ascendant }}</div>
         </div>
-    </div>
-</div>
+      </div>
 
-<!-- All Planets -->
-<div class="chart-section toggleable-section">
-    <button class="section-header" data-section="planets-content" aria-expanded="false" aria-label="Toggle planets section">
-        <span class="toggle-btn collapsed">▶</span>
-        <span class="section-title">🪐 <i>All Planets</i></span>
-    </button>
-    <div id="planets-content" class="section-content collapsed">
-    <div class="planets-grid">
-        {% for planet_name, planet_data in chart_data.planets.items() %}
-        <div class="planet-card">
-            <h4>
-                {% if planet_name == 'Sun' %}☀️
-                {% elif planet_name == 'Moon' %}🌙
-                {% elif planet_name == 'Mercury' %}☿️
-                {% elif planet_name == 'Venus' %}♀️
-                {% elif planet_name == 'Mars' %}♂️
-                {% elif planet_name == 'Jupiter' %}♃
-                {% elif planet_name == 'Saturn' %}♄
-                {% elif planet_name == 'Uranus' %}♅
-                {% elif planet_name == 'Neptune' %}♆
-                {% elif planet_name == 'Pluto' %}♇
-                {% elif planet_name == 'Chiron' %}⚷
-                {% endif %}
-                {{ planet_name }}
-            </h4>
-            <p><strong>{{ planet_data.sign }}</strong></p>
-            <small>{{ planet_data.degree|round(2) }}°</small>
-            {% if planet_data.house %}
-            <small class="house-info">House {{ planet_data.house }}</small>
-            {% endif %}
-            <div class="planet-description">
-                {% if planet_name == 'Sun' %}Your core identity, ego, and life purpose. Represents your conscious will and vitality.
-                {% elif planet_name == 'Moon' %}Your emotions, instincts, and subconscious patterns. How you nurture and need to be nurtured.
-                {% elif planet_name == 'Mercury' %}Communication, thinking, and learning style. How you process and share information.
-                {% elif planet_name == 'Venus' %}Love, beauty, relationships, and values. What you find attractive and how you show affection.
-                {% elif planet_name == 'Mars' %}Energy, passion, drive, and how you take action. Your assertiveness and sexual energy.
-                {% elif planet_name == 'Jupiter' %}Growth, expansion, luck, and wisdom. Your beliefs, optimism, and opportunities for abundance.
-                {% elif planet_name == 'Saturn' %}Discipline, responsibility, and life lessons. Challenges that lead to mastery and maturity.
-                {% elif planet_name == 'Uranus' %}Innovation, rebellion, and sudden changes. Your uniqueness and desire for freedom.
-                {% elif planet_name == 'Neptune' %}Dreams, intuition, and spirituality. Your imagination, compassion, and connection to the divine.
-                {% elif planet_name == 'Pluto' %}Transformation, power, and regeneration. Deep psychological changes and hidden resources.
-                {% elif planet_name == 'Chiron' %}The wounded healer. Past wounds that become sources of wisdom and healing for others.
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
+      <h3 class="section-title">Placements</h3>
+      <div class="placements">
+        <table>
+          <thead>
+            <tr><th>Body</th><th>Sign</th><th>House</th><th>°</th></tr>
+          </thead>
+          <tbody>
+            {% for planet_name, planet_data in chart_data.planets.items() %}
+            <tr>
+              <td><span class="glyph">{{ planet_glyphs.get(planet_name, '✦') }}</span>{{ planet_name }}</td>
+              <td><span class="glyph">{{ sign_glyphs.get(planet_data.sign, '') }}</span>{{ planet_data.sign }}</td>
+              <td class="muted">{{ planet_data.house if planet_data.house else '—' }}</td>
+              <td class="muted">{{ planet_data.degree|round(0)|int }}°</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-    </div>
-</div>
+  </section>
 
-<!-- Houses -->
-<div class="chart-section toggleable-section">
-    <button class="section-header" data-section="houses-content" aria-expanded="false" aria-label="Toggle houses section">
-        <span class="toggle-btn collapsed">▶</span>
-        <span class="section-title">🏠 <i>Houses</i></span>
-    </button>
-    <div id="houses-content" class="section-content collapsed">
-    <div class="houses-grid">
-        {% for house_number in range(1, 13) %}
-        {% set house_data = chart_data.houses[house_number] %}
-        <div class="house-card">
-            <h4>
-                {% if house_number == 1 %}🪞
-                {% elif house_number == 2 %}💰
-                {% elif house_number == 3 %}💬
-                {% elif house_number == 4 %}🏡
-                {% elif house_number == 5 %}🎨
-                {% elif house_number == 6 %}🧑‍💼
-                {% elif house_number == 7 %}🤝
-                {% elif house_number == 8 %}🔄
-                {% elif house_number == 9 %}🌍
-                {% elif house_number == 10 %}🏆
-                {% elif house_number == 11 %}👥
-                {% elif house_number == 12 %}🔮
-                {% endif %}
-                {{ house_number }}{{ 'st' if house_number == 1 else 'nd' if house_number == 2 else 'rd' if house_number == 3 else 'th' }} House
-            </h4>
-            <div class="house-title">
-                {% if house_number == 1 %}<strong>Self & Identity</strong>
-                {% elif house_number == 2 %}<strong>Money & Values</strong>
-                {% elif house_number == 3 %}<strong>Communication</strong>
-                {% elif house_number == 4 %}<strong>Home & Family</strong>
-                {% elif house_number == 5 %}<strong>Creativity & Romance</strong>
-                {% elif house_number == 6 %}<strong>Health & Work</strong>
-                {% elif house_number == 7 %}<strong>Partnerships</strong>
-                {% elif house_number == 8 %}<strong>Transformation</strong>
-                {% elif house_number == 9 %}<strong>Philosophy & Travel</strong>
-                {% elif house_number == 10 %}<strong>Career & Reputation</strong>
-                {% elif house_number == 11 %}<strong>Friends & Hopes</strong>
-                {% elif house_number == 12 %}<strong>Spirituality & Subconscious</strong>
-                {% endif %}
-            </div>
-
-            <p><strong>{{ house_data.sign }}</strong></p>
-            <small>{{ house_data.degree|round(2) }}°</small>
-            {% if house_data.planets %}
-            <div class="house-planets">
-                {% for planet in house_data.planets %}
-                <span class="planet-badge">{{ planet.name }}</span>
-                {% endfor %}
-            </div>
-            {% endif %}
-            <div class="house-description">
-                {% if house_number == 1 %}Your outer personality, first impressions, and how you present yourself to the world
-                {% elif house_number == 2 %}Your relationship with money, possessions, self-worth, and personal values
-                {% elif house_number == 3 %}Communication style, siblings, short trips, and day-to-day interactions
-                {% elif house_number == 4 %}Family roots, home environment, emotional foundation, and inner security
-                {% elif house_number == 5 %}Creative expression, romance, children, fun, and personal joy
-                {% elif house_number == 6 %}Daily routines, health habits, work environment, and service to others
-                {% elif house_number == 7 %}Romantic partnerships, business relationships, and one-on-one connections
-                {% elif house_number == 8 %}Shared resources, transformation, psychology, and life's mysteries
-                {% elif house_number == 9 %}Higher education, philosophy, long-distance travel, and spiritual beliefs
-                {% elif house_number == 10 %}Career path, public image, reputation, and life direction
-                {% elif house_number == 11 %}Friendships, group activities, hopes, dreams, and social causes
-                {% elif house_number == 12 %}Subconscious mind, spirituality, hidden strengths, and inner healing
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
+  <!-- Houses -->
+  <section class="chrome-border glass panel panel--houses">
+    <h3 class="section-title">Houses</h3>
+    <div class="placements">
+      <table>
+        <thead>
+          <tr><th>House</th><th>Sign</th><th>°</th><th>Inhabitants</th></tr>
+        </thead>
+        <tbody>
+          {% for house_number in range(1, 13) %}
+          {% set house_data = chart_data.houses[house_number] %}
+          <tr>
+            <td>
+              <span class="house-num">{{ house_number }}</span>
+              <span class="house-name">{{ house_titles.get(house_number, '') }}</span>
+            </td>
+            <td><span class="glyph">{{ sign_glyphs.get(house_data.sign, '') }}</span>{{ house_data.sign }}</td>
+            <td class="muted">{{ house_data.degree|round(0)|int }}°</td>
+            <td>
+              {% if house_data.planets %}
+              {% for planet in house_data.planets %}<span class="planet-chip">{{ planet_glyphs.get(planet.name, '✦') }} {{ planet.name }}</span>{% endfor %}
+              {% else %}
+              <span class="muted">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    </div>
-</div>
+  </section>
 
-<div class="navigation-links">
-    <a href="/" class="back-link">← Get another horoscope</a>
-</div>
+  <footer class="page-foot">✦ &nbsp; built under a waxing crescent &nbsp; ✦</footer>
+</main>
 {% endblock %}
+

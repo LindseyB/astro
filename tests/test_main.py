@@ -43,7 +43,7 @@ class TestAstroApp(unittest.TestCase):
             'longitude': '74w00'
         })
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Ask Anything', response.data)
+        self.assertIn(b'Ask the', response.data)
         self.assertIn(b'document.body.dataset.streaming', response.data)
 
     def test_ask_anything_route_missing_question(self):
@@ -370,16 +370,17 @@ class TestIntegration(unittest.TestCase):
         self.assertIn(b'Complete Natal Chart', response.data)
         self.assertIn(b'Gemini', response.data)
 
-        # Check for planet descriptions
-        self.assertIn(b'Your core identity', response.data)
-        self.assertIn(b'Your emotions', response.data)
+        # Check for placements table
+        self.assertIn(b'Placements', response.data)
+        self.assertIn(b'>Sun<', response.data)
+        self.assertIn(b'>Moon<', response.data)
 
-        # Check for house descriptions
-        self.assertIn(b'1st House', response.data)
-        self.assertIn(b'Self & Identity', response.data)
+        # Check for houses table
+        self.assertIn(b'Houses', response.data)
+        self.assertIn(b'Self &amp; Identity', response.data)
 
         # Check for astrology analysis section
-        self.assertIn(b'Complete Chart Analysis', response.data)
+        self.assertIn(b'Chart analysis', response.data)
 
 
 class TestFormPersistenceIntegration(unittest.TestCase):

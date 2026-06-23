@@ -33,13 +33,50 @@
 {% if streaming %}
 <script>document.body.dataset.streaming = 'true';</script>
 {% endif %}
+<script>
+    // Seed localStorage with THIS reading's birth info so the home page
+    // (and "ask the stars") reflects the current chart rather than any
+    // stale, previously saved values.
+    (function () {
+        var mg = {{ form_data.music_genre | tojson }};
+        var otherGenre = {{ form_data.other_genre | tojson }};
+        var isOther = !!(otherGenre && otherGenre.trim());
+        var data = {
+            birth_date: {{ form_data.birth_date | tojson }},
+            birth_time: {{ form_data.birth_time | tojson }},
+            timezone_offset: {{ form_data.timezone_offset | tojson }},
+            latitude: {{ form_data.latitude | tojson }},
+            longitude: {{ form_data.longitude | tojson }},
+            music_genre: isOther ? 'other' : (mg || 'any'),
+            other_genre: isOther ? otherGenre : ''
+        };
+        try {
+            localStorage.setItem('astro_form_data', JSON.stringify({ data: data, timestamp: Date.now() }));
+            if (data.timezone_offset) {
+                localStorage.setItem('timezone_offset', data.timezone_offset);
+            }
+        } catch (e) { /* ignore storage errors */ }
+    })();
+</script>
+<script>
+    // Pass chart data to JavaScript for the streamed song suggestion
+    window.chartDataForMusic = {
+        birthDate: "{{ form_data.birth_date }}",
+        birthTime: "{{ form_data.birth_time }}",
+        timezoneOffset: "{{ form_data.timezone_offset }}",
+        latitude: "{{ form_data.latitude }}",
+        longitude: "{{ form_data.longitude }}",
+        musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
+    };
+</script>
 <div class="reading-page">
-    <!-- Header with back button and edit chart -->
+    <!-- Header with back button and theme toggle -->
     <header class="reading-header">
-        <a href="/" class="back-link">← back to bento</a>
+        <a href="/" class="back-link">← back to main</a>
         <div class="header-actions">
-            <button id="editChartBtn" class="edit-btn" title="Edit chart">
-                <span>✏️</span> edit chart
+            <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
+                <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             </button>
         </div>
     </header>
@@ -59,10 +96,14 @@
             <span class="chart-marker">{{ chart_data.sun }} ☉</span>
             <span class="chart-marker">{{ chart_data.moon }} ☽</span>
             <span class="chart-marker">{{ chart_data.ascendant }} ⬆</span>
-            <button class="override-btn" id="editChartBtn2" title="Edit chart">
-                <span>✏️</span> override
-            </button>
         </div>
+
+        <!-- Mercury Retrograde Status -->
+        {% if chart_data.mercury_retrograde %}
+        <div class="mercury-warning">
+            ⚠️ <strong>Mercury is in retrograde!</strong> Expect crossed wires and second-guessing today — double-check your messages and big decisions.
+        </div>
+        {% endif %}
 
         <!-- Reading Content -->
         <div class="reading-content" id="analysisContent">
@@ -126,74 +167,8 @@
     </main>
 </div>
 
-<!-- Edit Chart Slide-Over -->
-<div class="slide-overlay" id="editChartOverlay"></div>
-<div class="slide-panel" id="editChartPanel">
-    <div class="slide-header">
-        <h2>edit chart</h2>
-        <button class="slide-close" id="editChartClose">×</button>
-    </div>
-    <div class="slide-content">
-        <form id="editChartForm" method="POST" action="/chart">
-            <div class="form-field">
-                <label>Birth Date</label>
-                <input type="date" name="birth_date" value="{{ form_data.birth_date }}" required>
-            </div>
-            <div class="form-field">
-                <label>Birth Time</label>
-                <input type="time" name="birth_time" value="{{ form_data.birth_time }}" required>
-            </div>
-            <div class="form-field">
-                <label>Timezone</label>
-                <select name="timezone_offset" required>
-                    <option value="{{ form_data.timezone_offset }}" selected>{{ form_data.timezone_offset }}</option>
-                </select>
-            </div>
-            <div class="form-field">
-                <label>Latitude</label>
-                <input type="text" name="latitude" value="{{ form_data.latitude }}" required>
-            </div>
-            <div class="form-field">
-                <label>Longitude</label>
-                <input type="text" name="longitude" value="{{ form_data.longitude }}" required>
-            </div>
-        </form>
-    </div>
-    <div class="slide-footer">
-        <button class="btn-cancel" id="editChartCancel">cancel</button>
-        <button class="btn-save" id="editChartSave">save</button>
-    </div>
-</div>
-
 <script>
-// Slide-over management
-const editBtns = document.querySelectorAll('#editChartBtn, #editChartBtn2');
-const overlay = document.getElementById('editChartOverlay');
-const panel = document.getElementById('editChartPanel');
-const closeBtn = document.getElementById('editChartClose');
-const cancelBtn = document.getElementById('editChartCancel');
-const saveBtn = document.getElementById('editChartSave');
-
-editBtns.forEach(btn => btn.addEventListener('click', () => {
-    panel.classList.add('active');
-    overlay.classList.add('active');
-}));
-
-function closePanel() {
-    panel.classList.remove('active');
-    overlay.classList.remove('active');
-}
-
-closeBtn.addEventListener('click', closePanel);
-cancelBtn.addEventListener('click', closePanel);
-overlay.addEventListener('click', closePanel);
-saveBtn.addEventListener('click', () => document.getElementById('editChartForm').submit());
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closePanel();
-});
-
-// Question and navigation helpers
+// ── Listening-section helpers ─────────────────────────────────
 function askPrompt(prompt) {
     document.getElementById('askInput').value = prompt;
     sendQuestion();
@@ -202,8 +177,26 @@ function askPrompt(prompt) {
 function sendQuestion() {
     const question = document.getElementById('askInput').value;
     if (question.trim()) {
-        // Post to ask-anything endpoint
-        window.location.href = `/ask-anything?q=${encodeURIComponent(question)}&birth_date={{ form_data.birth_date }}&birth_time={{ form_data.birth_time }}&timezone_offset={{ form_data.timezone_offset }}&latitude={{ form_data.latitude }}&longitude={{ form_data.longitude }}`;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/ask-anything';
+        const fields = {
+            question_prompt: question,
+            birth_date: {{ form_data.birth_date | tojson }},
+            birth_time: {{ form_data.birth_time | tojson }},
+            timezone_offset: {{ form_data.timezone_offset | tojson }},
+            latitude: {{ form_data.latitude | tojson }},
+            longitude: {{ form_data.longitude | tojson }}
+        };
+        for (const name in fields) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = fields[name];
+            form.appendChild(input);
+        }
+        document.body.appendChild(form);
+        form.submit();
     }
 }
 

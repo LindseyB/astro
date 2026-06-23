@@ -205,6 +205,7 @@
         <input type="text" id="locationSearch" placeholder="Search city or address…">
         <button type="button" class="location-search-btn" onclick="searchLocation()">Search</button>
       </div>
+      <div id="locationSearchError" class="location-search-error" role="alert" aria-live="polite" hidden></div>
       <div id="locationMap" style="margin-top:0.5rem;"></div>
       <div class="location-coords" style="margin-top:0.5rem;">
         <input type="text" id="latitude" name="latitude" placeholder="Latitude" readonly>
@@ -249,6 +250,18 @@
   </div>
 </aside>
 
+<!-- ===== Ask the stars modal ===== -->
+<div class="ask-modal-overlay" id="askModalOverlay" aria-hidden="true">
+  <div class="ask-modal chrome-border" role="dialog" aria-modal="true" aria-labelledby="askModalTitle">
+    <button class="ask-modal-close" id="askModalClose" aria-label="Close">×</button>
+    <p class="eyebrow">chat</p>
+    <h2 id="askModalTitle">Ask the stars</h2>
+    <p class="ask-modal-sub">Anything. The current sky will answer.</p>
+    <textarea id="askModalInput" class="ask-modal-input" rows="3" placeholder="What do you want to know?"></textarea>
+    <button class="btn-primary ask-modal-submit" id="askModalSubmit">Ask the stars →</button>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block page_scripts %}
@@ -257,19 +270,12 @@
 <script src="{{ url_for('static', filename='js/music-genre.js') }}"></script>
 <script src="{{ url_for('static', filename='js/form-persistence.js') }}"></script>
 <script src="{{ url_for('static', filename='js/timezone-select.js') }}"></script>
-<script src="{{ url_for('static', filename='js/dark-mode.js') }}"></script>
 <!-- LaunchDarkly JS SDK -->
 <script src="https://unpkg.com/launchdarkly-js-client-sdk@3"></script>
 <script src="{{ url_for('static', filename='js/ld-experiment.js') }}"></script>
 
 <script>
 (function () {
-  // ── Theme toggle ─────────────────────────────────────────
-  var root = document.documentElement;
-  document.getElementById('themeToggle').addEventListener('click', function () {
-    root.classList.toggle('dark');
-    localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
-  });
 
   // ── Panel open / close ────────────────────────────────────
   var overlay  = document.getElementById('panelOverlay');
@@ -303,18 +309,53 @@
   closeBtn.addEventListener('click', closePanel);
   overlay.addEventListener('click', closePanel);
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closePanel();
+    if (e.key === 'Escape') { closePanel(); closeAskModal(); }
+  });
+
+  // ── Ask the stars modal ──────────────────────────────────
+  var askOverlay = document.getElementById('askModalOverlay');
+  var askInput   = document.getElementById('askModalInput');
+  var askSubmit  = document.getElementById('askModalSubmit');
+  var askClose   = document.getElementById('askModalClose');
+
+  function openAskModal() {
+    askInput.value = document.getElementById('question_prompt').value || '';
+    askOverlay.classList.add('open');
+    askOverlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function () { askInput.focus(); }, 50);
+  }
+  function closeAskModal() {
+    askOverlay.classList.remove('open');
+    askOverlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  askClose.addEventListener('click', closeAskModal);
+  askOverlay.addEventListener('click', function (e) {
+    if (e.target === askOverlay) closeAskModal();
+  });
+  askSubmit.addEventListener('click', function () {
+    var q = askInput.value.trim();
+    if (!q) { askInput.focus(); return; }
+    document.getElementById('question_prompt').value = q;
+    closeAskModal();
+    if (hasBirthData()) {
+      submitToAction('/ask-anything');
+    } else {
+      // still need birth info — hand off to the side panel, question is kept
+      openPanel('/ask-anything');
+    }
   });
 
   // ── Tile clicks ───────────────────────────────────────────
   document.querySelectorAll('.tile[data-action]').forEach(function (tile) {
     tile.addEventListener('click', function () {
       var action = tile.dataset.action;
-      if (!hasBirthData()) {
-        openPanel(action);
+      if (action === '/ask-anything') {
+        openAskModal();
         return;
       }
-      if (action === '/ask-anything' && !document.getElementById('question_prompt').value.trim()) {
+      if (!hasBirthData()) {
         openPanel(action);
         return;
       }
@@ -339,35 +380,69 @@
 
   // ── Clear data ────────────────────────────────────────────
   document.getElementById('clearDataBtn').addEventListener('click', function () {
-    localStorage.removeItem('astro-form-data');
+    localStorage.removeItem('astro_form_data');
     ['birth_date','birth_time','timezone_offset','latitude','longitude','music_genre','other_genre','question_prompt']
       .forEach(function(id){ var el = document.getElementById(id); if(el) el.value = ''; });
   });
 
   // ── Helpers ───────────────────────────────────────────────
+  // Read saved chart info persisted by form-persistence.js (key: astro_form_data)
+  function getSavedFormData() {
+    try {
+      var stored = localStorage.getItem('astro_form_data');
+      if (!stored) return {};
+      var parsed = JSON.parse(stored);
+      return parsed.data || parsed || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  // Field value preferring the live DOM, falling back to saved chart info
+  // (the timezone Select2 widget doesn't always reflect its value on the native input)
+  function fieldVal(id) {
+    var el = document.getElementById(id);
+    var domVal = el ? (el.value || '').trim() : '';
+    if (domVal) return domVal;
+    var saved = getSavedFormData();
+    return (saved[id] || '').toString().trim();
+  }
+
   function hasBirthData() {
     return !!(
-      document.getElementById('birth_date').value &&
-      document.getElementById('birth_time').value &&
-      document.getElementById('timezone_offset').value &&
-      document.getElementById('latitude').value &&
-      document.getElementById('longitude').value
+      fieldVal('birth_date') &&
+      fieldVal('birth_time') &&
+      fieldVal('timezone_offset') &&
+      fieldVal('latitude') &&
+      fieldVal('longitude')
     );
   }
 
   function submitToAction(action) {
     var form = document.getElementById('masterForm');
     form.action = action;
-    document.getElementById('f_birth_date').value     = document.getElementById('birth_date').value;
-    document.getElementById('f_birth_time').value     = document.getElementById('birth_time').value;
-    document.getElementById('f_timezone_offset').value= document.getElementById('timezone_offset').value;
-    document.getElementById('f_latitude').value       = document.getElementById('latitude').value;
-    document.getElementById('f_longitude').value      = document.getElementById('longitude').value;
-    document.getElementById('f_music_genre').value    = document.getElementById('music_genre').value;
-    document.getElementById('f_other_genre').value    = document.getElementById('other_genre').value || '';
+    document.getElementById('f_birth_date').value     = fieldVal('birth_date');
+    document.getElementById('f_birth_time').value     = fieldVal('birth_time');
+    document.getElementById('f_timezone_offset').value= fieldVal('timezone_offset');
+    document.getElementById('f_latitude').value       = fieldVal('latitude');
+    document.getElementById('f_longitude').value      = fieldVal('longitude');
+    document.getElementById('f_music_genre').value    = fieldVal('music_genre');
+    document.getElementById('f_other_genre').value    = fieldVal('other_genre');
     document.getElementById('f_question_prompt').value= document.getElementById('question_prompt').value || '';
     form.submit();
   }
+
+  // ── Restore native date/time picker on click ──────────────
+  // The calendar/clock indicator is hidden (to keep it out of the tab
+  // order), so re-open the picker when the user clicks the field.
+  ['birth_date', 'birth_time'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el && typeof el.showPicker === 'function') {
+      el.addEventListener('click', function () {
+        try { el.showPicker(); } catch (e) { /* needs a user gesture */ }
+      });
+    }
+  });
 })();
 </script>
 {% endblock %}

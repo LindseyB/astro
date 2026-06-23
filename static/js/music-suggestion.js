@@ -3,6 +3,8 @@ function loadMusicSuggestion(chartData, chartType) {
     const container = document.getElementById('music-suggestion-placeholder');
     if (!container) return;
 
+    let reader;
+
     container.innerHTML = '<p><em>Loading song suggestion...</em></p>';
 
     fetch('/music-suggestion', {
@@ -21,7 +23,7 @@ function loadMusicSuggestion(chartData, chartType) {
     .then(response => {
         if (!response.ok) throw new Error('Failed to load music suggestion');
         
-        const reader = response.body.getReader();
+        reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
         let suggestionText = '';

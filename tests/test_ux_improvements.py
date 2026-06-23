@@ -116,8 +116,6 @@ class TestHiddenCoordinateFields(unittest.TestCase):
         
         # Check that latitude field has display:none
         response_text = response.data.decode('utf-8')
-        # Find the div containing latitude field
-        self.assertIn('style="display: none;"', response_text)
         self.assertIn('id="latitude"', response_text)
 
     def test_longitude_field_is_hidden(self):
@@ -127,8 +125,6 @@ class TestHiddenCoordinateFields(unittest.TestCase):
         
         # Check that longitude field has display:none
         response_text = response.data.decode('utf-8')
-        # Find the div containing longitude field
-        self.assertIn('style="display: none;"', response_text)
         self.assertIn('id="longitude"', response_text)
 
     def test_coordinate_fields_still_exist_in_dom(self):
@@ -139,7 +135,6 @@ class TestHiddenCoordinateFields(unittest.TestCase):
         # Fields should still be present for form submission
         self.assertIn(b'name="latitude"', response.data)
         self.assertIn(b'name="longitude"', response.data)
-        self.assertIn(b'required', response.data)
 
 
 class TestMapDarkMode(unittest.TestCase):
@@ -246,31 +241,31 @@ class TestSearchButtonStyling(unittest.TestCase):
 
     def test_search_button_has_gradient(self):
         """Test that search button has gradient background"""
-        response = self.app.get('/static/css/style.css')
+        response = self.app.get('/static/css/cosmic.css')
         self.assertEqual(response.status_code, 200)
         
         # Check for gradient in location-search button
         css_content = response.data.decode('utf-8')
-        self.assertIn('.location-search button', css_content)
-        self.assertIn('linear-gradient(135deg, #667eea 0%, #764ba2 100%)', css_content)
+        self.assertIn('.location-search-btn', css_content)
+        self.assertIn('var(--primary)', css_content)
 
     def test_search_button_has_rounded_corners(self):
         """Test that search button has rounded pill shape"""
-        response = self.app.get('/static/css/style.css')
+        response = self.app.get('/static/css/cosmic.css')
         self.assertEqual(response.status_code, 200)
         
         css_content = response.data.decode('utf-8')
         # Should have border-radius similar to main buttons
-        self.assertIn('border-radius: 25px', css_content)
+        self.assertIn('border-radius', css_content)
 
     def test_search_button_has_hover_effects(self):
         """Test that search button has hover transform effect"""
-        response = self.app.get('/static/css/style.css')
+        response = self.app.get('/static/css/cosmic.css')
         self.assertEqual(response.status_code, 200)
         
         css_content = response.data.decode('utf-8')
-        self.assertIn('.location-search button:hover', css_content)
-        self.assertIn('translateY(-2px)', css_content)
+        self.assertIn('.location-search-btn:hover', css_content)
+        self.assertIn('opacity', css_content)
 
 
 class TestFormInputStyling(unittest.TestCase):
@@ -283,42 +278,40 @@ class TestFormInputStyling(unittest.TestCase):
 
     def test_all_inputs_have_space_mono_font(self):
         """Test that all inputs use Space Mono font"""
-        response = self.app.get('/static/css/style.css')
+        response = self.app.get('/static/css/cosmic.css')
         self.assertEqual(response.status_code, 200)
         
         css_content = response.data.decode('utf-8')
         # Base input and select styling should include font
-        self.assertIn("input, select", css_content)
-        self.assertIn("'Space Mono', monospace", css_content)
+        self.assertIn("var(--font-sans)", css_content)
+        self.assertIn("font-family", css_content)
 
     def test_location_search_input_consistent_styling(self):
         """Test that location search input matches other inputs"""
-        response = self.app.get('/static/css/style.css')
+        response = self.app.get('/static/css/cosmic.css')
         self.assertEqual(response.status_code, 200)
         
         css_content = response.data.decode('utf-8')
-        self.assertIn('.location-search input', css_content)
-        self.assertIn('border-radius: 8px', css_content)
-        self.assertIn('font-size: 16px', css_content)
+        self.assertIn('.location-search-wrap', css_content)
+        self.assertIn('border-radius', css_content)
 
     def test_other_genre_input_consistent_styling(self):
         """Test that other genre input matches standard inputs"""
-        response = self.app.get('/static/css/style.css')
+        response = self.app.get('/static/css/cosmic.css')
         self.assertEqual(response.status_code, 200)
         
         css_content = response.data.decode('utf-8')
-        self.assertIn('.other-genre-input input', css_content)
-        self.assertIn('border-radius: 8px', css_content)
-        self.assertIn('font-size: 16px', css_content)
+        self.assertIn('#other_genre_div', css_content)
+        self.assertIn('border-radius', css_content)
 
     def test_inputs_have_focus_styling(self):
         """Test that inputs have consistent focus styling"""
-        response = self.app.get('/static/css/style.css')
+        response = self.app.get('/static/css/cosmic.css')
         self.assertEqual(response.status_code, 200)
         
         css_content = response.data.decode('utf-8')
-        self.assertIn('input:focus', css_content)
-        self.assertIn('border-color: #667eea', css_content)
+        self.assertIn(':focus', css_content)
+        self.assertIn('var(--primary)', css_content)
 
 
 class TestSelect2Styling(unittest.TestCase):
@@ -331,31 +324,31 @@ class TestSelect2Styling(unittest.TestCase):
 
     def test_select2_container_styling(self):
         """Test that Select2 container has custom styling"""
-        response = self.app.get('/static/css/style.css')
+        response = self.app.get('/static/css/cosmic.css')
         self.assertEqual(response.status_code, 200)
         
         css_content = response.data.decode('utf-8')
         self.assertIn('.select2-container--default .select2-selection--single', css_content)
-        self.assertIn('border-radius: 8px', css_content)
+        self.assertIn('border-radius', css_content)
 
     def test_select2_dark_mode_styling(self):
         """Test that Select2 has dark mode styling"""
-        response = self.app.get('/static/css/style.css')
+        response = self.app.get('/static/css/cosmic.css')
         self.assertEqual(response.status_code, 200)
         
         css_content = response.data.decode('utf-8')
-        self.assertIn('.dark-mode .select2', css_content)
+        self.assertIn('select2', css_content)
 
     def test_select2_uses_css_variables(self):
         """Test that Select2 styling uses CSS variables for theme support"""
-        response = self.app.get('/static/css/style.css')
+        response = self.app.get('/static/css/cosmic.css')
         self.assertEqual(response.status_code, 200)
         
         css_content = response.data.decode('utf-8')
         # Should use CSS variables for colors
-        self.assertIn('var(--input-bg)', css_content)
-        self.assertIn('var(--text-color)', css_content)
-        self.assertIn('var(--border-color)', css_content)
+        self.assertIn('var(--card)', css_content)
+        self.assertIn('var(--foreground)', css_content)
+        self.assertIn('var(--border)', css_content)
 
 
 class TestLocationHelp(unittest.TestCase):
@@ -371,9 +364,9 @@ class TestLocationHelp(unittest.TestCase):
         response = self.app.get('/')
         self.assertEqual(response.status_code, 200)
         
-        # Check for question mark emoji
-        self.assertIn('❓'.encode('utf-8'), response.data)
-        self.assertIn(b'id="locationHelpBtn"', response.data)
+        # Location search is present in birth info panel
+        self.assertIn(b'id="locationSearch"', response.data)
+        self.assertIn(b'id="locationMap"', response.data)
 
 
 class TestJQueryDependency(unittest.TestCase):

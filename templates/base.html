@@ -39,6 +39,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cosmic.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/button-effect.css') }}">
     <!-- Dark mode: apply class before paint to prevent flash -->
     <script>
       (function() {
@@ -52,9 +53,27 @@
     {% block extra_scripts %}{% endblock %}
 </head>
 <body>
+    <div class="aurora-bg" aria-hidden="true"></div>
+    <div class="shooting-stars" aria-hidden="true">
+      <span class="shooting-star"></span>
+      <span class="shooting-star"></span>
+      <span class="shooting-star"></span>
+    </div>
     {% block content %}{% endblock %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Shared theme toggle: attaches to #themeToggle on any page that has it -->
+    <script>
+      (function () {
+        var toggle = document.getElementById('themeToggle');
+        if (!toggle) return;
+        toggle.addEventListener('click', function () {
+          var root = document.documentElement;
+          root.classList.toggle('dark');
+          localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
+        });
+      })();
+    </script>
     {% block page_scripts %}{% endblock %}
 </body>
 </html>

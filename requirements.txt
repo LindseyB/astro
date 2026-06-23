@@ -9,3 +9,4 @@ pytest-flask
 pytest-cov
 launchdarkly-server-sdk
 requests
+python-dotenv

@@ -1,0 +1,62 @@
+/* ============================================================
+   Button shine hover effect
+   A soft diagonal gloss sweeps across every button on hover.
+   ============================================================ */
+
+/* Low-specificity position hint: any button class that sets its own
+   position (e.g. absolutely-positioned close/copy buttons) overrides
+   this, so the shine always anchors to the button itself. */
+button {
+  position: relative;
+}
+
+/* `.tile` bento cards keep their bespoke hover, so they opt out.
+   This rule is intentionally additive: it does NOT set `transition` or
+   `transform` on the button itself, so each component keeps its own
+   bespoke hover easing (opacity / box-shadow fades, etc.). */
+button:not(.tile) {
+  overflow: hidden;
+}
+
+button:not(.tile)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 100%
+  );
+  /* Park the gloss off the left edge; animated via transform (composited). */
+  transform: translateX(-150%) skewX(-20deg);
+  pointer-events: none;
+  opacity: 0;
+}
+
+button:not(.tile):hover::after {
+  animation: btn-shine 0.75s ease;
+}
+
+@keyframes btn-shine {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(280%) skewX(-20deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:not(.tile):hover::after {
+    animation: none;
+  }
+}

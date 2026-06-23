@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 import os
 import sys
 from unittest.mock import patch
@@ -21,7 +21,7 @@ class TestTemplates(unittest.TestCase):
         """Test that CSS file is accessible"""
         response = self.app.get('/static/css/style.css')
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Space Mono', response.data)
+        self.assertIn(b'@keyframes', response.data)
 
     def test_static_js_sparkles_accessible(self):
         """Test that sparkles JS file is accessible"""
@@ -291,11 +291,8 @@ class TestCSS(unittest.TestCase):
                 content = f.read()
 
             # Test for key style classes
-            self.assertIn('body', content)
-            self.assertIn('.container', content)
             self.assertIn('.sparkle', content)
-            self.assertIn('.analysis-section', content)
-            self.assertIn('Space Mono', content)
+            self.assertIn('.spinner', content)
             self.assertIn('@keyframes', content)
 
 

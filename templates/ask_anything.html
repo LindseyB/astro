@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Ask Anything - Astro Horoscope{% endblock %}
+{% block title %}Ask the stars - Astro Horoscope{% endblock %}
 
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
@@ -30,27 +30,92 @@
 <script>document.body.dataset.streaming = 'true';</script>
 {% endif %}
 
-<h1>💬 <i>Ask Anything</i></h1>
+<div class="reading-page">
+    <header class="reading-header">
+        <a href="/" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            back to main
+        </a>
+        <div class="header-actions">
+            <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
+                <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+        </div>
+    </header>
 
-<div class="ask-question-card">
-    <p class="ask-question-label">Your Question</p>
-    <p class="ask-question-text">{{ question }}</p>
+    <main class="reading-main">
+        <header class="feature-head">
+            <p class="eyebrow">chat with the cosmos</p>
+            <h1 class="reading-heading">Ask the <span class="text-holo">stars.</span></h1>
+            <p class="subtitle">Yes/no, advice, decoding a transit — anything. Answered through your chart.</p>
+        </header>
+
+        <section class="chrome-border glass chat-panel">
+            <div class="chat-scroll" id="chatScroll">
+                <div class="msg-user">{{ question }}</div>
+                <div class="msg-ai">
+                    <p class="tag">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 10l-5 3.6L16.5 20 12 16.6 7.5 20 9 13.6 4 10l6.1-1.2z"/></svg>
+                        the stars
+                    </p>
+                    <div class="analysis-content" id="analysisContent">
+                        {% if streaming %}
+                        <!-- Content will be loaded via streaming JavaScript -->
+                        {% endif %}
+                    </div>
+                    <button id="copyAnalysisBtn" class="copy-chip copy-btn-float" onclick="copyAnalysis()" title="Copy your answer" aria-label="Copy your answer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <form class="chat-form" method="POST" action="/ask-anything">
+                <input type="hidden" name="birth_date" value="{{ form_data.birth_date }}">
+                <input type="hidden" name="birth_time" value="{{ form_data.birth_time }}">
+                <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
+                <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
+                <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
+                <textarea class="chat-input" name="question_prompt" rows="1" placeholder="Ask anything…" required></textarea>
+                <button class="send-btn" type="submit" aria-label="Send">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                </button>
+            </form>
+        </section>
+    </main>
+
+    <footer class="page-foot">✦ &nbsp; built under a waxing crescent &nbsp; ✦</footer>
 </div>
 
-<div class="analysis-section">
-    <h2>🧠 <i>Answer</i></h2>
-    <div class="analysis-content" id="analysisContent">
-        {% if streaming %}
-        <!-- Content will be loaded via streaming JavaScript -->
-        {% endif %}
-    </div>
-    <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()" title="Copy your answer">
-        📋
-    </button>
-</div>
-
-<div class="ask-actions">
-    <a href="/" class="back-link">← Ask another question</a>
-    <a href="/" class="back-link">Back to chart setup</a>
-</div>
+<script>
+    // Auto-grow the textarea and submit on Enter (Shift+Enter for newline)
+    (function () {
+        var input = document.querySelector('.chat-input');
+        if (!input) return;
+        function grow() {
+            var cs = getComputedStyle(input);
+            // Under box-sizing: border-box, height must include the borders or
+            // the content box ends up too short and forces a scrollbar.
+            var borderY = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+            var maxPx = parseFloat(cs.maxHeight);
+            input.style.height = 'auto';
+            var needed = input.scrollHeight + borderY;
+            if (needed > maxPx) {
+                input.style.height = maxPx + 'px';
+                input.style.overflowY = 'auto';
+            } else {
+                input.style.height = needed + 'px';
+                input.style.overflowY = 'hidden';
+            }
+        }
+        grow();
+        input.addEventListener('input', grow);
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (input.value.trim()) input.form.submit();
+            }
+        });
+    })();
+</script>
 {% endblock %}

@@ -60,6 +60,7 @@ class ChartWheel {
         
         this.ctx = this.canvas.getContext('2d');
         this.chartData = chartData;
+        this.theme = this.resolveTheme();
         
         // Set canvas size with device pixel ratio for crisp rendering
         this.dpr = window.devicePixelRatio || 1;
@@ -92,6 +93,34 @@ class ChartWheel {
         this.draw();
     }
     
+    resolveTheme() {
+        const cs = getComputedStyle(document.documentElement);
+        const isDark = document.documentElement.classList.contains('dark');
+        const val = (name, fb) => (cs.getPropertyValue(name).trim() || fb);
+        return {
+            isDark,
+            fg: val('--foreground', isDark ? '#e8e4f6' : '#2a2342'),
+            muted: val('--muted-foreground', isDark ? '#a8a2c8' : '#6c6488'),
+            accent: val('--accent', '#a78bfa'),
+            border: isDark ? 'rgba(206, 200, 240, 0.18)' : 'rgba(74, 58, 138, 0.18)',
+            ringFill: isDark ? 'rgba(124, 92, 200, 0.14)' : 'rgba(124, 92, 200, 0.08)',
+            innerFill: isDark ? 'rgba(24, 19, 44, 0.55)' : 'rgba(255, 255, 255, 0.65)',
+            centerFill: isDark ? 'rgba(32, 26, 58, 0.92)' : 'rgba(255, 255, 255, 0.92)',
+            chipFill: isDark ? 'rgba(40, 33, 68, 0.92)' : 'rgba(255, 255, 255, 0.94)',
+            holo: ['#c4b5fd', '#67e8f9', '#818cf8'],
+            fontDisplay: val('--font-display', "'Space Grotesk', system-ui, sans-serif"),
+            fontSans: val('--font-sans', "'DM Sans', system-ui, sans-serif")
+        };
+    }
+    
+    holoGradient(x0, y0, x1, y1) {
+        const g = this.ctx.createLinearGradient(x0, y0, x1, y1);
+        g.addColorStop(0, this.theme.holo[0]);
+        g.addColorStop(0.5, this.theme.holo[1]);
+        g.addColorStop(1, this.theme.holo[2]);
+        return g;
+    }
+    
     draw() {
         // Clear canvas
         this.ctx.clearRect(0, 0, this.size, this.size);
@@ -109,21 +138,21 @@ class ChartWheel {
     
     drawBackground() {
         // Outer background circle
-        this.ctx.fillStyle = '#2c3e50';
+        this.ctx.fillStyle = this.theme.ringFill;
         this.ctx.beginPath();
         this.ctx.arc(this.centerX, this.centerY, this.outerRadius, 0, Math.PI * 2);
         this.ctx.fill();
     }
     
     drawInnerCircle() {
-        // White inner circle for chart content
-        this.ctx.fillStyle = '#ffffff';
+        // Inner circle for chart content
+        this.ctx.fillStyle = this.theme.innerFill;
         this.ctx.beginPath();
         this.ctx.arc(this.centerX, this.centerY, this.zodiacInnerRadius, 0, Math.PI * 2);
         this.ctx.fill();
         
         // Subtle inner rings for depth
-        this.ctx.strokeStyle = '#e0e0e0';
+        this.ctx.strokeStyle = this.theme.border;
         this.ctx.lineWidth = 1;
         this.ctx.beginPath();
         this.ctx.arc(this.centerX, this.centerY, this.innerRadius, 0, Math.PI * 2);
@@ -154,7 +183,7 @@ class ChartWheel {
             const endAngle = (180 - (astroEnd - ascendantAbsoluteDegree)) * Math.PI / 180;
             
             // Draw zodiac segments (going counterclockwise, so swap start/end)
-            this.ctx.fillStyle = '#2c3e50';
+            this.ctx.fillStyle = this.theme.ringFill;
             this.ctx.beginPath();
             this.ctx.arc(this.centerX, this.centerY, this.outerRadius, endAngle, startAngle);
             this.ctx.arc(this.centerX, this.centerY, this.zodiacInnerRadius, startAngle, endAngle, true);
@@ -162,7 +191,7 @@ class ChartWheel {
             this.ctx.fill();
             
             // Draw separator lines
-            this.ctx.strokeStyle = '#ffffff';
+            this.ctx.strokeStyle = this.theme.border;
             this.ctx.lineWidth = 2;
             this.ctx.beginPath();
             const lineX = this.centerX + Math.cos(startAngle) * this.zodiacInnerRadius;
@@ -180,19 +209,23 @@ class ChartWheel {
             const y = this.centerY + Math.sin(midAngle) * symbolRadius;
             
             // Symbol
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.font = 'bold 20px Arial';
+            this.ctx.fillStyle = this.theme.accent;
+            this.ctx.font = `bold 20px ${this.theme.fontDisplay}`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             this.ctx.fillText(ZODIAC_SYMBOLS[sign], x, y - 8);
             
             // Name
-            this.ctx.font = '10px Arial';
+            this.ctx.fillStyle = this.theme.muted;
+            this.ctx.font = `10px ${this.theme.fontSans}`;
             this.ctx.fillText(sign.toUpperCase(), x, y + 10);
         });
         
         // Draw outer and inner borders
-        this.ctx.strokeStyle = '#ffffff';
+        this.ctx.strokeStyle = this.holoGradient(
+            this.centerX - this.outerRadius, this.centerY - this.outerRadius,
+            this.centerX + this.outerRadius, this.centerY + this.outerRadius
+        );
         this.ctx.lineWidth = 2;
         this.ctx.beginPath();
         this.ctx.arc(this.centerX, this.centerY, this.outerRadius, 0, Math.PI * 2);
@@ -221,7 +254,7 @@ class ChartWheel {
     }
     
     drawHouseLines() {
-        this.ctx.strokeStyle = '#2c3e50';
+        this.ctx.strokeStyle = this.theme.border;
         this.ctx.lineWidth = 1.5;
         
         // Draw lines from center to zodiac ring for each house cusp
@@ -240,9 +273,11 @@ class ChartWheel {
             if (houseNum === 1 || houseNum === 10) {
                 this.ctx.setLineDash([]);
                 this.ctx.lineWidth = 2;
+                this.ctx.strokeStyle = this.theme.accent;
             } else {
                 this.ctx.setLineDash([5, 5]);
                 this.ctx.lineWidth = 1;
+                this.ctx.strokeStyle = this.theme.border;
             }
             
             this.ctx.beginPath();
@@ -255,7 +290,7 @@ class ChartWheel {
     }
     
     drawHouseNumbers() {
-        this.ctx.font = 'bold 14px Arial';
+        this.ctx.font = `bold 14px ${this.theme.fontDisplay}`;
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
         
@@ -284,14 +319,14 @@ class ChartWheel {
             const x = this.centerX + Math.cos(midAngle) * radius;
             const y = this.centerY + Math.sin(midAngle) * radius;
             
-            // Draw white background circle for readability
-            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            // Draw background circle for readability
+            this.ctx.fillStyle = this.theme.chipFill;
             this.ctx.beginPath();
             this.ctx.arc(x, y, 12, 0, Math.PI * 2);
             this.ctx.fill();
             
             // Draw house number
-            this.ctx.fillStyle = '#2c3e50';
+            this.ctx.fillStyle = this.theme.muted;
             this.ctx.fillText(houseNum.toString(), x, y);
         }
     }
@@ -335,20 +370,20 @@ class ChartWheel {
                 'Chiron': '#9B59B6'
             };
             
-            // Draw white circle background
-            this.ctx.fillStyle = '#ffffff';
+            // Draw chip background
+            this.ctx.fillStyle = this.theme.chipFill;
             this.ctx.beginPath();
             this.ctx.arc(x, y, 14, 0, Math.PI * 2);
             this.ctx.fill();
             
             // Draw colored border
-            this.ctx.strokeStyle = colors[name] || '#2c3e50';
+            this.ctx.strokeStyle = colors[name] || this.theme.accent;
             this.ctx.lineWidth = 2;
             this.ctx.stroke();
             
             // Draw planet symbol
-            this.ctx.fillStyle = colors[name] || '#2c3e50';
-            this.ctx.font = 'bold 16px Arial';
+            this.ctx.fillStyle = colors[name] || this.theme.accent;
+            this.ctx.font = `bold 16px ${this.theme.fontDisplay}`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             this.ctx.fillText(PLANET_SYMBOLS[name], x, y);
@@ -360,7 +395,7 @@ class ChartWheel {
                 const tickX2 = this.centerX + Math.cos(angle) * (this.innerRadius - 8);
                 const tickY2 = this.centerY + Math.sin(angle) * (this.innerRadius - 8);
                 
-                this.ctx.strokeStyle = colors[name] || '#2c3e50';
+                this.ctx.strokeStyle = colors[name] || this.theme.accent;
                 this.ctx.lineWidth = 2;
                 this.ctx.beginPath();
                 this.ctx.moveTo(tickX, tickY);
@@ -474,12 +509,15 @@ class ChartWheel {
     
     drawCenterInfo() {
         // Draw center circle
-        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillStyle = this.theme.centerFill;
         this.ctx.beginPath();
         this.ctx.arc(this.centerX, this.centerY, this.centerRadius, 0, Math.PI * 2);
         this.ctx.fill();
         
-        this.ctx.strokeStyle = '#2c3e50';
+        this.ctx.strokeStyle = this.holoGradient(
+            this.centerX - this.centerRadius, this.centerY - this.centerRadius,
+            this.centerX + this.centerRadius, this.centerY + this.centerRadius
+        );
         this.ctx.lineWidth = 2;
         this.ctx.stroke();
         
@@ -490,8 +528,8 @@ class ChartWheel {
             const ascX = this.centerX + Math.cos(ascAngle) * (this.centerRadius + 20);
             const ascY = this.centerY + Math.sin(ascAngle) * (this.centerRadius + 20);
             
-            this.ctx.fillStyle = '#2c3e50';
-            this.ctx.font = 'bold 11px Arial';
+            this.ctx.fillStyle = this.theme.accent;
+            this.ctx.font = `bold 11px ${this.theme.fontDisplay}`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             this.ctx.fillText('ASC', ascX, ascY);
@@ -504,8 +542,8 @@ class ChartWheel {
             const mcX = this.centerX + Math.cos(mcAngle) * (this.centerRadius + 20);
             const mcY = this.centerY + Math.sin(mcAngle) * (this.centerRadius + 20);
             
-            this.ctx.fillStyle = '#2c3e50';
-            this.ctx.font = 'bold 11px Arial';
+            this.ctx.fillStyle = this.theme.accent;
+            this.ctx.font = `bold 11px ${this.theme.fontDisplay}`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             this.ctx.fillText('MC', mcX, mcY);
@@ -517,6 +555,12 @@ class ChartWheel {
 document.addEventListener('DOMContentLoaded', function() {
     const chartCanvas = document.getElementById('chartWheel');
     if (chartCanvas && window.chartData) {
-        new ChartWheel('chartWheel', window.chartData);
+        const wheel = new ChartWheel('chartWheel', window.chartData);
+        // Redraw on dark/light theme changes so the wheel colors stay in sync
+        const observer = new MutationObserver(function() {
+            wheel.theme = wheel.resolveTheme();
+            wheel.draw();
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     }
 });
