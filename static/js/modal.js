@@ -27,6 +27,18 @@ function initializeModals() {
             openModal('locationHelpModal');
         });
     }
+
+    // Open Ask Anything modal from the mode button
+    const askAnythingBtn = document.getElementById('askAnythingBtn');
+    if (askAnythingBtn) {
+        askAnythingBtn.addEventListener('click', function() {
+            openModal('askAnythingModal');
+            const askInput = document.getElementById('question_prompt');
+            if (askInput) {
+                askInput.focus();
+            }
+        });
+    }
     
     // Close modal when clicking on overlay (outside modal content)
     const overlays = document.querySelectorAll('.modal-overlay');

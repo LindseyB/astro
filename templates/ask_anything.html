@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Ask Anything - Astro Horoscope{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
+{% if streaming %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="{{ url_for('static', filename='js/stream-analysis.js') }}"></script>
+<script>
+    window.chartDataForStreaming = {
+        pageType: 'ask-anything',
+        question: "{{ question | e }}"
+    };
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if streaming %}
+<script>document.body.dataset.streaming = 'true';</script>
+{% endif %}
+
+<h1>💬 <i>Ask Anything</i></h1>
+
+<div class="chart-section">
+    <h2><i>Your Question</i></h2>
+    <p><strong>{{ question }}</strong></p>
+</div>
+
+<div class="analysis-section">
+    <h2>🧠 <i>Answer</i></h2>
+    <div class="analysis-content" id="analysisContent">
+        {% if streaming %}
+        <!-- Content will be loaded via streaming JavaScript -->
+        {% endif %}
+    </div>
+    <button id="copyAnalysisBtn" class="copy-btn copy-btn-small copy-btn-float" onclick="copyAnalysis()" title="Copy your answer">
+        📋
+    </button>
+</div>
+
+<div class="navigation-links">
+    <a href="/" class="back-link">← Ask another question</a>
+</div>
+{% endblock %}

@@ -390,6 +390,54 @@ class TestStreamingEndpointsSSE(unittest.TestCase):
         response_data = json.loads(response.data)
         self.assertIn('error', response_data)
 
+    @patch('routes.stream_calculate_ask_anything')
+    @patch('ai_service.get_client')
+    def test_stream_ask_anything_sse_format(self, mock_get_client, mock_stream_ask_anything):
+        """Test /stream-ask-anything returns properly formatted SSE stream"""
+        mock_get_client.return_value = MagicMock()
+        mock_stream_ask_anything.return_value = iter(['Answer part one. ', 'Answer part two.'])
+
+        response = self.app.post('/stream-ask-anything',
+                                data=json.dumps({'question': 'What is a good morning routine?'}),
+                                content_type='application/json')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, 'text/event-stream')
+
+        messages = self._consume_sse_stream(response)
+        chunk_messages = [msg for msg in messages if 'chunk' in msg]
+        done_messages = [msg for msg in messages if 'done' in msg]
+
+        self.assertEqual(len(chunk_messages), 2)
+        self.assertEqual(chunk_messages[0]['chunk'], 'Answer part one. ')
+        self.assertEqual(chunk_messages[1]['chunk'], 'Answer part two.')
+        self.assertEqual(len(done_messages), 1)
+        self.assertTrue(done_messages[0]['done'])
+
+    def test_stream_ask_anything_missing_question(self):
+        """Test /stream-ask-anything validates required question field"""
+        response = self.app.post('/stream-ask-anything',
+                                data=json.dumps({'question': '   '}),
+                                content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.data)
+        self.assertIn('error', response_data)
+        self.assertIn('question', response_data['error'].lower())
+
+    @patch('ai_service.get_client')
+    def test_stream_ask_anything_ai_service_unavailable(self, mock_get_client):
+        """Test error when AI service is unavailable for ask anything"""
+        mock_get_client.side_effect = ValueError('ANTHROPIC_TOKEN not set')
+
+        response = self.app.post('/stream-ask-anything',
+                                data=json.dumps({'question': 'What is the weather?' }),
+                                content_type='application/json')
+
+        self.assertEqual(response.status_code, 503)
+        response_data = json.loads(response.data)
+        self.assertIn('error', response_data)
+
     @patch('calculations.stream_ai_api')
     @patch('calculations.get_current_planets')
     @patch('calculations.get_planets_in_houses')

@@ -199,11 +199,12 @@
                placeholder="74w00" readonly>
         <small class="field-hint">Format: DDwMM for West, DDeMM for East</small>
     </div>
-    
-    <div class="button-group">
-        <button type="submit" formaction="/chart">Get Horoscope 🔮</button>
-        <button type="submit" formaction="/full-chart">Full Chart 📊</button>
-        <button type="submit" formaction="/live-mas">Live Más 🔔</button>
+
+    <div class="button-group mode-buttons">
+        <button type="submit" formaction="/chart" data-submit-mode="chart">Get Horoscope 🔮</button>
+        <button type="submit" formaction="/full-chart" data-submit-mode="full-chart">Full Chart 📊</button>
+        <button type="submit" formaction="/live-mas" data-submit-mode="live-mas">Live Más 🔔</button>
+        <button type="button" id="askAnythingBtn">Ask Anything 💬</button>
     </div>
     
     <div class="clear-data-container">
@@ -230,6 +231,26 @@
                 <li>Coordinates will be automatically converted to astrology format</li>
             </ul>
             <p><small>💡 The map makes it easy to find your exact birth location - just click or search!</small></p>
+        </div>
+    </div>
+</div>
+
+<!-- Ask Anything Modal -->
+<div id="askAnythingModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>💬 Ask Anything</h3>
+            <button class="modal-close" aria-label="Close modal">×</button>
+        </div>
+        <div class="modal-body">
+            <p>Ask any question and get a direct answer.</p>
+            <form action="/ask-anything" method="POST">
+                <div class="form-group question-group">
+                    <label for="question_prompt">Your question:</label>
+                    <textarea id="question_prompt" name="question_prompt" rows="4" placeholder="What do you want to know?" required></textarea>
+                </div>
+                <button type="submit">Get Answer 💬</button>
+            </form>
         </div>
     </div>
 </div>
