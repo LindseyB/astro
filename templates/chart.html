@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Your Cosmic Chart - Astro Horoscope{% endblock %}
+{% block title %}Your Reading - Astro Horoscope{% endblock %}
 
 {% block extra_scripts %}
 <script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
@@ -33,245 +33,184 @@
 {% if streaming %}
 <script>document.body.dataset.streaming = 'true';</script>
 {% endif %}
-<div class="container">
-    <!-- Hero Section with Header -->
-    <div class="hero-section">
-        <div class="hero-content">
-            <h1>🌟 <i>Your Cosmic Vibe</i></h1>
-            <div class="main-signs-inline">
-                <span class="sign-badge">☉ {{ chart_data.sun }}</span>
-                <span class="sign-badge">🌙 {{ chart_data.moon }}</span>
-                <span class="sign-badge">⬆️ {{ chart_data.ascendant }}</span>
-            </div>
+<div class="reading-page">
+    <!-- Header with back button and edit chart -->
+    <header class="reading-header">
+        <a href="/" class="back-link">← back to bento</a>
+        <div class="header-actions">
+            <button id="editChartBtn" class="edit-btn" title="Edit chart">
+                <span>✏️</span> edit chart
+            </button>
         </div>
-        <button id="editChartBtn" class="btn-icon btn-edit-chart" title="Edit chart information">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-            </svg>
-        </button>
-    </div>
+    </header>
 
-    <!-- Main Bento Grid -->
-    <div class="bento-grid">
-        <!-- Today's Reading (Large - 2x2 on desktop) -->
-        <div class="tile large fade-in" data-sun="{{ chart_data.sun }}" data-moon="{{ chart_data.moon }}" data-ascendant="{{ chart_data.ascendant }}">
-            <div class="tile-header">
+    <!-- Main reading section -->
+    <main class="reading-main">
+        <!-- Title Section -->
+        <div class="reading-title-section">
+            <p class="reading-eyebrow">COSMIC WISDOM</p>
+            <h1 class="reading-heading">Today, in three breaths</h1>
+            <p class="reading-subtitle">A reading for the next 24 hours</p>
+        </div>
+
+        <!-- Chart info bar -->
+        <div class="chart-info-bar">
+            <span class="using-label">USING</span>
+            <span class="chart-marker">{{ chart_data.sun }} ☉</span>
+            <span class="chart-marker">{{ chart_data.moon }} ☽</span>
+            <span class="chart-marker">{{ chart_data.ascendant }} ⬆</span>
+            <button class="override-btn" id="editChartBtn2" title="Edit chart">
+                <span>✏️</span> override
+            </button>
+        </div>
+
+        <!-- Reading Content -->
+        <div class="reading-content" id="analysisContent">
+            {% if streaming %}
+            <div class="streaming-indicator">
+                <p>✨ Reading your cosmic energy...</p>
+            </div>
+            {% else %}
+            {{ chart_data.astrology_analysis | markdown | safe }}
+            {% endif %}
+        </div>
+
+        <!-- The Sky is Listening Section -->
+        <section class="listening-section">
+            <div class="listening-header">
+                <svg class="listening-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M19 14c1.49-1.46 3-3.72 3-7a7 7 0 0 0-7-7 7 7 0 0 0-7 7c0 3.28 1.51 5.54 3 7m5 2v4m-3 0h6"></path>
+                </svg>
                 <div>
-                    <p class="eyebrow">Today's Reading</p>
-                    <h2 class="tile-title">Your Daily Horoscope</h2>
+                    <h2 class="listening-title">The sky is listening</h2>
+                    <p class="listening-subtitle">Try one of these, or write your own:</p>
                 </div>
-                <button class="btn-icon" id="copyAnalysisBtn" onclick="copyAnalysis()" title="Copy horoscope">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+            </div>
+
+            <!-- Prompt buttons -->
+            <div class="prompts-row">
+                <button class="prompt-btn" onclick="askPrompt('What should I avoid today?')">What should I avoid today?</button>
+                <button class="prompt-btn" onclick="askPrompt('Best time to text my ex?')">Best time to text my ex?</button>
+                <button class="prompt-btn" onclick="askPrompt('Explain my moon sign.')">Explain my moon sign.</button>
+            </div>
+
+            <!-- Ask anything input -->
+            <div class="ask-input-group">
+                <input type="text" class="ask-input" id="askInput" placeholder="Ask anything..." />
+                <button class="send-btn" onclick="sendQuestion()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     </svg>
                 </button>
             </div>
-            <div class="tile-analysis-content" id="analysisContent">
-                {% if streaming %}
-                <div class="streaming-placeholder">
-                    <p class="text-secondary">✨ Reading your cosmic energy...</p>
-                </div>
-                {% else %}
-                <div class="analysis-text">{{ chart_data.astrology_analysis | markdown | safe }}</div>
-                {% endif %}
-            </div>
-            <div id="music-suggestion-placeholder" data-chart-type="daily"></div>
+        </section>
+
+        <!-- Bottom navigation -->
+        <div class="reading-nav">
+            <a href="/full-chart" class="nav-link" onclick="submitForm(event, '/full-chart')">view full chart</a>
+            <a href="/live-mas" class="nav-link" onclick="submitForm(event, '/live-mas')">cosmic cravings 🌮</a>
+            <a href="/" class="nav-link">another reading</a>
         </div>
 
-        <!-- Ask the Stars (Chat) -->
-        <div class="tile fade-in">
-            <div class="tile-header">
-                <p class="eyebrow">Ask the Stars</p>
-            </div>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--color-cyan); opacity: 0.6;">
-                <circle cx="12" cy="12" r="1"></circle>
-                <path d="M12 1v6m0 6v6"></path>
-                <path d="M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24"></path>
-                <path d="M1 12h6m6 0h6"></path>
-                <path d="M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"></path>
-            </svg>
-            <h3 class="tile-title">Quick Questions?</h3>
-            <p class="tile-description">Get direct astrological answers about any question on your mind.</p>
-            <a href="#" onclick="openAskAnything()" class="btn-secondary" style="margin-top: auto;">Ask Anything →</a>
-        </div>
-
-        <!-- The Sky is Listening (Prompts) -->
-        <div class="tile fade-in">
-            <div class="tile-header">
-                <p class="eyebrow">The Sky is Listening</p>
-            </div>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--color-cyan); opacity: 0.6;">
-                <path d="M19 14c1.49-1.46 3-3.72 3-7a7 7 0 0 0-7-7 7 7 0 0 0-7 7c0 3.28 1.51 5.54 3 7m5 2v4m-3 0h6"></path>
-            </svg>
-            <h3 class="tile-title">Prompts</h3>
-            <div class="prompts-list">
-                <button class="btn-ghost btn-prompt" onclick="askPrompt('💘 Love')">💘 Love</button>
-                <button class="btn-ghost btn-prompt" onclick="askPrompt('💼 Career')">💼 Career</button>
-                <button class="btn-ghost btn-prompt" onclick="askPrompt('✨ Growth')">✨ Growth</button>
-            </div>
-        </div>
-
-        <!-- Full Birth Chart -->
-        <div class="tile fade-in">
-            <div class="tile-header">
-                <p class="eyebrow">Full Chart</p>
-            </div>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--color-cyan); opacity: 0.6;">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-            <h3 class="tile-title">All Placements</h3>
-            <p class="tile-description">Complete breakdown of your natal chart with houses and planets.</p>
-            <form action="/full-chart" method="POST" style="margin-top: auto;">
-                <input type="hidden" name="birth_date" value="{{ form_data.birth_date }}">
-                <input type="hidden" name="birth_time" value="{{ form_data.birth_time }}">
-                <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
-                <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
-                <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
-                <input type="hidden" name="music_genre" value="{{ form_data.music_genre }}">
-                <input type="hidden" name="other_genre" value="{{ form_data.other_genre }}">
-                <button type="submit" class="btn-secondary" style="width: 100%;">View Full Chart →</button>
-            </form>
-        </div>
-
-        <!-- Cosmic Cravings (Taco Bell) -->
-        <div class="tile fade-in">
-            <div class="tile-header">
-                <p class="eyebrow">Cosmic Cravings</p>
-            </div>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--color-cyan); opacity: 0.6;">
-                <path d="M6 9l6-6 6 6"></path>
-                <path d="M6 15l6 6 6-6"></path>
-            </svg>
-            <h3 class="tile-title">Taco Bell Order</h3>
-            <p class="tile-description">What Taco Bell order matches your cosmic energy today?</p>
-            <form action="/live-mas" method="POST" style="margin-top: auto;">
-                <input type="hidden" name="birth_date" value="{{ form_data.birth_date }}">
-                <input type="hidden" name="birth_time" value="{{ form_data.birth_time }}">
-                <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
-                <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
-                <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
-                <button type="submit" class="btn-secondary" style="width: 100%;">Get Order →</button>
-            </form>
-        </div>
-
-        <!-- Back to Setup -->
-        <div class="tile fade-in text-center">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--color-cyan); opacity: 0.6; margin: 0 auto;">
-                <polyline points="15 18l-6-6 6-6"></polyline>
-            </svg>
-            <h3 class="tile-title">Ready to Restart?</h3>
-            <a href="/" class="btn-secondary" style="margin-top: auto;">Back to Setup →</a>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="footer-section">
-        <p><small>✨ BUILT UNDER A WAXING CRESCENT ✨</small></p>
-    </div>
+        <!-- Hidden form for navigation -->
+        <form id="navForm" method="POST" style="display: none;">
+            <input type="hidden" name="birth_date" value="{{ form_data.birth_date }}">
+            <input type="hidden" name="birth_time" value="{{ form_data.birth_time }}">
+            <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
+            <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
+            <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
+            <input type="hidden" name="music_genre" value="{{ form_data.music_genre }}">
+            <input type="hidden" name="other_genre" value="{{ form_data.other_genre }}">
+        </form>
+    </main>
 </div>
 
-<!-- Edit Chart Slide-Over Panel -->
-<div class="drawer-overlay" id="editChartOverlay"></div>
-<div class="drawer-panel" id="editChartPanel">
-    <div class="drawer-header">
-        <h2 style="margin: 0;">Edit Chart</h2>
-        <button class="drawer-close" id="editChartClose">×</button>
+<!-- Edit Chart Slide-Over -->
+<div class="slide-overlay" id="editChartOverlay"></div>
+<div class="slide-panel" id="editChartPanel">
+    <div class="slide-header">
+        <h2>edit chart</h2>
+        <button class="slide-close" id="editChartClose">×</button>
     </div>
-    <div class="drawer-content">
+    <div class="slide-content">
         <form id="editChartForm" method="POST" action="/chart">
-            <div class="form-group">
-                <label for="edit_birth_date">Birth Date</label>
-                <input type="date" id="edit_birth_date" name="birth_date" value="{{ form_data.birth_date }}" required>
+            <div class="form-field">
+                <label>Birth Date</label>
+                <input type="date" name="birth_date" value="{{ form_data.birth_date }}" required>
             </div>
-
-            <div class="form-group">
-                <label for="edit_birth_time">Birth Time</label>
-                <input type="time" id="edit_birth_time" name="birth_time" value="{{ form_data.birth_time }}" required>
+            <div class="form-field">
+                <label>Birth Time</label>
+                <input type="time" name="birth_time" value="{{ form_data.birth_time }}" required>
             </div>
-
-            <div class="form-group">
-                <label for="edit_timezone">Timezone</label>
-                <select id="edit_timezone" name="timezone_offset" required>
+            <div class="form-field">
+                <label>Timezone</label>
+                <select name="timezone_offset" required>
                     <option value="{{ form_data.timezone_offset }}" selected>{{ form_data.timezone_offset }}</option>
                 </select>
             </div>
-
-            <div class="form-group">
-                <label for="edit_latitude">Latitude</label>
-                <input type="text" id="edit_latitude" name="latitude" value="{{ form_data.latitude }}" required>
+            <div class="form-field">
+                <label>Latitude</label>
+                <input type="text" name="latitude" value="{{ form_data.latitude }}" required>
             </div>
-
-            <div class="form-group">
-                <label for="edit_longitude">Longitude</label>
-                <input type="text" id="edit_longitude" name="longitude" value="{{ form_data.longitude }}" required>
-            </div>
-
-            <div class="form-group">
-                <label for="edit_music_genre">Music Genre</label>
-                <select id="edit_music_genre" name="music_genre">
-                    <option value="any" {% if form_data.music_genre == 'any' %}selected{% endif %}>Any Genre</option>
-                    <option value="pop" {% if form_data.music_genre == 'pop' %}selected{% endif %}>Pop</option>
-                    <option value="rock" {% if form_data.music_genre == 'rock' %}selected{% endif %}>Rock</option>
-                    <option value="other" {% if form_data.music_genre == 'other' %}selected{% endif %}>Other</option>
-                </select>
+            <div class="form-field">
+                <label>Longitude</label>
+                <input type="text" name="longitude" value="{{ form_data.longitude }}" required>
             </div>
         </form>
     </div>
-    <div class="drawer-footer">
-        <button class="btn-ghost" id="editChartCancel" style="flex: 1;">Cancel</button>
-        <button class="btn-primary" id="editChartSave" style="flex: 1;">Save Changes</button>
+    <div class="slide-footer">
+        <button class="btn-cancel" id="editChartCancel">cancel</button>
+        <button class="btn-save" id="editChartSave">save</button>
     </div>
 </div>
 
 <script>
-// Edit Chart Slide-Over Logic
-const editChartBtn = document.getElementById('editChartBtn');
-const editChartPanel = document.getElementById('editChartPanel');
-const editChartOverlay = document.getElementById('editChartOverlay');
-const editChartClose = document.getElementById('editChartClose');
-const editChartCancel = document.getElementById('editChartCancel');
-const editChartSave = document.getElementById('editChartSave');
+// Slide-over management
+const editBtns = document.querySelectorAll('#editChartBtn, #editChartBtn2');
+const overlay = document.getElementById('editChartOverlay');
+const panel = document.getElementById('editChartPanel');
+const closeBtn = document.getElementById('editChartClose');
+const cancelBtn = document.getElementById('editChartCancel');
+const saveBtn = document.getElementById('editChartSave');
 
-function openEditChart() {
-    editChartPanel.classList.add('active');
-    editChartOverlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
+editBtns.forEach(btn => btn.addEventListener('click', () => {
+    panel.classList.add('active');
+    overlay.classList.add('active');
+}));
+
+function closePanel() {
+    panel.classList.remove('active');
+    overlay.classList.remove('active');
 }
 
-function closeEditChart() {
-    editChartPanel.classList.remove('active');
-    editChartOverlay.classList.remove('active');
-    document.body.style.overflow = '';
-}
+closeBtn.addEventListener('click', closePanel);
+cancelBtn.addEventListener('click', closePanel);
+overlay.addEventListener('click', closePanel);
+saveBtn.addEventListener('click', () => document.getElementById('editChartForm').submit());
 
-editChartBtn.addEventListener('click', openEditChart);
-editChartClose.addEventListener('click', closeEditChart);
-editChartCancel.addEventListener('click', closeEditChart);
-editChartOverlay.addEventListener('click', closeEditChart);
-
-editChartSave.addEventListener('click', () => {
-    document.getElementById('editChartForm').submit();
-});
-
-// Close on Escape key
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && editChartPanel.classList.contains('active')) {
-        closeEditChart();
-    }
+    if (e.key === 'Escape') closePanel();
 });
 
-// Ask anything and prompts
-function openAskAnything() {
-    // Placeholder - implement based on Ask Anything modal
-    alert('Ask Anything - coming soon');
+// Question and navigation helpers
+function askPrompt(prompt) {
+    document.getElementById('askInput').value = prompt;
+    sendQuestion();
 }
 
-function askPrompt(prompt) {
-    // Placeholder - implement based on prompt selection
-    alert('Prompt: ' + prompt);
+function sendQuestion() {
+    const question = document.getElementById('askInput').value;
+    if (question.trim()) {
+        // Post to ask-anything endpoint
+        window.location.href = `/ask-anything?q=${encodeURIComponent(question)}&birth_date={{ form_data.birth_date }}&birth_time={{ form_data.birth_time }}&timezone_offset={{ form_data.timezone_offset }}&latitude={{ form_data.latitude }}&longitude={{ form_data.longitude }}`;
+    }
+}
+
+function submitForm(e, action) {
+    e.preventDefault();
+    document.getElementById('navForm').action = action;
+    document.getElementById('navForm').submit();
 }
 </script>
 
