@@ -81,7 +81,14 @@
     }
 
     const requestPayload = chartData.pageType === 'ask-anything'
-        ? { question: chartData.question }
+        ? {
+            question: chartData.question,
+            birth_date: chartData.birthDate,
+            birth_time: chartData.birthTime,
+            timezone_offset: chartData.timezoneOffset,
+            latitude: chartData.latitude,
+            longitude: chartData.longitude
+        }
         : {
             birth_date: chartData.birthDate,
             birth_time: chartData.birthTime,

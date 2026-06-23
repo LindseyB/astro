@@ -18,6 +18,34 @@ function closeModal(modalId) {
     }
 }
 
+function syncAskAnythingBirthFields() {
+    const fieldMap = [
+        ['birth_date', 'ask_birth_date'],
+        ['birth_time', 'ask_birth_time'],
+        ['timezone_offset', 'ask_timezone_offset'],
+        ['latitude', 'ask_latitude'],
+        ['longitude', 'ask_longitude']
+    ];
+
+    let missingSourceField = null;
+
+    fieldMap.forEach(([sourceId, targetId]) => {
+        const source = document.getElementById(sourceId);
+        const target = document.getElementById(targetId);
+        const value = source ? source.value : '';
+
+        if (target) {
+            target.value = value;
+        }
+
+        if (!missingSourceField && source && !value) {
+            missingSourceField = source;
+        }
+    });
+
+    return missingSourceField;
+}
+
 // Initialize modal listeners when DOM is ready
 function initializeModals() {
     // Open location help modal when button is clicked
@@ -32,10 +60,45 @@ function initializeModals() {
     const askAnythingBtn = document.getElementById('askAnythingBtn');
     if (askAnythingBtn) {
         askAnythingBtn.addEventListener('click', function() {
+            const missingField = syncAskAnythingBirthFields();
             openModal('askAnythingModal');
             const askInput = document.getElementById('question_prompt');
             if (askInput) {
                 askInput.focus();
+            }
+
+            if (missingField) {
+                if (missingField.id === 'latitude' || missingField.id === 'longitude') {
+                    openModal('locationHelpModal');
+                    const locationSearch = document.getElementById('locationSearch');
+                    if (locationSearch) {
+                        locationSearch.focus();
+                    }
+                } else {
+                    missingField.reportValidity();
+                }
+            }
+        });
+    }
+
+    const askAnythingForm = document.querySelector('#askAnythingModal form');
+    if (askAnythingForm) {
+        askAnythingForm.addEventListener('submit', function(e) {
+            if (missingField) {
+                e.preventDefault();
+                closeModal('askAnythingModal');
+
+                if (missingField.id === 'latitude' || missingField.id === 'longitude') {
+                    openModal('locationHelpModal');
+                    const locationSearch = document.getElementById('locationSearch');
+                    if (locationSearch) {
+                        locationSearch.focus();
+                    }
+                    return;
+                }
+
+                missingField.focus();
+                missingField.reportValidity();
             }
         });
     }

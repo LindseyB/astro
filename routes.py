@@ -310,11 +310,35 @@ def live_mas():
 def ask_anything():
     """Render Ask Anything placeholder page immediately"""
     question = request.form.get('question_prompt', '').strip()
+    birth_date_html = request.form.get('birth_date', '').strip()
+    birth_time = request.form.get('birth_time', '').strip()
+    timezone_offset = request.form.get('timezone_offset', '').strip()
+    latitude = request.form.get('latitude', '').strip()
+    longitude = request.form.get('longitude', '').strip()
 
     if not question:
         return render_template('error.html', error="Please enter a question before using Ask Anything mode."), 400
 
-    return render_template('ask_anything.html', question=question, streaming=True)
+    required_fields = {
+        'birth_date': birth_date_html,
+        'birth_time': birth_time,
+        'timezone_offset': timezone_offset,
+        'latitude': latitude,
+        'longitude': longitude,
+    }
+    missing_fields = [name for name, value in required_fields.items() if not value]
+    if missing_fields:
+        return render_template('error.html', error="Please complete your birth details before using Ask Anything mode."), 400
+
+    form_data = {
+        'birth_date': birth_date_html,
+        'birth_time': birth_time,
+        'timezone_offset': timezone_offset,
+        'latitude': latitude,
+        'longitude': longitude,
+    }
+
+    return render_template('ask_anything.html', question=question, form_data=form_data, streaming=True)
 
 
 @app.route('/stream-live-mas-analysis', methods=['POST'])
@@ -372,9 +396,34 @@ def stream_ask_anything():
         data = request.get_json() or {}
         question = (data.get('question') or '').strip()
 
+        def _norm(v):
+            return v.strip() if isinstance(v, str) else v
+
+        birth_date = _norm(data.get('birth_date'))
+        birth_time = _norm(data.get('birth_time'))
+        timezone_offset = _norm(data.get('timezone_offset'))
+        latitude = _norm(data.get('latitude'))
+        longitude = _norm(data.get('longitude'))
+
         if not question:
             return jsonify({'error': 'Missing required field: question'}), 400
 
+        required_fields = {
+            'birth_date': birth_date,
+            'birth_time': birth_time,
+            'timezone_offset': timezone_offset,
+            'latitude': latitude,
+            'longitude': longitude,
+        }
+        missing_fields = [
+            name for name, value in required_fields.items()
+            if value is None or (isinstance(value, str) and value == '')
+        ]
+        if missing_fields:
+            return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
+
+        if birth_date and '-' in birth_date:
+            birth_date = birth_date.replace('-', '/')
         from ai_service import get_client
         try:
             get_client()
@@ -386,7 +435,7 @@ def stream_ask_anything():
 
         def generate():
             try:
-                for chunk in stream_calculate_ask_anything(question):
+                for chunk in stream_calculate_ask_anything(question, birth_date, birth_time, timezone_offset, latitude, longitude):
                     if chunk:
                         yield f"data: {json.dumps({'chunk': chunk})}\n\n"
                 yield f"data: {json.dumps({'done': True})}\n\n"
