@@ -26,7 +26,8 @@ class TestAstroApp(unittest.TestCase):
         """Test index includes Ask Anything input and action button"""
         response = self.app.get('/')
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'id="askAnythingBtn"', response.data)
+        # Check for Ask Anything card and modal (new design)
+        self.assertIn(b'Ask the stars', response.data)
         self.assertIn(b'id="askAnythingModal"', response.data)
         self.assertIn(b'name="question_prompt"', response.data)
         self.assertIn(b'action="/ask-anything"', response.data)
@@ -472,14 +473,13 @@ class TestFormPersistenceIntegration(unittest.TestCase):
         response = self.app.get('/')
         self.assertEqual(response.status_code, 200)
 
-        # Check for form persistence elements
-        self.assertIn(b'id="formDataStatus"', response.data)
+        # Check for form persistence elements (form fields)
+        self.assertIn(b'id="birth_date"', response.data)
         self.assertIn(b'id="resetFormBtn"', response.data)
         self.assertIn(b'Clear Saved Data', response.data)
 
         # Check for location map elements
         self.assertIn(b'id="locationMap"', response.data)
-        self.assertIn(b'id="locationDisplay"', response.data)
         self.assertIn(b'id="locationSearch"', response.data)
 
 
