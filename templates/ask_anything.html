@@ -22,15 +22,19 @@
 {% endblock %}
 
 {% block content %}
+<script>
+    document.body.dataset.disableTrail = 'true';
+    document.body.classList.add('ask-page');
+</script>
 {% if streaming %}
 <script>document.body.dataset.streaming = 'true';</script>
 {% endif %}
 
 <h1>💬 <i>Ask Anything</i></h1>
 
-<div class="chart-section">
-    <h2><i>Your Question</i></h2>
-    <p><strong>{{ question }}</strong></p>
+<div class="ask-question-card">
+    <p class="ask-question-label">Your Question</p>
+    <p class="ask-question-text">{{ question }}</p>
 </div>
 
 <div class="analysis-section">
@@ -45,7 +49,8 @@
     </button>
 </div>
 
-<div class="navigation-links">
+<div class="ask-actions">
     <a href="/" class="back-link">← Ask another question</a>
+    <a href="/" class="back-link">Back to chart setup</a>
 </div>
 {% endblock %}

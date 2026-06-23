@@ -150,6 +150,10 @@ class StarTrail {
 
 
 document.addEventListener('DOMContentLoaded', function() {
+    if (document.body.dataset.disableTrail === 'true') {
+        return;
+    }
+
     window.starTrail = new StarTrail();
 
     if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {

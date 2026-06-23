@@ -471,6 +471,15 @@ input[readonly] {
     margin-top: 0;
 }
 
+.button-group.mode-buttons button:not(.main-cta) {
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.button-group.mode-buttons .ask-mode-btn {
+    background: rgba(255, 255, 255, 0.7);
+    border-style: dashed;
+}
+
 /* Main CTA Button - Experiment Variant */
 .button-group button.main-cta {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -761,6 +770,24 @@ input[readonly] {
     transition: color 0.3s ease;
 }
 
+.flow-step {
+    background: var(--section-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 18px 0;
+}
+
+.step-title {
+    text-align: left;
+    margin: 0 0 14px 0;
+    font-size: 20px;
+}
+
+.optional-step {
+    opacity: 0.94;
+}
+
 .form-data-status {
     display: none;
     text-align: center;
@@ -812,38 +839,79 @@ input[readonly] {
     min-height: 90px;
 }
 
+.ask-question-card {
+    margin: 18px 0;
+    padding: 16px 18px;
+    background: var(--section-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.ask-question-label {
+    margin: 0 0 6px 0;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+.ask-question-text {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 18px;
+}
+
+.ask-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.ask-page .analysis-section {
+    margin-top: 16px;
+}
+
+.ask-page .analysis-section::before {
+    display: none;
+}
+
+.ask-page .analysis-content {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
 .clear-data-container {
     text-align: center;
     margin-top: 15px;
 }
 
 .clear-data-btn {
-    background: #e2e8f0;
-    color: #4a5568;
-    border: 1px solid #cbd5e0;
-    padding: 8px 16px;
-    border-radius: 4px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    padding: 0;
+    border-radius: 0;
     cursor: pointer;
     font-size: 12px;
     font-family: 'Space Mono', monospace;
-    transition: all 0.3s ease;
+    transition: color 0.2s ease;
     width: auto;
     margin: 0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }
 
 .dark-mode .clear-data-btn {
-    background: #27272a;
     color: #a1a1aa;
-    border-color: #3f3f46;
 }
 
 .clear-data-btn:hover {
-    background: #cbd5e0;
-    transform: translateY(-1px);
+    color: #667eea;
+    transform: none;
 }
 
 .dark-mode .clear-data-btn:hover {
-    background: #3f3f46;
+    color: #c4b5fd;
 }
 
 .location-help {
