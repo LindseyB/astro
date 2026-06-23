@@ -33,16 +33,43 @@ class TestAstroApp(unittest.TestCase):
 
     def test_ask_anything_route_valid_question(self):
         """Test ask-anything placeholder page renders for valid question"""
-        response = self.app.post('/ask-anything', data={'question_prompt': 'What should I cook tonight?'})
+        response = self.app.post('/ask-anything', data={
+            'question_prompt': 'What should I cook tonight?',
+            'birth_date': '1990-01-15',
+            'birth_time': '12:00',
+            'timezone_offset': '-05:00',
+            'latitude': '40n42',
+            'longitude': '74w00'
+        })
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Ask Anything', response.data)
         self.assertIn(b'document.body.dataset.streaming', response.data)
 
     def test_ask_anything_route_missing_question(self):
         """Test ask-anything route validates question input"""
-        response = self.app.post('/ask-anything', data={'question_prompt': '   '})
+        response = self.app.post('/ask-anything', data={
+            'question_prompt': '   ',
+            'birth_date': '1990-01-15',
+            'birth_time': '12:00',
+            'timezone_offset': '-05:00',
+            'latitude': '40n42',
+            'longitude': '74w00'
+        })
         self.assertEqual(response.status_code, 400)
         self.assertIn(b'Please enter a question', response.data)
+
+    def test_ask_anything_route_missing_birth_details(self):
+        """Test ask-anything route requires astrological birth details"""
+        response = self.app.post('/ask-anything', data={
+            'question_prompt': 'Should I switch jobs this year?',
+            'birth_date': '',
+            'birth_time': '12:00',
+            'timezone_offset': '-05:00',
+            'latitude': '40n42',
+            'longitude': '74w00'
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'birth details', response.data)
 
     def test_chart_route_missing_data(self):
         """Test chart route with missing form data"""

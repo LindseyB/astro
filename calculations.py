@@ -207,21 +207,41 @@ def stream_calculate_full_chart(birth_date, birth_time, timezone_offset, latitud
         yield f"**Cosmic Note:** The AI astrologer is taking a cosmic tea break. ☕ You're as special and unique as the stars! 🔮"
 
 
-def stream_calculate_ask_anything(question):
+def stream_calculate_ask_anything(question, birth_date, birth_time, timezone_offset, latitude, longitude):
     """
-    Stream a general purpose answer for free-form questions.
+    Stream a general purpose answer for free-form questions with astrological context.
 
     Args:
         question (str): User's free-form question
+        birth_date (str): Birth date in YYYY/MM/DD format
+        birth_time (str): Birth time in HH:MM format
+        timezone_offset (str): Timezone offset
+        latitude (str): Latitude in flatlib format (e.g., 40n42)
+        longitude (str): Longitude in flatlib format (e.g., 74w00)
 
     Yields:
         str: Text chunks from AI streaming response
     """
+    chart, today_chart = create_charts(birth_date, birth_time, timezone_offset, latitude, longitude)
+    sun, moon, ascendant = get_main_positions(chart)
+    planets_in_houses = get_planets_in_houses(chart)
+    current_planets = get_current_planets(today_chart)
+
     user_prompt = (
         "Answer this question clearly and directly in a chill, friendly way. "
         "Be concise and practical, and use short bullets when useful. "
+        "Use the astrological context below to personalize your answer. "
         "If the question is ambiguous, make a reasonable assumption and state it briefly.\n\n"
-        f"Question: {question}"
+        f"Question: {question}\n\n"
+        f"Chart Data:\n"
+        f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
+        "Planets in Houses:\n" +
+        "\n".join([
+            f"{HOUSE_NAMES[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in house_data['planets']])
+            for house_number, house_data in planets_in_houses.items()
+        ]) +
+        "\n\nCurrent Planets status:\n" +
+        format_planets_for_api(current_planets)
     )
 
     system_content = (

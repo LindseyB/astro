@@ -398,7 +398,14 @@ class TestStreamingEndpointsSSE(unittest.TestCase):
         mock_stream_ask_anything.return_value = iter(['Answer part one. ', 'Answer part two.'])
 
         response = self.app.post('/stream-ask-anything',
-                                data=json.dumps({'question': 'What is a good morning routine?'}),
+                                data=json.dumps({
+                                    'question': 'What is a good morning routine?',
+                                    'birth_date': '1988-08-08',
+                                    'birth_time': '10:30',
+                                    'timezone_offset': '0',
+                                    'latitude': '51n30',
+                                    'longitude': '0w07'
+                                }),
                                 content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
@@ -417,7 +424,14 @@ class TestStreamingEndpointsSSE(unittest.TestCase):
     def test_stream_ask_anything_missing_question(self):
         """Test /stream-ask-anything validates required question field"""
         response = self.app.post('/stream-ask-anything',
-                                data=json.dumps({'question': '   '}),
+                                data=json.dumps({
+                                    'question': '   ',
+                                    'birth_date': '1988-08-08',
+                                    'birth_time': '10:30',
+                                    'timezone_offset': '0',
+                                    'latitude': '51n30',
+                                    'longitude': '0w07'
+                                }),
                                 content_type='application/json')
 
         self.assertEqual(response.status_code, 400)
@@ -431,12 +445,37 @@ class TestStreamingEndpointsSSE(unittest.TestCase):
         mock_get_client.side_effect = ValueError('ANTHROPIC_TOKEN not set')
 
         response = self.app.post('/stream-ask-anything',
-                                data=json.dumps({'question': 'What is the weather?' }),
+                                data=json.dumps({
+                                    'question': 'What is the weather?',
+                                    'birth_date': '1988-08-08',
+                                    'birth_time': '10:30',
+                                    'timezone_offset': '0',
+                                    'latitude': '51n30',
+                                    'longitude': '0w07'
+                                }),
                                 content_type='application/json')
 
         self.assertEqual(response.status_code, 503)
         response_data = json.loads(response.data)
         self.assertIn('error', response_data)
+
+    def test_stream_ask_anything_missing_birth_fields(self):
+        """Test /stream-ask-anything validates astrological birth fields"""
+        response = self.app.post('/stream-ask-anything',
+                                data=json.dumps({
+                                    'question': 'Should I move this year?',
+                                    'birth_date': '1988-08-08',
+                                    'birth_time': '',
+                                    'timezone_offset': '0',
+                                    'latitude': '51n30',
+                                    'longitude': '0w07'
+                                }),
+                                content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        response_data = json.loads(response.data)
+        self.assertIn('error', response_data)
+        self.assertIn('birth_time', response_data['error'])
 
     @patch('calculations.stream_ai_api')
     @patch('calculations.get_current_planets')

@@ -10,7 +10,12 @@
 <script>
     window.chartDataForStreaming = {
         pageType: 'ask-anything',
-        question: {{ question | tojson }}
+        question: {{ question | tojson }},
+        birthDate: {{ form_data.birth_date | tojson }},
+        birthTime: {{ form_data.birth_time | tojson }},
+        timezoneOffset: {{ form_data.timezone_offset | tojson }},
+        latitude: {{ form_data.latitude | tojson }},
+        longitude: {{ form_data.longitude | tojson }}
     };
 </script>
 {% endif %}

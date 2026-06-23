@@ -87,7 +87,14 @@ class TestTemplates(unittest.TestCase):
 
     def test_ask_anything_template_structure(self):
         """Test ask-anything template structure with streaming placeholder"""
-        response = self.app.post('/ask-anything', data={'question_prompt': 'How do I focus better?'})
+        response = self.app.post('/ask-anything', data={
+            'question_prompt': 'How do I focus better?',
+            'birth_date': '1988-08-08',
+            'birth_time': '10:30',
+            'timezone_offset': '0',
+            'latitude': '51n30',
+            'longitude': '00w07'
+        })
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'document.body.dataset.streaming', response.data)
         self.assertIn(b'stream-analysis.js', response.data)
