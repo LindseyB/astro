@@ -161,13 +161,24 @@ function updateLocationDisplay(lat, lng, astroLat, astroLng) {
 function getTimezoneForLocation(lat, lng) {
     const timezoneField = document.getElementById('timezone_offset');
     if (!timezoneField) return;
+    timezoneField.dataset.lastLng = String(lng);
     // Respect a manual override — never clobber a timezone the user chose.
     if (timezoneField.dataset.userModified === 'true') return;
 
     // Resolve the IANA timezone for these coordinates, then compute the UTC
     // offset for the birth date so daylight saving (time of year) is handled.
     const url = `https://timeapi.io/api/timezone/coordinate?latitude=${lat}&longitude=${lng}`;
-    fetch(url)
+    let timezoneRequest;
+    let timeoutId;
+    if (typeof AbortController === 'function') {
+        const controller = new AbortController();
+        timeoutId = setTimeout(function() { controller.abort(); }, 4000);
+        timezoneRequest = fetch(url, { signal: controller.signal });
+    } else {
+        timezoneRequest = fetch(url);
+    }
+
+    timezoneRequest
         .then(response => response.ok ? response.json() : Promise.reject(new Error('timezone lookup failed')))
         .then(data => {
             if (!data || !data.timeZone) throw new Error('no timezone in response');
@@ -177,6 +188,9 @@ function getTimezoneForLocation(lat, lng) {
         .catch(() => {
             // Fallback: rough estimate from longitude (no DST awareness).
             estimateTimezoneFromLongitude(lng);
+        })
+        .finally(() => {
+            if (timeoutId) clearTimeout(timeoutId);
         });
 }
 
@@ -222,6 +236,7 @@ function applyTimezoneGuess() {
     }
     const lastLng = parseFloat(timezoneField.dataset.lastLng || '');
     if (!isNaN(lastLng)) estimateTimezoneFromLongitude(lastLng);
+}
 
 // Rough timezone estimate from longitude, used only when the lookup fails.
 function estimateTimezoneFromLongitude(lng) {
