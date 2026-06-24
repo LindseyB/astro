@@ -216,8 +216,12 @@ function applyTimezoneGuess() {
     }
 
     const offset = offsetForZoneOnDate(zone, refDate);
-    if (offset) setTimezoneSelectValue(offset);
-}
+    if (offset) {
+        setTimezoneSelectValue(offset);
+        return;
+    }
+    const lastLng = parseFloat(timezoneField.dataset.lastLng || '');
+    if (!isNaN(lastLng)) estimateTimezoneFromLongitude(lastLng);
 
 // Rough timezone estimate from longitude, used only when the lookup fails.
 function estimateTimezoneFromLongitude(lng) {

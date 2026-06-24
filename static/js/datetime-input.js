@@ -17,6 +17,8 @@
     var month = parseInt(mo, 10);
     var day = parseInt(d, 10);
     if (!year || month < 1 || month > 12 || day < 1 || day > 31) return '';
+    var dt = new Date(Date.UTC(year, month - 1, day));
+    if (dt.getUTCFullYear() !== year || (dt.getUTCMonth() + 1) !== month || dt.getUTCDate() !== day) return '';
     return String(year).padStart(4, '0') + '-' + pad(month) + '-' + pad(day);
   }
 
@@ -87,6 +89,12 @@
     // Normalize free-typed text when the field loses focus.
     text.addEventListener('blur', function () {
       var normalized = normalizer(text.value);
+      var raw = (text.value || '').trim();
+      if (raw && !normalized) {
+        text.value = '';
+        text.dispatchEvent(new Event('change', { bubbles: true }));
+        return;
+      }
       if (normalized && normalized !== text.value) {
         text.value = normalized;
         text.dispatchEvent(new Event('change', { bubbles: true }));
