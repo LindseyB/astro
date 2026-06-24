@@ -427,24 +427,41 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* Sticky headers gain a frosted backdrop once the page is scrolled, so the
-   logo and actions stay readable over content scrolling behind them. */
+   logo and actions stay readable over content scrolling behind them. The
+   backdrop is a full-bleed pseudo-element so it spans the whole page width
+   while the header content stays centered. */
 .site-header,
 .reading-header {
-  border-bottom: 1px solid transparent;
-  transition: background-color 220ms ease, box-shadow 220ms ease,
-              border-color 220ms ease, backdrop-filter 220ms ease;
+  position: sticky; top: 0; z-index: 20;
 }
-.is-scrolled .site-header,
-.is-scrolled .reading-header {
-  background: var(--glass-bg);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border-bottom-color: var(--border);
-  box-shadow: var(--shadow-card);
+.site-header::before,
+.reading-header::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background: oklch(1 0 0 / 0.28);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 8px 24px -16px oklch(0.3 0.15 285 / 0.25);
+  transition: opacity 220ms ease;
+}
+.dark .site-header::before,
+.dark .reading-header::before {
+  background: oklch(0.18 0.06 285 / 0.3);
+}
+.is-scrolled .site-header::before,
+.is-scrolled .reading-header::before {
+  opacity: 1;
 }
 @media (prefers-reduced-motion: reduce) {
-  .site-header,
-  .reading-header { transition: none; }
+  .site-header::before,
+  .reading-header::before { transition: none; }
 }
 .logo {
   display: inline-flex; align-items: baseline; gap: 0.5rem;
