@@ -8,11 +8,15 @@ A web-based astrological horoscope for only the chillest of humans
 
 ## Features
 
-- 🌟 Calculate natal charts with Sun, Moon, and Ascendant signs
-- 📡 Check current Mercury retrograde status
-- 🌐 Web interface for easy input and viewing
+- 🌟 Natal chart calculations — Sun, Moon, and Ascendant signs
+- 🪐 Full birth chart with a rendered chart wheel, house placements, and aspects
+- 🔮 AI-powered daily horoscope, streamed in real time (Claude)
+- 💬 "Ask the stars" — ask anything and get an answer tuned to the current sky
+- 🌮 Personalized Taco Bell order based on your chart
+- 🎵 Music-genre preference with AI song recommendations
+- 📡 Current Mercury retrograde status
+- 🌗 Light and dark mode
 - 📱 Responsive design
-- 🔮 Gives you an amazing horoscope
 
 ## Installation
 
@@ -62,6 +66,8 @@ ANTHROPIC_TOKEN=your-api-key-here
 export ANTHROPIC_TOKEN="your-api-key-here"          # macOS/Linux
 # $env:ANTHROPIC_TOKEN = "your-api-key-here"        # Windows PowerShell
 ```
+
+> **Optional:** set `LAST_FM_API_KEY` (from https://www.last.fm/api/account/create) to enable real song recommendations. Without it, the app still runs and falls back to AI-suggested songs.
 
 3. Run the Flask app:
 
@@ -147,21 +153,25 @@ Skip the tacos if you’re working late, triple up on sides if you’re friendsh
 ## Screenshots
 
 ### Home — light
+
 <div align="center">
   <img src="docs/screenshots/home-light.png" alt="Home page in light mode showing bento-style grid of ritual tiles" width="600">
 </div>
 
 ### Home — dark
+
 <div align="center">
   <img src="docs/screenshots/home-dark.png" alt="Home page in dark mode showing bento-style grid of ritual tiles" width="600">
 </div>
 
 ### Birth info panel
+
 <div align="center">
   <img src="docs/screenshots/birth-panel.png" alt="Birth info slide-in panel with location search and inline error message" width="400">
 </div>
 
 ### Ask the stars
+
 <div align="center">
   <img src="docs/screenshots/ask-anything.png" alt="Ask the stars modal with auto-growing textarea" width="400">
 </div>

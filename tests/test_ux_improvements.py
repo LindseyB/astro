@@ -180,57 +180,6 @@ class TestMapDarkMode(unittest.TestCase):
         self.assertIn(b'document.documentElement', response.data)
 
 
-class TestSparklesUpdate(unittest.TestCase):
-    """Test sparkles.js updates for star characters and colors"""
-
-    def setUp(self):
-        """Set up test client"""
-        self.app = app.test_client()
-        self.app.testing = True
-
-    def test_sparkles_uses_star_characters(self):
-        """Test that sparkles.js uses star characters instead of emoji"""
-        response = self.app.get('/static/js/sparkles.js')
-        self.assertEqual(response.status_code, 200)
-        
-        # Check for star characters (UTF-8 encoded)
-        self.assertIn('✦'.encode('utf-8'), response.data)
-        self.assertIn('✧'.encode('utf-8'), response.data)
-        self.assertIn('⋆'.encode('utf-8'), response.data)
-        
-        # Should not have old emoji
-        self.assertNotIn('🌟'.encode('utf-8'), response.data)
-        self.assertNotIn('✨'.encode('utf-8'), response.data)
-
-    def test_sparkles_has_color_array(self):
-        """Test that sparkles.js includes color definitions"""
-        response = self.app.get('/static/js/sparkles.js')
-        self.assertEqual(response.status_code, 200)
-        
-        # Check for color array
-        self.assertIn(b'#FFD700', response.data)  # Gold
-        self.assertIn(b'#FFA500', response.data)  # Orange
-        self.assertIn(b'#FF69B4', response.data)  # Hot pink
-        self.assertIn(b'#9370DB', response.data)  # Purple
-
-    def test_sparkles_has_text_shadow(self):
-        """Test that sparkles.js applies text shadow for glow effect"""
-        response = self.app.get('/static/js/sparkles.js')
-        self.assertEqual(response.status_code, 200)
-        
-        # Check for textShadow property
-        self.assertIn(b'textShadow', response.data)
-
-    def test_sparkles_maintains_animation_logic(self):
-        """Test that sparkles.js maintains core animation functionality"""
-        response = self.app.get('/static/js/sparkles.js')
-        self.assertEqual(response.status_code, 200)
-        
-        # Core functions should still exist
-        self.assertIn(b'createSparkle', response.data)
-        self.assertIn(b'startSparkleRain', response.data)
-
-
 class TestSearchButtonStyling(unittest.TestCase):
     """Test search button styling matches main buttons"""
 

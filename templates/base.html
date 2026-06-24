@@ -53,6 +53,7 @@
 </head>
 <body>
     <div class="aurora-bg" aria-hidden="true"></div>
+    <div class="aurora-sparkles" aria-hidden="true"></div>
     <div class="shooting-stars" aria-hidden="true">
       <span class="shooting-star"></span>
       <span class="shooting-star"></span>
@@ -73,6 +74,10 @@
         });
       })();
     </script>
+    <!-- Dramatic glitter sparkles over the light-mode aurora -->
+    <script src="{{ url_for('static', filename='js/aurora-sparkle.js') }}"></script>
+    <!-- Frost the sticky header backdrop once the page is scrolled -->
+    <script src="{{ url_for('static', filename='js/header-scroll.js') }}"></script>
     {% block page_scripts %}{% endblock %}
 </body>
 </html>
