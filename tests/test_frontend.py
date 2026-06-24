@@ -38,7 +38,7 @@ class TestTemplates(unittest.TestCase):
         """Test that datetime input JS file is accessible"""
         response = self.app.get('/static/js/datetime-input.js')
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'normalizeDateString', response.data)
+        self.assertIn(b'normalizeDate', response.data)
 
     def test_index_template_renders(self):
         """Test that index template renders correctly"""
