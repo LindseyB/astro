@@ -3,7 +3,7 @@ Tests for the Last.fm service integration
 """
 
 from unittest.mock import patch, MagicMock
-from lastfm_service import get_top_tracks_by_genre, format_tracks_for_prompt
+from lastfm_service import get_top_tracks_by_genre, format_tracks_for_prompt, select_varied_tracks
 
 
 class TestGetTopTracksByGenre:
@@ -238,11 +238,12 @@ class TestFormatTracksForPrompt:
             for i in range(1, 11)
         ]
         result = format_tracks_for_prompt(tracks, limit=3)
-        
-        assert '- Song 1 by Artist 1' in result
-        assert '- Song 2 by Artist 2' in result
-        assert '- Song 3 by Artist 3' in result
-        assert '- Song 4 by Artist 4' not in result
+
+        lines = [line for line in result.splitlines() if line.startswith('- ')]
+        assert len(lines) == 3
+
+        valid_options = {f'- Song {i} by Artist {i}' for i in range(1, 11)}
+        assert all(line in valid_options for line in lines)
     
     def test_default_limit_is_20(self):
         """Test that default limit is 20 tracks"""
@@ -251,11 +252,12 @@ class TestFormatTracksForPrompt:
             for i in range(1, 25)
         ]
         result = format_tracks_for_prompt(tracks)
-        
-        # Should include first 20
-        assert '- Song 20 by Artist 20' in result
-        # Should not include 21st
-        assert '- Song 21 by Artist 21' not in result
+
+        lines = [line for line in result.splitlines() if line.startswith('- ')]
+        assert len(lines) == 20
+
+        valid_options = {f'- Song {i} by Artist {i}' for i in range(1, 25)}
+        assert all(line in valid_options for line in lines)
     
     def test_handles_fewer_tracks_than_limit(self):
         """Test handling when tracks list is smaller than limit"""
@@ -267,3 +269,27 @@ class TestFormatTracksForPrompt:
         
         assert '- Song 1 by Artist 1' in result
         assert '- Song 2 by Artist 2' in result
+
+
+class TestSelectVariedTracks:
+    """Tests for tiered varied track selection"""
+
+    def test_returns_empty_for_empty_input(self):
+        assert select_varied_tracks([], limit=30, seed_key='seed') == []
+
+    def test_respects_limit(self):
+        tracks = [{'name': f'Song {i}', 'artist': f'Artist {i}'} for i in range(1, 61)]
+        selected = select_varied_tracks(tracks, limit=30, seed_key='seed')
+        assert len(selected) == 30
+
+    def test_is_deterministic_with_same_seed(self):
+        tracks = [{'name': f'Song {i}', 'artist': f'Artist {i}'} for i in range(1, 61)]
+        selected_a = select_varied_tracks(tracks, limit=30, seed_key='2026-06-24:rock')
+        selected_b = select_varied_tracks(tracks, limit=30, seed_key='2026-06-24:rock')
+        assert selected_a == selected_b
+
+    def test_varies_with_different_seed(self):
+        tracks = [{'name': f'Song {i}', 'artist': f'Artist {i}'} for i in range(1, 61)]
+        selected_a = select_varied_tracks(tracks, limit=30, seed_key='2026-06-24:rock')
+        selected_b = select_varied_tracks(tracks, limit=30, seed_key='2026-06-25:rock')
+        assert selected_a != selected_b

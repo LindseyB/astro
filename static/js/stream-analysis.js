@@ -24,11 +24,14 @@
 
         // Only horoscope/full-chart pages load the async music suggestion.
         if (chartData.pageType === 'chart' || chartData.pageType === 'full-chart') {
-            const musicPlaceholder = document.createElement('div');
-            musicPlaceholder.id = 'music-suggestion-placeholder';
+            let musicPlaceholder = document.getElementById('music-suggestion-placeholder');
+            if (!musicPlaceholder) {
+                musicPlaceholder = document.createElement('div');
+                musicPlaceholder.id = 'music-suggestion-placeholder';
+                analysisContainer.appendChild(musicPlaceholder);
+            }
             const chartType = chartData.pageType === 'chart' ? 'daily' : 'natal';
             musicPlaceholder.setAttribute('data-chart-type', chartType);
-            analysisContainer.appendChild(musicPlaceholder);
 
             if (typeof loadMusicSuggestion === 'function' && window.chartDataForMusic) {
                 loadMusicSuggestion(window.chartDataForMusic, chartType);
@@ -45,6 +48,16 @@
         
         const analysisContainer = document.getElementById('analysisContent');
         const chartData = window.chartDataForStreaming;
+        let fullText = '';
+        let hasFinalized = false;
+
+        function safeFinalizeStream() {
+            if (hasFinalized) {
+                return;
+            }
+            hasFinalized = true;
+            finalizeStream(analysisContainer, fullText, chartData);
+        }
         
         console.log('Streaming initialized:', {
             analysisContainer: !!analysisContainer,
@@ -114,7 +127,6 @@
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
-        let fullText = '';
         
         // Clear loading message
         analysisContainer.innerHTML = '';
@@ -122,7 +134,7 @@
         function processStream() {
             reader.read().then(({ done, value }) => {
                 if (done) {
-                    finalizeStream(analysisContainer, fullText, chartData);
+                    safeFinalizeStream();
                     return;
                 }
                 
@@ -143,7 +155,7 @@
                                 // Display raw text while streaming
                                 analysisContainer.textContent = fullText;
                             } else if (data.done) {
-                                finalizeStream(analysisContainer, fullText, chartData);
+                                safeFinalizeStream();
                             } else if (data.error) {
                                 console.error('Streaming error:', data.error);
                                 analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';

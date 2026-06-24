@@ -143,7 +143,7 @@ def test_music_suggestion_with_lastfm_integration(client):
                 _ = b''.join(response.response)
                 
                 # Verify Last.fm was called with correct genre
-                mock_lastfm.assert_called_once_with('disco')
+                mock_lastfm.assert_called_once_with('disco', limit=50)
                 
                 # Verify the prompt included Last.fm tracks
                 call_args = mock_stream.call_args
@@ -215,4 +215,4 @@ def test_music_suggestion_any_genre_skips_lastfm(client):
                 _ = b''.join(response.response)
                 
                 # Last.fm should still be called (it handles 'any' internally)
-                mock_lastfm.assert_called_once_with('any')
+                mock_lastfm.assert_called_once_with('any', limit=50)

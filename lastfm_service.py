@@ -2,12 +2,73 @@
 Last.fm API service for fetching top tracks by genre
 """
 import os
+import random
+from datetime import datetime
 import requests
 from config import logger
 
 # Last.fm API configuration
 LASTFM_API_KEY = os.environ.get("LAST_FM_API_KEY")
 LASTFM_API_URL = "https://ws.audioscrobbler.com/2.0/"
+
+
+def select_varied_tracks(tracks, limit=30, seed_key=None):
+    """
+    Select a varied mix of tracks from popularity tiers while staying in-genre.
+
+    Strategy:
+      - 40% from top tier
+      - 35% from middle tier
+      - 25% from tail tier
+    Selection is deterministic per day/genre when seed_key is provided.
+    """
+    if not tracks:
+        return []
+
+    if limit <= 0:
+        return []
+
+    if len(tracks) <= limit:
+        return tracks[:]
+
+    top_end = max(1, int(len(tracks) * 0.33))
+    mid_end = max(top_end + 1, int(len(tracks) * 0.66))
+
+    top_tier = tracks[:top_end]
+    mid_tier = tracks[top_end:mid_end]
+    tail_tier = tracks[mid_end:]
+
+    top_target = max(1, int(round(limit * 0.40)))
+    mid_target = max(1, int(round(limit * 0.35)))
+    tail_target = max(0, limit - top_target - mid_target)
+
+    if seed_key is None:
+        seed_key = datetime.utcnow().strftime('%Y-%m-%d')
+
+    rng = random.Random(str(seed_key))
+
+    def sample_tier(tier, count):
+        if count <= 0 or not tier:
+            return []
+        if len(tier) <= count:
+            picked = tier[:]
+            rng.shuffle(picked)
+            return picked
+        return rng.sample(tier, count)
+
+    selected = []
+    selected.extend(sample_tier(top_tier, top_target))
+    selected.extend(sample_tier(mid_tier, mid_target))
+    selected.extend(sample_tier(tail_tier, tail_target))
+
+    if len(selected) < limit:
+        remaining = [track for track in tracks if track not in selected]
+        if remaining:
+            rng.shuffle(remaining)
+            selected.extend(remaining[: limit - len(selected)])
+
+    rng.shuffle(selected)
+    return selected[:limit]
 
 
 def get_top_tracks_by_genre(genre, limit=20):
@@ -94,8 +155,9 @@ def format_tracks_for_prompt(tracks, limit=20):
     if not tracks:
         return ""
     
-    # Take only the specified limit
-    limited_tracks = tracks[:limit]
+    # Use a deterministic daily seed so suggestions rotate over time but are stable within a day.
+    daily_seed = datetime.utcnow().strftime('%Y-%m-%d')
+    limited_tracks = select_varied_tracks(tracks, limit=limit, seed_key=daily_seed)
     
     # Format as bullet list
     track_lines = [f"- {track['name']} by {track['artist']}" for track in limited_tracks]

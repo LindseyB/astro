@@ -3,6 +3,12 @@ function loadMusicSuggestion(chartData, chartType) {
     const container = document.getElementById('music-suggestion-placeholder');
     if (!container) return;
 
+    // Prevent duplicate requests if multiple triggers fire.
+    if (container.dataset.loading === 'true' || container.dataset.loaded === 'true') {
+        return;
+    }
+    container.dataset.loading = 'true';
+
     let reader;
 
     container.innerHTML = '<p><em>Loading song suggestion...</em></p>';
@@ -58,9 +64,12 @@ function loadMusicSuggestion(chartData, chartType) {
                                 p.textContent = suggestionText;
                                 container.innerHTML = '';
                                 container.appendChild(p);
+                                container.dataset.loaded = 'true';
+                                container.dataset.loading = 'false';
                             } else if (data.error) {
                                 console.error('Music suggestion error:', data.error);
                                 reader.cancel();
+                                container.dataset.loading = 'false';
                                 container.remove();
                             }
                         } catch (e) {
@@ -80,12 +89,18 @@ function loadMusicSuggestion(chartData, chartType) {
         if (reader) {
             reader.cancel();
         }
+        container.dataset.loading = 'false';
         container.remove();
     });
 }
 
 // Auto-load music suggestion when page loads
 document.addEventListener('DOMContentLoaded', function() {
+    // Streaming pages trigger music suggestion after analysis finishes.
+    if (document.body.dataset.streaming === 'true') {
+        return;
+    }
+
     const musicContainer = document.getElementById('music-suggestion-placeholder');
     if (musicContainer) {
         const chartData = window.chartDataForMusic;

@@ -8,7 +8,7 @@ from formatters import markdown_filter, prepare_music_genre_text, format_planets
 from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas, stream_calculate_ask_anything
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets, get_full_chart_structure
 from ai_service import stream_ai_api
-from lastfm_service import get_top_tracks_by_genre, format_tracks_for_prompt
+from lastfm_service import get_top_tracks_by_genre, format_tracks_for_prompt, LASTFM_API_KEY
 from prompt_templates import load_prompt_template, load_prompt_text
 import json
 import re
@@ -569,9 +569,26 @@ def music_suggestion():
         else:
             song_request = " any genre"
 
-        # Get top tracks from Last.fm for the genre
-        lastfm_tracks = get_top_tracks_by_genre(music_genre)
-        tracks_context = format_tracks_for_prompt(lastfm_tracks)
+        # Fetch a larger pool and let formatter pick a varied 30-track mix.
+        lastfm_tracks = get_top_tracks_by_genre(music_genre, limit=50)
+        tracks_context = format_tracks_for_prompt(lastfm_tracks, limit=30)
+
+        normalized_genre = (music_genre or '').strip().lower() if isinstance(music_genre, str) else ''
+        if not normalized_genre or normalized_genre == 'any':
+            lastfm_status = 'skipped_any_genre'
+        elif not LASTFM_API_KEY:
+            lastfm_status = 'skipped_missing_api_key'
+        elif lastfm_tracks:
+            lastfm_status = 'ok_tracks_found'
+        else:
+            lastfm_status = 'ok_no_tracks_found'
+
+        logger.info(
+            "Last.fm lookup status: %s (genre=%s, tracks=%d)",
+            lastfm_status,
+            music_genre,
+            len(lastfm_tracks),
+        )
         
         tracks_block = ""
         if tracks_context:
@@ -612,7 +629,10 @@ def music_suggestion():
                 logger.error(f"Error streaming music suggestion: {e}")
                 yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
-        return Response(stream_with_context(generate()), mimetype='text/event-stream')
+        response = Response(stream_with_context(generate()), mimetype='text/event-stream')
+        response.headers['X-Lastfm-Status'] = lastfm_status
+        response.headers['X-Lastfm-Tracks-Count'] = str(len(lastfm_tracks))
+        return response
 
     except Exception as e:
         logger.error(f"ERROR in /music-suggestion route: {type(e).__name__}: {str(e)}")
