@@ -2,16 +2,32 @@
 let map;
 let marker;
 let currentTileLayer;
+// Set while we programmatically change the timezone, so those updates are not
+// mistaken for a manual override by the user.
+let suppressTzModified = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     initMap();
     
-    // Mark timezone field as user-modified when manually changed
+    // Mark timezone field as user-modified when the user changes it themselves,
+    // so our location/date best-guess never overrides their choice.
     const timezoneField = document.getElementById('timezone_offset');
     if (timezoneField) {
-        timezoneField.addEventListener('input', function() {
-            this.dataset.userModified = 'true';
+        timezoneField.addEventListener('change', function() {
+            if (!suppressTzModified) this.dataset.userModified = 'true';
         });
+        if (window.jQuery) {
+            jQuery('#timezone_offset').on('select2:select', function() {
+                this.dataset.userModified = 'true';
+            });
+        }
+    }
+
+    // When the birth date changes, re-evaluate the timezone guess so the offset
+    // reflects daylight saving for that time of year.
+    const birthDateField = document.getElementById('birth_date');
+    if (birthDateField) {
+        birthDateField.addEventListener('change', applyTimezoneGuess);
     }
     
     // Handle Enter key in search input
@@ -143,17 +159,89 @@ function updateLocationDisplay(lat, lng, astroLat, astroLng) {
 }
 
 function getTimezoneForLocation(lat, lng) {
-    // Use a simple timezone estimation based on longitude
-    // For a more accurate timezone, you'd want to use a timezone API
-    const timezoneOffset = Math.round(lng / 15);
-    const offsetString = (timezoneOffset >= 0 ? '+' : '') + 
-                        timezoneOffset.toString().padStart(2, '0') + ':00';
-    
     const timezoneField = document.getElementById('timezone_offset');
-    // Only update timezone if field is empty or hasn't been manually modified by user
-    if (timezoneField && !timezoneField.value && !timezoneField.dataset.userModified) {
-        timezoneField.value = offsetString;
+    if (!timezoneField) return;
+    // Respect a manual override — never clobber a timezone the user chose.
+    if (timezoneField.dataset.userModified === 'true') return;
+
+    // Resolve the IANA timezone for these coordinates, then compute the UTC
+    // offset for the birth date so daylight saving (time of year) is handled.
+    const url = `https://timeapi.io/api/timezone/coordinate?latitude=${lat}&longitude=${lng}`;
+    fetch(url)
+        .then(response => response.ok ? response.json() : Promise.reject(new Error('timezone lookup failed')))
+        .then(data => {
+            if (!data || !data.timeZone) throw new Error('no timezone in response');
+            timezoneField.dataset.ianaZone = data.timeZone;
+            applyTimezoneGuess();
+        })
+        .catch(() => {
+            // Fallback: rough estimate from longitude (no DST awareness).
+            estimateTimezoneFromLongitude(lng);
+        });
+}
+
+// Compute the UTC offset (e.g. "-04:00") for an IANA timezone on a given date,
+// using the browser's Intl support so daylight saving is taken into account.
+function offsetForZoneOnDate(timeZone, date) {
+    try {
+        const dtf = new Intl.DateTimeFormat('en-US', { timeZone: timeZone, timeZoneName: 'longOffset' });
+        const part = dtf.formatToParts(date).find(p => p.type === 'timeZoneName');
+        const name = part ? part.value : 'GMT+00:00';
+        const match = name.match(/GMT([+-])(\d{1,2})(?::?(\d{2}))?/);
+        if (!match) return '+00:00'; // plain "GMT" => UTC
+        const sign = match[1];
+        const hours = match[2].padStart(2, '0');
+        const minutes = match[3] || '00';
+        return `${sign}${hours}:${minutes}`;
+    } catch (e) {
+        return null;
     }
+}
+
+// Apply the best-guess timezone for the resolved IANA zone and the birth date.
+function applyTimezoneGuess() {
+    const timezoneField = document.getElementById('timezone_offset');
+    if (!timezoneField || timezoneField.dataset.userModified === 'true') return;
+    const zone = timezoneField.dataset.ianaZone;
+    if (!zone) return;
+
+    const birthDateField = document.getElementById('birth_date');
+    let refDate;
+    if (birthDateField && birthDateField.value) {
+        // Noon UTC on the birth date keeps us clear of DST transition edges.
+        refDate = new Date(birthDateField.value + 'T12:00:00Z');
+        if (isNaN(refDate.getTime())) refDate = new Date();
+    } else {
+        refDate = new Date();
+    }
+
+    const offset = offsetForZoneOnDate(zone, refDate);
+    if (offset) setTimezoneSelectValue(offset);
+}
+
+// Rough timezone estimate from longitude, used only when the lookup fails.
+function estimateTimezoneFromLongitude(lng) {
+    const timezoneField = document.getElementById('timezone_offset');
+    if (!timezoneField || timezoneField.dataset.userModified === 'true') return;
+    const offsetHours = Math.round(lng / 15);
+    const sign = offsetHours >= 0 ? '+' : '-';
+    const abs = Math.abs(offsetHours).toString().padStart(2, '0');
+    setTimezoneSelectValue(`${sign}${abs}:00`);
+}
+
+// Programmatically set the timezone select (Select2-aware) without it counting
+// as a manual user override.
+function setTimezoneSelectValue(offset) {
+    const timezoneField = document.getElementById('timezone_offset');
+    if (!timezoneField) return;
+    suppressTzModified = true;
+    if (window.jQuery && jQuery('#timezone_offset').data('select2')) {
+        jQuery('#timezone_offset').val(offset).trigger('change');
+    } else {
+        timezoneField.value = offset;
+        timezoneField.dispatchEvent(new Event('change'));
+    }
+    setTimeout(function() { suppressTzModified = false; }, 0);
 }
 
 function updateMapTiles() {

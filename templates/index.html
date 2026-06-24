@@ -5,6 +5,9 @@
 {% endblock %}
 
 {% block content %}
+<!-- Flash message (auto-hides) -->
+<div id="flashToast" class="flash-toast" role="status" aria-live="polite"></div>
+
 <!-- Header -->
 <header class="site-header">
   <a href="/" class="logo">
@@ -115,11 +118,29 @@
     <div class="field-row">
       <div class="field-group">
         <label for="birth_date">Date</label>
-        <input type="date" id="birth_date" name="birth_date">
+        <div class="input-with-picker">
+          <input type="text" id="birth_date" name="birth_date" inputmode="numeric"
+                 autocomplete="off" placeholder="YYYY-MM-DD" pattern="\d{4}-\d{2}-\d{2}"
+                 aria-describedby="birth_date_hint">
+          <button type="button" class="picker-btn" id="birth_date_btn" aria-label="Open calendar" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </button>
+          <input type="date" id="birth_date_native" class="hidden-native-picker" tabindex="-1" aria-hidden="true">
+        </div>
+        <span id="birth_date_hint" class="field-hint">Type or pick — e.g. 1990-07-15</span>
       </div>
       <div class="field-group">
         <label for="birth_time">Time</label>
-        <input type="time" id="birth_time" name="birth_time">
+        <div class="input-with-picker">
+          <input type="text" id="birth_time" name="birth_time" inputmode="numeric"
+                 autocomplete="off" placeholder="HH:MM" pattern="\d{2}:\d{2}"
+                 aria-describedby="birth_time_hint">
+          <button type="button" class="picker-btn" id="birth_time_btn" aria-label="Open time picker" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          </button>
+          <input type="time" id="birth_time_native" class="hidden-native-picker" tabindex="-1" aria-hidden="true">
+        </div>
+        <span id="birth_time_hint" class="field-hint">24-hour, e.g. 09:30 or 21:30</span>
       </div>
     </div>
 
@@ -267,6 +288,7 @@
 {% block page_scripts %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="{{ url_for('static', filename='js/location-map.js') }}"></script>
+<script src="{{ url_for('static', filename='js/datetime-input.js') }}"></script>
 <script src="{{ url_for('static', filename='js/music-genre.js') }}"></script>
 <script src="{{ url_for('static', filename='js/form-persistence.js') }}"></script>
 <script src="{{ url_for('static', filename='js/timezone-select.js') }}"></script>
@@ -440,17 +462,24 @@
     form.submit();
   }
 
-  // ── Restore native date/time picker on click ──────────────
-  // The calendar/clock indicator is hidden (to keep it out of the tab
-  // order), so re-open the picker when the user clicks the field.
-  ['birth_date', 'birth_time'].forEach(function (id) {
-    var el = document.getElementById(id);
-    if (el && typeof el.showPicker === 'function') {
-      el.addEventListener('click', function () {
-        try { el.showPicker(); } catch (e) { /* needs a user gesture */ }
-      });
-    }
-  });
+  // ── Flash message (auto-hides) ────────────────────────────
+  function showFlash(message, duration) {
+    var toast = document.getElementById('flashToast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(showFlash._timer);
+    showFlash._timer = setTimeout(function () {
+      toast.classList.remove('show');
+    }, duration || 6000);
+  }
+
+  // ── First visit: prompt for birth info ────────────────────
+  // If nothing has been saved yet, open the panel and nudge the user.
+  if (!hasBirthData()) {
+    openPanel(null);
+    showFlash('Please enter your birth information');
+  }
 })();
 </script>
 {% endblock %}
