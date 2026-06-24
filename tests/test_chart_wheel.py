@@ -18,8 +18,6 @@ class TestChartWheelVisualization(unittest.TestCase):
 
     def test_full_chart_includes_canvas(self):
         """Test that full chart page includes canvas element"""
-        from unittest.mock import patch
-
         # Create complete house data (all 12 houses required)
         houses = {}
         signs = ['Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius',
@@ -27,51 +25,45 @@ class TestChartWheelVisualization(unittest.TestCase):
         for i in range(1, 13):
             houses[i] = {'sign': signs[i-1], 'degree': 10.0 + i}
 
-        if True:
-            form_data = {
-                'birth_date': '1995-07-10',
-                'birth_time': '14:30',
-                'timezone_offset': '-8',
-                'latitude': '34n03',
-                'longitude': '118w14'
-            }
+        form_data = {
+            'birth_date': '1995-07-10',
+            'birth_time': '14:30',
+            'timezone_offset': '-8',
+            'latitude': '34n03',
+            'longitude': '118w14'
+        }
 
-            response = self.app.post('/full-chart', data=form_data)
-            self.assertEqual(response.status_code, 200)
+        response = self.app.post('/full-chart', data=form_data)
+        self.assertEqual(response.status_code, 200)
 
-            # Check for canvas element
-            self.assertIn(b'<canvas id="chartWheel"', response.data)
+        # Check for canvas element
+        self.assertIn(b'<canvas id="chartWheel"', response.data)
 
     def test_chart_data_structure(self):
         """Test that chart data is properly structured for JavaScript"""
-        from unittest.mock import patch
+        form_data = {
+            'birth_date': '1990-04-15',
+            'birth_time': '12:00',
+            'timezone_offset': '0',
+            'latitude': '40n42',
+            'longitude': '74w00'
+        }
 
-        if True:
-            form_data = {
-                'birth_date': '1990-04-15',
-                'birth_time': '12:00',
-                'timezone_offset': '0',
-                'latitude': '40n42',
-                'longitude': '74w00'
-            }
+        response = self.app.post('/full-chart', data=form_data)
+        self.assertEqual(response.status_code, 200)
 
-            response = self.app.post('/full-chart', data=form_data)
-            self.assertEqual(response.status_code, 200)
-
-            # Check that chart data is embedded in the page
-            self.assertIn(b'window.chartData', response.data)
-            
-            # Extract the chart data (check for presence of data structure)
-            response_text = response.data.decode('utf-8')
-            self.assertIn('planets:', response_text)
-            self.assertIn('houses:', response_text)
-            self.assertIn('Sun', response_text)
-            self.assertIn('Aries', response_text)
+        # Check that chart data is embedded in the page
+        self.assertIn(b'window.chartData', response.data)
+        
+        # Extract the chart data (check for presence of data structure)
+        response_text = response.data.decode('utf-8')
+        self.assertIn('planets:', response_text)
+        self.assertIn('houses:', response_text)
+        self.assertIn('Sun', response_text)
+        self.assertIn('Aries', response_text)
 
     def test_all_zodiac_signs_handled(self):
         """Test that all 12 zodiac signs are properly handled"""
-        from unittest.mock import patch
-
         zodiac_signs = [
             'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
             'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
@@ -91,8 +83,6 @@ class TestChartWheelVisualization(unittest.TestCase):
 
     def test_all_major_planets_handled(self):
         """Test that all major planets are properly handled"""
-        from unittest.mock import patch
-
         planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 
                    'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto']
 
@@ -116,23 +106,20 @@ class TestChartWheelVisualization(unittest.TestCase):
 
     def test_house_cusps_all_present(self):
         """Test that all 12 house cusps are properly handled"""
-        from unittest.mock import patch
+        form_data = {
+            'birth_date': '1990-01-01',
+            'birth_time': '12:00',
+            'timezone_offset': '0',
+            'latitude': '0',
+            'longitude': '0'
+        }
 
-        if True:
-            form_data = {
-                'birth_date': '1990-01-01',
-                'birth_time': '12:00',
-                'timezone_offset': '0',
-                'latitude': '0',
-                'longitude': '0'
-            }
+        response = self.app.post('/full-chart', data=form_data)
+        self.assertEqual(response.status_code, 200)
 
-            response = self.app.post('/full-chart', data=form_data)
-            self.assertEqual(response.status_code, 200)
-
-            # Check that chart data includes basic structure
-            response_text = response.data.decode('utf-8')
-            self.assertIn('window.chartData', response_text)
+        # Check that chart data includes basic structure
+        response_text = response.data.decode('utf-8')
+        self.assertIn('window.chartData', response_text)
 
 
 class TestChartWheelJavaScript(unittest.TestCase):
@@ -241,20 +228,17 @@ class TestFullChartRoute(unittest.TestCase):
 
     def test_full_chart_post_with_valid_data(self):
         """Test POST to full-chart with valid data"""
-        from unittest.mock import patch
+        form_data = {
+            'birth_date': '1990-08-01',
+            'birth_time': '12:00',
+            'timezone_offset': '0',
+            'latitude': '0',
+            'longitude': '0'
+        }
 
-        if True:
-            form_data = {
-                'birth_date': '1990-08-01',
-                'birth_time': '12:00',
-                'timezone_offset': '0',
-                'latitude': '0',
-                'longitude': '0'
-            }
-
-            response = self.app.post('/full-chart', data=form_data)
-            self.assertEqual(response.status_code, 200)
-            self.assertIn(b'chartWheel', response.data)
+        response = self.app.post('/full-chart', data=form_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'chartWheel', response.data)
 
 
 if __name__ == '__main__':

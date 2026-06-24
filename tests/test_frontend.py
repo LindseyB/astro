@@ -1,7 +1,6 @@
 import unittest
 import os
 import sys
-from unittest.mock import patch
 
 # Add the parent directory to the path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -69,23 +68,20 @@ class TestTemplates(unittest.TestCase):
 
     def test_full_chart_template_structure(self):
         """Test full chart template structure with streaming placeholder"""
-        from unittest.mock import patch
+        form_data = {
+            'birth_date': '1988-08-08',
+            'birth_time': '10:30',
+            'timezone_offset': '0',
+            'latitude': '51n30',
+            'longitude': '00w07'
+        }
 
-        if True:
-            form_data = {
-                'birth_date': '1988-08-08',
-                'birth_time': '10:30',
-                'timezone_offset': '0',
-                'latitude': '51n30',
-                'longitude': '00w07'
-            }
+        response = self.app.post('/full-chart', data=form_data)
+        self.assertEqual(response.status_code, 200)
 
-            response = self.app.post('/full-chart', data=form_data)
-            self.assertEqual(response.status_code, 200)
-
-            # Check for streaming setup
-            self.assertIn(b'document.body.dataset.streaming', response.data)
-            self.assertIn(b'stream-analysis.js', response.data)
+        # Check for streaming setup
+        self.assertIn(b'document.body.dataset.streaming', response.data)
+        self.assertIn(b'stream-analysis.js', response.data)
 
     def test_ask_anything_template_structure(self):
         """Test ask-anything template structure with streaming placeholder"""
