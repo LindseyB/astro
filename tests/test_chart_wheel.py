@@ -27,7 +27,7 @@ class TestChartWheelVisualization(unittest.TestCase):
         for i in range(1, 13):
             houses[i] = {'sign': signs[i-1], 'degree': 10.0 + i}
 
-        with patch('routes.should_show_chart_wheel', return_value=True):
+        if True:
             form_data = {
                 'birth_date': '1995-07-10',
                 'birth_time': '14:30',
@@ -46,7 +46,7 @@ class TestChartWheelVisualization(unittest.TestCase):
         """Test that chart data is properly structured for JavaScript"""
         from unittest.mock import patch
 
-        with patch('routes.should_show_chart_wheel', return_value=True):
+        if True:
             form_data = {
                 'birth_date': '1990-04-15',
                 'birth_time': '12:00',
@@ -118,7 +118,7 @@ class TestChartWheelVisualization(unittest.TestCase):
         """Test that all 12 house cusps are properly handled"""
         from unittest.mock import patch
 
-        with patch('routes.should_show_chart_wheel', return_value=True):
+        if True:
             form_data = {
                 'birth_date': '1990-01-01',
                 'birth_time': '12:00',
@@ -243,7 +243,7 @@ class TestFullChartRoute(unittest.TestCase):
         """Test POST to full-chart with valid data"""
         from unittest.mock import patch
 
-        with patch('routes.should_show_chart_wheel', return_value=True):
+        if True:
             form_data = {
                 'birth_date': '1990-08-01',
                 'birth_time': '12:00',

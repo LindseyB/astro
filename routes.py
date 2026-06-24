@@ -6,7 +6,6 @@ from flask import Flask, render_template, request, Response, stream_with_context
 from config import logger, HOUSE_NAMES
 from formatters import markdown_filter, prepare_music_genre_text, format_planets_for_api
 from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas, stream_calculate_ask_anything
-from launchdarkly_service import should_show_chart_wheel
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets, get_full_chart_structure
 from ai_service import stream_ai_api
 from lastfm_service import get_top_tracks_by_genre, format_tracks_for_prompt
@@ -230,19 +229,9 @@ def full_chart():
 
     # Convert date format from YYYY-MM-DD to YYYY/MM/DD
     birth_date = birth_date_html.replace('-', '/')
-    
-    # Get user IP and check feature flag
-    user_ip = get_user_ip()
-    show_chart_wheel = should_show_chart_wheel(user_ip)
-
-    # In local development without LaunchDarkly configured, show the chart wheel
-    # so the full natal chart visualization can be previewed.
-    if not show_chart_wheel and app.debug and not os.environ.get('LAUNCHDARKLY_SDK_KEY'):
-        show_chart_wheel = True
 
     try:
         logger.info(f"Rendering full chart placeholder for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
-        logger.info(f"Chart wheel display flag for IP {user_ip}: {show_chart_wheel}")
         
         # Calculate chart structure (fast - no AI)
         full_chart_data = get_full_chart_structure(birth_date, birth_time, timezone_offset, latitude, longitude)
@@ -259,7 +248,7 @@ def full_chart():
             'other_genre': request.form.get('other_genre', '')
         }
         
-        return render_template('full_chart.html', chart_data=full_chart_data, show_chart_wheel=show_chart_wheel, form_data=form_data, streaming=True)
+        return render_template('full_chart.html', chart_data=full_chart_data, form_data=form_data, streaming=True)
     except Exception as e:
         logger.error(f"ERROR in /full-chart route: {type(e).__name__}: {str(e)}")
         if app.debug:
