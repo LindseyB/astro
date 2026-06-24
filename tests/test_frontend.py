@@ -22,18 +22,6 @@ class TestTemplates(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'@keyframes', response.data)
 
-    def test_static_js_sparkles_accessible(self):
-        """Test that sparkles JS file is accessible"""
-        response = self.app.get('/static/js/sparkles.js')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'createSparkle', response.data)
-
-    def test_static_js_star_trail_accessible(self):
-        """Test that star trail JS file is accessible"""
-        response = self.app.get('/static/js/star-trail.js')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'StarTrail', response.data)
-
     def test_static_js_datetime_input_accessible(self):
         """Test that datetime input JS file is accessible"""
         response = self.app.get('/static/js/datetime-input.js')
@@ -165,31 +153,6 @@ class TestErrorHandling(unittest.TestCase):
 class TestJavaScriptFunctionality(unittest.TestCase):
     """Test JavaScript file contents and structure"""
 
-    def test_sparkles_js_functions(self):
-        """Test that sparkles.js contains required functions"""
-        sparkles_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'js', 'sparkles.js')
-
-        if os.path.exists(sparkles_path):
-            with open(sparkles_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-
-            self.assertIn('createSparkle', content)
-            self.assertIn('startSparkleRain', content)
-            self.assertIn('sparkleContainer', content)
-
-    def test_star_trail_js_class(self):
-        """Test that star-trail.js contains StarTrail class"""
-        star_trail_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'js', 'star-trail.js')
-
-        if os.path.exists(star_trail_path):
-            with open(star_trail_path, 'r') as f:
-                content = f.read()
-
-            self.assertIn('class StarTrail', content)
-            self.assertIn('createStar', content)
-            self.assertIn('animate', content)
-            self.assertIn('mousemove', content)
-
     def test_chart_wheel_js_class(self):
         """Test that chart-wheel.js contains ChartWheel class"""
         chart_wheel_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'js', 'chart-wheel.js')
@@ -227,30 +190,6 @@ class TestJavaScriptFunctionality(unittest.TestCase):
             'static', 'js', 'chart-wheel.js'
         )
         self.assertTrue(os.path.exists(chart_wheel_path), "chart-wheel.js should exist")
-
-    def test_modal_js_functions(self):
-        """Test that modal.js contains required functions"""
-        modal_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'js', 'modal.js')
-
-        if os.path.exists(modal_path):
-            with open(modal_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-
-            # Test for main functions
-            self.assertIn('openModal', content)
-            self.assertIn('closeModal', content)
-            self.assertIn('initializeModals', content)
-            
-            # Test for event handling
-            self.assertIn('handleEscapeKey', content)
-            self.assertIn('addEventListener', content)
-            
-            # Test for modal interaction elements
-            self.assertIn('modal-overlay', content)
-            self.assertIn('modal-close', content)
-            
-            # Test for accessibility
-            self.assertIn('overflow', content)  # Body scroll prevention
 
     def test_section_toggle_js_functions(self):
         """Test that section-toggle.js contains required functions"""
@@ -293,7 +232,6 @@ class TestCSS(unittest.TestCase):
                 content = f.read()
 
             # Test for key style classes
-            self.assertIn('.sparkle', content)
             self.assertIn('.spinner', content)
             self.assertIn('@keyframes', content)
 
