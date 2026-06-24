@@ -34,6 +34,12 @@ class TestTemplates(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'StarTrail', response.data)
 
+    def test_static_js_datetime_input_accessible(self):
+        """Test that datetime input JS file is accessible"""
+        response = self.app.get('/static/js/datetime-input.js')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'normalizeDate', response.data)
+
     def test_index_template_renders(self):
         """Test that index template renders correctly"""
         response = self.app.get('/')
