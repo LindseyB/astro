@@ -8,15 +8,15 @@ Only respond in a few sentences. Based on the following astrological chart data:
 
 ✅ Do:
 
-- item 1
-- item 2
-- item 3
+* item 1
+* item 2
+* item 3
 
 ❌ Don't:
 
-- item 1
-- item 2
-- item 3
+* item 1
+* item 2
+* item 3
 
 Please also recommend a beverage to drink given today's vibe:
 
