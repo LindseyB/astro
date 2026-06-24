@@ -1322,7 +1322,8 @@ body.index-page .container > h1:first-of-type { display: none; }
   position: absolute; top: 0.85rem; right: 1rem;
   width: 2rem; height: 2rem; display: inline-flex;
   align-items: center; justify-content: center;
-  background: transparent; border: none; cursor: pointer;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 999px; cursor: pointer;
   font-size: 1.5rem; line-height: 1; color: var(--muted-foreground);
   transition: color 150ms;
 }
