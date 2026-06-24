@@ -6,6 +6,7 @@ import json
 import re
 from anthropic import Anthropic
 from config import logger
+from prompt_templates import load_prompt_template, load_prompt_text
 
 # Client setup for Anthropic API
 token = os.environ.get("ANTHROPIC_TOKEN")
@@ -124,21 +125,16 @@ def verify_song_exists(song_info):
         dict: {'is_real': bool, 'explanation': str}
     """
     try:
-        verification_prompt = (
-            f"You are a music expert. Check if this song is real:\n\n"
-            f"{song_info}\n\n"
-            f"Respond ONLY with a JSON object in this exact format:\n"
-            f'{{"is_real": true/false, "explanation": "brief explanation"}}\n\n'
-            f"If the song exists, is_real should be true. If it's made up or you're not confident it exists, is_real should be false."
-        )
+        verification_template = load_prompt_template("ai_service/song_verification_user.md")
+        verification_prompt = verification_template.render(song_info=song_info)
 
-        system_content = "You are a precise music database expert. You only respond with valid JSON."
+        system_content = load_prompt_text("ai_service/song_verification_system.md")
 
         api_client = get_client()
         response = api_client.messages.create(
             model=model,
-            max_tokens=500,
-            temperature=0.3,  # Lower temperature for factual verification
+            max_tokens=verification_template.metadata.get('max_tokens', 500),
+            temperature=verification_template.metadata.get('temperature', 0.3),
             system=system_content,
             messages=[
                 {

@@ -7,8 +7,37 @@ from flatlib.geopos import GeoPos
 from flatlib import const
 from config import PLANET_CONSTANTS, HOUSE_NAMES, logger
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets
-from formatters import prepare_music_genre_text, format_planets_for_api
+from formatters import format_planets_for_api, format_planets_in_houses_for_prompt
+from prompt_templates import load_prompt_template, load_prompt_text
 from ai_service import stream_ai_api
+
+
+def _format_planets_in_houses(planets_in_houses):
+    return format_planets_in_houses_for_prompt(planets_in_houses, HOUSE_NAMES)
+
+
+def _format_full_chart_planets(planets):
+    return "\n".join(
+        f"- {name}: {data['sign']} at {data['degree']:.2f}° in House {data['house'] or 'N/A'}"
+        for name, data in planets.items()
+    )
+
+
+def _format_full_chart_houses(house_data):
+    house_lines = []
+
+    for house_number in sorted(house_data.keys()):
+        planet_text = ", ".join(
+            f"{planet['name']} in {planet['sign']} ({planet['degree']:.2f}°)"
+            for planet in house_data[house_number]['planets']
+        )
+
+        house_lines.append(
+            f"- House {house_number} ({house_data[house_number]['sign']} "
+            f"{house_data[house_number]['degree']:.2f}°): {planet_text}"
+        )
+
+    return "\n".join(house_lines)
 
 
 def stream_calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre="any"):
@@ -38,24 +67,25 @@ def stream_calculate_chart(birth_date, birth_time, timezone_offset, latitude, lo
     # Get current planet statuses
     current_planets = get_current_planets(today_chart)
 
-    # Build the user prompt
-    user_prompt = "Only respond in a few sentences. Based on the following astrological chart data: First give a single sentence summarizing the day as what today's vibe will be like. Then recommend activities in this exact markdown format:\n\n✅ Do:\n\n* item 1\n* item 2\n* item 3\n\n❌ Don't:\n\n* item 1\n* item 2\n* item 3\n\nPlease also recommend a beverage to drink given today's vibe:\n\n" + \
-                  f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n" + \
-                  "Planets in Houses:\n" + \
-                  "\n".join([f"{HOUSE_NAMES[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" + \
-                  "Current Planets status:\n" + \
-                  format_planets_for_api(current_planets)
+    user_template = load_prompt_template("calculations/chart_user.md")
+    user_prompt = user_template.render(
+        sun_sign=sun.sign,
+        moon_sign=moon.sign,
+        ascendant_sign=ascendant.sign,
+        planets_in_houses=_format_planets_in_houses(planets_in_houses),
+        current_planets=format_planets_for_api(current_planets),
+    )
 
     # Log the prompt to console
     logger.debug("=== USER PROMPT ===")
     logger.debug(user_prompt)
     logger.debug("=== END PROMPT ===")
 
-    system_content = "You are a cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly. Never use any mdashes in your responses those just aren't cool."
+    system_content = load_prompt_text("calculations/shared_astrologer_system.md")
 
     # Stream AI response
     try:
-        for chunk in stream_ai_api(system_content, user_prompt):
+        for chunk in stream_ai_api(system_content, user_prompt, temperature=user_template.metadata.get("temperature", 1.0)):
             yield chunk
     except Exception as e:
         logger.error(f"Error streaming chart calculation: {e}")
@@ -88,23 +118,20 @@ def stream_calculate_live_mas(birth_date, birth_time, timezone_offset, latitude,
     # Get current planet statuses
     current_planets = get_current_planets(today_chart)
 
-    # Build the Taco Bell user prompt
-    user_prompt = (
-        "You are a cosmic Taco Bell expert! Based on this person's astrological chart, "
-        "create a personalized Taco Bell order that matches their cosmic energy. "
-        "Be creative, fun, and use lots of emojis! Be concise and use a bulleted list.:\n\n"
-        f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
-        "Planets in Houses:\n" +
-        "\n".join([f"{HOUSE_NAMES[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in data['planets']]) for house_number, data in planets_in_houses.items()]) + "\n\n" +
-        "Current Planets status:\n" +
-        format_planets_for_api(current_planets)
+    user_template = load_prompt_template("calculations/live_mas_user.md")
+    user_prompt = user_template.render(
+        sun_sign=sun.sign,
+        moon_sign=moon.sign,
+        ascendant_sign=ascendant.sign,
+        planets_in_houses=_format_planets_in_houses(planets_in_houses),
+        current_planets=format_planets_for_api(current_planets),
     )
 
-    system_content = "You are a cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts and the taco bell menu quickly. Never use any mdashes in your responses those just aren't cool."
+    system_content = load_prompt_text("calculations/live_mas_system.md")
 
     # Stream AI response
     try:
-        for chunk in stream_ai_api(system_content, user_prompt, temperature=1):
+        for chunk in stream_ai_api(system_content, user_prompt, temperature=user_template.metadata.get("temperature", 1.0)):
             yield chunk
     except Exception as e:
         logger.error(f"Error streaming live mas calculation: {e}")
@@ -176,31 +203,20 @@ def stream_calculate_full_chart(birth_date, birth_time, timezone_offset, latitud
                     'degree': float(obj.signlon)
                 })
 
-    # Build the user prompt for the full chart
-    user_prompt = (
-        "Only respond in a few sentences. Based on the following natal chart data, "
-        "please give a concise, emoji-filled summary of this person's personality and life themes. "
-        "Highlight any unique planetary placements or house patterns. "
-        "Format your response in bullet points:\n\n"
-        f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
-        "Planets:\n" +
-        "\n".join([
-            f"- {name}: {data['sign']} at {data['degree']:.2f}° in House {data['house'] or 'N/A'}"
-            for name, data in planets.items()
-        ]) +
-        "\n\nHouses:\n" +
-        "\n".join([
-            f"- House {num} ({house_data[num]['sign']} {house_data[num]['degree']:.2f}°): " +
-            ", ".join([f"{p['name']} in {p['sign']} ({p['degree']:.2f}°)" for p in house_data[num]['planets']]) or "No major planets"
-            for num in sorted(house_data.keys())
-        ])
+    user_template = load_prompt_template("calculations/full_chart_user.md")
+    user_prompt = user_template.render(
+        sun_sign=sun.sign,
+        moon_sign=moon.sign,
+        ascendant_sign=ascendant.sign,
+        planets=_format_full_chart_planets(planets),
+        houses=_format_full_chart_houses(house_data),
     )
 
-    system_content = "You are a cool astrologer who uses lots of emojis and is very casual. You are also very concise and to the point. You are an expert in astrology and can analyze charts quickly. Never use any mdashes in your responses those just aren't cool."
+    system_content = load_prompt_text("calculations/shared_astrologer_system.md")
 
     # Stream AI response
     try:
-        for chunk in stream_ai_api(system_content, user_prompt):
+        for chunk in stream_ai_api(system_content, user_prompt, temperature=user_template.metadata.get("temperature", 1.0)):
             yield chunk
     except Exception as e:
         logger.error(f"Error streaming full chart calculation: {e}")
@@ -227,36 +243,20 @@ def stream_calculate_ask_anything(question, birth_date, birth_time, timezone_off
     planets_in_houses = get_planets_in_houses(chart)
     current_planets = get_current_planets(today_chart)
 
-    user_prompt = (
-        "Give this person a confident, direct take on their question by reading their natal chart "
-        "AGAINST the current sky. Weigh both: what their birth chart reveals about who they are, AND "
-        "how today's planetary positions and any retrogrades are transiting that chart right now. "
-        "Reference at least one current transit (a present-day planet position or retrograde) and tie it "
-        "to a placement in their natal chart. Be witty, fun, and definitive. Use short bullets where useful. "
-        "Don't hedge or suggest they trust their own intuition instead – give them the astrological answer!\n\n"
-        f"Question: {question}\n\n"
-        "NATAL CHART (who they are):\n"
-        f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
-        "Planets in Houses:\n" +
-        "\n".join([
-            f"{HOUSE_NAMES[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in house_data['planets']])
-            for house_number, house_data in planets_in_houses.items()
-        ]) +
-        "\n\nCURRENT SKY (transits happening now):\n" +
-        format_planets_for_api(current_planets)
+    user_template = load_prompt_template("calculations/ask_anything_user.md")
+    user_prompt = user_template.render(
+        question=question,
+        sun_sign=sun.sign,
+        moon_sign=moon.sign,
+        ascendant_sign=ascendant.sign,
+        planets_in_houses=_format_planets_in_houses(planets_in_houses),
+        current_planets=format_planets_for_api(current_planets),
     )
 
-    system_content = (
-        "You are a confident, cool astrologer who reads charts with humor and conviction. "
-        "You always blend two things: the person's natal chart (their birth placements) and the "
-        "current sky (today's transits and retrogrades), explaining how the present moment is acting "
-        "on their chart. Make bold, fun astrological recommendations. "
-        "Be direct and witty – don't hedge or equivocate. Use a chill tone with light emoji. "
-        "Avoid em dashes (—) in your responses."
-    )
+    system_content = load_prompt_text("calculations/ask_anything_system.md")
 
     try:
-        for chunk in stream_ai_api(system_content, user_prompt, temperature=0.6):
+        for chunk in stream_ai_api(system_content, user_prompt, temperature=user_template.metadata.get("temperature", 1.0)):
             yield chunk
     except Exception as e:
         logger.error(f"Error streaming ask-anything response: {e}")
