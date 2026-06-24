@@ -4,11 +4,12 @@ Flask application and route handlers
 
 from flask import Flask, render_template, request, Response, stream_with_context, jsonify
 from config import logger, HOUSE_NAMES
-from formatters import markdown_filter, prepare_music_genre_text, format_planets_for_api
+from formatters import markdown_filter, prepare_music_genre_text, format_planets_for_api, format_planets_in_houses_for_prompt
 from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas, stream_calculate_ask_anything
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets, get_full_chart_structure
 from ai_service import stream_ai_api
 from lastfm_service import get_top_tracks_by_genre, format_tracks_for_prompt
+from prompt_templates import load_prompt_template, load_prompt_text
 import json
 import re
 import os
@@ -572,32 +573,29 @@ def music_suggestion():
         lastfm_tracks = get_top_tracks_by_genre(music_genre)
         tracks_context = format_tracks_for_prompt(lastfm_tracks)
         
-        # Build the user prompt
-        user_prompt = (
-            f"Based on this astrological chart, recommend ONE perfect song of the following genre: {song_request}. "
-            f"Try to provide *ONLY* the song title and artist in this exact format:\n"
-            f"🎶 [Title] by [Artist]\n\n"
-            f"If you're having a hard time providing a song, recommend an artist instead in this format:\n\n"
-            f"Artist: [Artist Name]\n\n"
-            f"Provide a single sentence justification for your recommendation. It should be concise, short, and to the point, while maintaining a casual, vibey tone.\n\n"
-        )
-        
-        # Add Last.fm tracks as examples if available
+        tracks_block = ""
         if tracks_context:
-            user_prompt += f"{tracks_context}\n\nYou may choose from these popular tracks or suggest other songs in the same genre that match the astrological vibe.\n\n"
-        
-        user_prompt += (
-            f"Chart Data:\n"
-            f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
-            "Planets in Houses:\n" +
-            "\n".join([f"{HOUSE_NAMES[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in house_data['planets']]) 
-                      for house_number, house_data in planets_in_houses.items()]) + "\n\n"
+            tracks_block = (
+                f"{tracks_context}\n\n"
+                "You may choose from these popular tracks or suggest other songs in the same genre that match the astrological vibe.\n\n"
+            )
+
+        current_planets_block = ""
+        if chart_type == 'daily':
+            current_planets_block = "Current Planets status:\n" + format_planets_for_api(current_planets)
+
+        user_template = load_prompt_template("routes/music_suggestion_user.md")
+        user_prompt = user_template.render(
+            song_request=song_request,
+            tracks_block=tracks_block,
+            sun_sign=sun.sign,
+            moon_sign=moon.sign,
+            ascendant_sign=ascendant.sign,
+            planets_in_houses=format_planets_in_houses_for_prompt(planets_in_houses, HOUSE_NAMES),
+            current_planets_block=current_planets_block,
         )
 
-        if chart_type == 'daily':
-            user_prompt += "Current Planets status:\n" + format_planets_for_api(current_planets)
-
-        system_content = "You are a music expert and astrologer. You are a cool astrologer who uses lots of emojis and is very casual. You are also VERY concise and to the point. You are an expert in astrology and can analyze charts quickly. Never use any mdashes in your responses those just aren't cool. Be precise with song titles and artists. The songs should match the vibe of the astrological chart data provided."
+        system_content = load_prompt_text("routes/music_suggestion_system.md")
 
         logger.debug("=== MUSIC SUGGESTION PROMPT ===")
         logger.debug(user_prompt)
@@ -606,7 +604,7 @@ def music_suggestion():
         def generate():
             """Generator function for streaming response"""
             try:
-                for chunk in stream_ai_api(system_content, user_prompt, temperature=0.4):
+                for chunk in stream_ai_api(system_content, user_prompt, temperature=user_template.metadata.get("temperature", 1.0)):
                     if chunk:
                         yield f"data: {json.dumps({'chunk': chunk})}\n\n"
                 yield f"data: {json.dumps({'done': True})}\n\n"

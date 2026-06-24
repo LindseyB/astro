@@ -178,6 +178,36 @@ Skip the tacos if you’re working late, triple up on sides if you’re friendsh
 
 ## Development
 
+### Prompt templates
+
+Runtime prompts live under `prompts/` as markdown files with lightweight frontmatter metadata.
+
+Use this shape:
+
+```md
+---
+description: Short human-readable summary
+role: user
+temperature: 0.4
+max_tokens: 500
+---
+
+Prompt body with placeholders like {sun_sign} or {question}
+```
+
+Notes:
+
+- `description` is for humans reading the repo.
+- `role` is typically `user` or `system`.
+- `temperature` and `max_tokens` are optional and only used where the call site reads them.
+- Prompt bodies are rendered with Python `str.format(...)`, so placeholders should use `{name}` syntax.
+
+The shared loader lives in `prompt_templates.py`. Current prompt groups are organized by feature area:
+
+- `prompts/calculations/` for horoscope, full chart, Taco Bell, and ask-anything prompts
+- `prompts/routes/` for route-level prompts such as music suggestions
+- `prompts/ai_service/` for service-level prompts such as song verification
+
 ### Run all tests
 
 ```bash

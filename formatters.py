@@ -34,6 +34,15 @@ def prepare_music_genre_text(music_genre, chart_type="daily"):
         return f"(Please prioritize {music_genre} genre if possible)"
 
 
+def format_planets_in_houses_for_prompt(planets_in_houses, house_names):
+    """Format house placement data for prompt consumption."""
+    return "\n".join(
+        f"{house_names[house_number]}: "
+        + ", ".join(f"{planet['name']} in {planet['sign']}" for planet in house_data['planets'])
+        for house_number, house_data in planets_in_houses.items()
+    )
+
+
 def format_planets_for_api(current_planets):
     """
     Format planet positions for AI API consumption
