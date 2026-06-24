@@ -228,25 +228,29 @@ def stream_calculate_ask_anything(question, birth_date, birth_time, timezone_off
     current_planets = get_current_planets(today_chart)
 
     user_prompt = (
-        "Based on this person's chart, give them a confident, direct take on their question. "
-        "Tell them what their chart reveals about this situation or decision. Be witty, fun, and definitive. "
-        "Use short bullets where useful. Don't hedge or suggest they trust their own intuition instead – "
-        "give them the astrological answer based on what the chart says!\n\n"
+        "Give this person a confident, direct take on their question by reading their natal chart "
+        "AGAINST the current sky. Weigh both: what their birth chart reveals about who they are, AND "
+        "how today's planetary positions and any retrogrades are transiting that chart right now. "
+        "Reference at least one current transit (a present-day planet position or retrograde) and tie it "
+        "to a placement in their natal chart. Be witty, fun, and definitive. Use short bullets where useful. "
+        "Don't hedge or suggest they trust their own intuition instead – give them the astrological answer!\n\n"
         f"Question: {question}\n\n"
-        f"Chart Data:\n"
+        "NATAL CHART (who they are):\n"
         f"Sun: {sun.sign}, Moon: {moon.sign}, Ascendant: {ascendant.sign}\n\n"
         "Planets in Houses:\n" +
         "\n".join([
             f"{HOUSE_NAMES[house_number]}: " + ", ".join([f"{p['name']} in {p['sign']}" for p in house_data['planets']])
             for house_number, house_data in planets_in_houses.items()
         ]) +
-        "\n\nCurrent Planets status:\n" +
+        "\n\nCURRENT SKY (transits happening now):\n" +
         format_planets_for_api(current_planets)
     )
 
     system_content = (
         "You are a confident, cool astrologer who reads charts with humor and conviction. "
-        "Make bold, fun astrological recommendations based on what the person's chart reveals. "
+        "You always blend two things: the person's natal chart (their birth placements) and the "
+        "current sky (today's transits and retrogrades), explaining how the present moment is acting "
+        "on their chart. Make bold, fun astrological recommendations. "
         "Be direct and witty – don't hedge or equivocate. Use a chill tone with light emoji. "
         "Avoid em dashes (—) in your responses."
     )
