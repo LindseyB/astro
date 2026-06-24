@@ -40,12 +40,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cosmic.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/button-effect.css') }}">
-    <!-- Dark mode: apply class before paint to prevent flash -->
+    <!-- Dark mode: apply class before paint to prevent flash. Defaults to dark unless the user opted out. -->
     <script>
       (function() {
         var saved = localStorage.getItem('theme');
-        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (saved === 'dark' || (!saved && prefersDark)) {
+        if (saved !== 'light') {
           document.documentElement.classList.add('dark');
         }
       })();

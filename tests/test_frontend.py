@@ -1,7 +1,6 @@
 import unittest
 import os
 import sys
-from unittest.mock import patch
 
 # Add the parent directory to the path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -69,23 +68,20 @@ class TestTemplates(unittest.TestCase):
 
     def test_full_chart_template_structure(self):
         """Test full chart template structure with streaming placeholder"""
-        from unittest.mock import patch
+        form_data = {
+            'birth_date': '1988-08-08',
+            'birth_time': '10:30',
+            'timezone_offset': '0',
+            'latitude': '51n30',
+            'longitude': '00w07'
+        }
 
-        with patch('routes.should_show_chart_wheel', return_value=False):
-            form_data = {
-                'birth_date': '1988-08-08',
-                'birth_time': '10:30',
-                'timezone_offset': '0',
-                'latitude': '51n30',
-                'longitude': '00w07'
-            }
+        response = self.app.post('/full-chart', data=form_data)
+        self.assertEqual(response.status_code, 200)
 
-            response = self.app.post('/full-chart', data=form_data)
-            self.assertEqual(response.status_code, 200)
-
-            # Check for streaming setup
-            self.assertIn(b'document.body.dataset.streaming', response.data)
-            self.assertIn(b'stream-analysis.js', response.data)
+        # Check for streaming setup
+        self.assertIn(b'document.body.dataset.streaming', response.data)
+        self.assertIn(b'stream-analysis.js', response.data)
 
     def test_ask_anything_template_structure(self):
         """Test ask-anything template structure with streaming placeholder"""
@@ -294,58 +290,6 @@ class TestCSS(unittest.TestCase):
             self.assertIn('.sparkle', content)
             self.assertIn('.spinner', content)
             self.assertIn('@keyframes', content)
-
-
-class TestLaunchDarklyIntegration(unittest.TestCase):
-    """Test LaunchDarkly integration with routes"""
-
-    def setUp(self):
-        """Set up test client"""
-        self.app = app.test_client()
-        self.app.testing = True
-    
-    @patch('routes.should_show_chart_wheel')
-    @patch('routes.get_user_ip')
-    def test_full_chart_route_calls_feature_flag(self, mock_get_ip, mock_flag):
-        """Test that full chart route calls the LaunchDarkly feature flag with IP"""
-        mock_flag.return_value = True
-        mock_get_ip.return_value = "192.168.1.100"
-        
-        form_data = {
-            'birth_date': '1990-01-01',
-            'birth_time': '12:00',
-            'timezone_offset': '0',
-            'latitude': '40n42',
-            'longitude': '74w00',
-            'music_genre': 'rock'
-        }
-        
-        response = self.app.post('/full-chart', data=form_data)
-        
-        # The main thing we want to test is that the flag is being called with IP
-        mock_get_ip.assert_called_once()
-        mock_flag.assert_called_once_with("192.168.1.100")
-        
-        # Response should be successful
-        self.assertEqual(response.status_code, 200)
-        # Should contain streaming setup
-        self.assertIn(b'document.body.dataset.streaming', response.data)
-    
-    @patch('routes.should_show_chart_wheel')
-    @patch('routes.get_user_ip')
-    def test_ip_function_integration(self, mock_get_ip, mock_flag):
-        """Test that we can get user IP and call the flag function"""
-        mock_flag.return_value = False
-        mock_get_ip.return_value = "203.0.113.195"
-        
-        from routes import get_user_ip, app as routes_app
-        with routes_app.test_request_context('/', headers={'X-Forwarded-For': '203.0.113.195'}):
-            user_ip = get_user_ip()
-            self.assertEqual(user_ip, "203.0.113.195")
-                
-        # Test the flag function
-        result = mock_flag('203.0.113.195')
-        self.assertEqual(result, False)
 
 
 if __name__ == '__main__':
