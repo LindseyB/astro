@@ -53,6 +53,13 @@
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-toast show" role="status" aria-live="polite" data-flash-category="{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
     <div class="aurora-bg" aria-hidden="true"></div>
     <div class="aurora-sparkles" aria-hidden="true"></div>
     <div class="shooting-stars" aria-hidden="true">
@@ -63,6 +70,18 @@
     {% block content %}{% endblock %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+      (function () {
+        var toasts = document.querySelectorAll('.flash-toast.show');
+        if (!toasts.length) return;
+
+        window.setTimeout(function () {
+          toasts.forEach(function (toast) {
+            toast.classList.remove('show');
+          });
+        }, 6000);
+      })();
+    </script>
     <!-- Shared theme toggle: attaches to #themeToggle on any page that has it -->
     <script>
       (function () {

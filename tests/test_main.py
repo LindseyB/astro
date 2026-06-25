@@ -1,11 +1,14 @@
 import unittest
 import sys
 import os
+from datetime import date
+from unittest.mock import patch
 
 # Add the parent directory to the path to import our app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from routes import app
+from routes import _is_birthday_today
 from formatters import format_planets_for_api, markdown_filter, prepare_music_genre_text
 
 
@@ -92,6 +95,22 @@ class TestAstroApp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         # Should contain the streaming placeholder setup
         self.assertIn(b'document.body.dataset.streaming', response.data)
+
+    @patch('routes._get_user_local_today', return_value=date(2026, 6, 25))
+    def test_chart_route_shows_birthday_flash_when_birthdate_matches_today(self, _mock_today):
+        """Chart page should include birthday flash message on matching local date."""
+        form_data = {
+            'birth_date': '1990-06-25',
+            'birth_time': '12:00',
+            'timezone_offset': '+00:00',
+            'latitude': '40n42',
+            'longitude': '74w00'
+        }
+
+        response = self.app.post('/chart', data=form_data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Happy Birthday!', response.data)
 
     def test_full_chart_route_missing_data(self):
         """Test full chart route with missing form data"""
@@ -224,6 +243,20 @@ class TestUtilityFunctions(unittest.TestCase):
         """Test music genre text preparation with None genre returns empty string"""
         result = prepare_music_genre_text(None, 'daily')
         self.assertEqual(result, '')
+
+
+class TestBirthdayHelpers(unittest.TestCase):
+
+    @patch('routes._get_user_local_today', return_value=date(2026, 6, 25))
+    def test_is_birthday_today_true(self, _mock_today):
+        self.assertTrue(_is_birthday_today('1990-06-25', '+00:00'))
+
+    @patch('routes._get_user_local_today', return_value=date(2026, 6, 25))
+    def test_is_birthday_today_false(self, _mock_today):
+        self.assertFalse(_is_birthday_today('1990-06-24', '+00:00'))
+
+    def test_is_birthday_today_invalid_date(self):
+        self.assertFalse(_is_birthday_today('not-a-date', '+00:00'))
 
 
 class TestFullChartTemplateData(unittest.TestCase):

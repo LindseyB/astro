@@ -2,7 +2,7 @@
 Flask application and route handlers
 """
 
-from flask import Flask, render_template, request, Response, stream_with_context, jsonify
+from flask import Flask, render_template, request, Response, stream_with_context, jsonify, flash
 from config import logger, HOUSE_NAMES
 from formatters import markdown_filter, prepare_music_genre_text, format_planets_for_api, format_planets_in_houses_for_prompt
 from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas, stream_calculate_ask_anything
@@ -13,8 +13,10 @@ from prompt_templates import load_prompt_template, load_prompt_text
 import json
 import re
 import os
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'astro-dev-secret-key')
 
 # In development, disable static file caching so CSS/JS edits show on reload
 if os.environ.get('FLASK_ENV') == 'development' or os.environ.get('FLASK_DEBUG') == '1':
@@ -91,6 +93,40 @@ def _normalize_birth_inputs(birth_date, timezone_offset, latitude, longitude):
     return birth_date, timezone_offset, latitude, longitude
 
 
+def _parse_timezone_offset_minutes(timezone_offset):
+    """Parse timezone offsets like -5, +05:00, or +0530 into minutes."""
+    if not isinstance(timezone_offset, str):
+        return 0
+
+    tz = timezone_offset.strip()
+    match = re.fullmatch(r'([+-]?)(\d{1,2})(?::?(\d{2}))?', tz)
+    if not match:
+        return 0
+
+    sign_token, hours_text, minutes_text = match.groups()
+    sign = -1 if sign_token == '-' else 1
+    hours = int(hours_text)
+    minutes = int(minutes_text or '0')
+    return sign * (hours * 60 + minutes)
+
+
+def _get_user_local_today(timezone_offset):
+    """Return today's date using the provided timezone offset."""
+    offset_minutes = _parse_timezone_offset_minutes(timezone_offset)
+    return (datetime.utcnow() + timedelta(minutes=offset_minutes)).date()
+
+
+def _is_birthday_today(birth_date_html, timezone_offset):
+    """True if the user's birthday (month/day) matches their local date."""
+    try:
+        birthday = datetime.strptime(birth_date_html, '%Y-%m-%d').date()
+    except (TypeError, ValueError):
+        return False
+
+    local_today = _get_user_local_today(timezone_offset)
+    return (birthday.month, birthday.day) == (local_today.month, local_today.day)
+
+
 @app.route('/')
 def index():
     """Render home page"""
@@ -148,7 +184,17 @@ def chart():
             'other_genre': request.form.get('other_genre', '')
         }
         
-        return render_template('chart.html', chart_data=chart_data, form_data=form_data, streaming=True)
+        is_birthday = _is_birthday_today(birth_date_html, timezone_offset)
+        if is_birthday:
+            flash('Happy Birthday!', 'success')
+
+        return render_template(
+            'chart.html',
+            chart_data=chart_data,
+            form_data=form_data,
+            streaming=True,
+            is_birthday=is_birthday
+        )
     except Exception as e:
         logger.error(f"ERROR in /chart route: {type(e).__name__}: {str(e)}")
         if app.debug:
