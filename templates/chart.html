@@ -84,7 +84,7 @@
 
 <div class="reading-page">
     <!-- Main reading section -->
-    <main class="reading-main">
+    <main class="reading-main" id="main-content" tabindex="-1">
         <a href="/" class="back-link">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Back to main
@@ -112,7 +112,7 @@
         {% endif %}
 
         <!-- Reading Content -->
-        <div class="reading-content" id="analysisContent">
+        <div class="reading-content" id="analysisContent" role="status" aria-live="polite" aria-busy="false" aria-atomic="false">
             {% if streaming %}
             <div class="streaming-indicator">
                 <p>✨ Reading your cosmic energy...</p>
@@ -143,8 +143,9 @@
 
             <!-- Ask anything input -->
             <div class="ask-input-group">
+                <label class="sr-only" for="askInput">Ask a follow-up question</label>
                 <input type="text" class="ask-input" id="askInput" placeholder="Ask anything..." />
-                <button class="send-btn" onclick="sendQuestion()">
+                <button class="send-btn" onclick="sendQuestion()" aria-label="Send question">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <circle cx="12" cy="12" r="1"></circle>
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>

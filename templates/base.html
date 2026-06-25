@@ -52,6 +52,7 @@
     {% block extra_scripts %}{% endblock %}
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="aurora-bg" aria-hidden="true"></div>
     <div class="aurora-sparkles" aria-hidden="true"></div>
     <div class="shooting-stars" aria-hidden="true">
@@ -65,12 +66,37 @@
     <!-- Shared theme toggle: attaches to #themeToggle on any page that has it -->
     <script>
       (function () {
-        var toggle = document.getElementById('themeToggle');
-        if (!toggle) return;
-        toggle.addEventListener('click', function () {
+        var toggles = document.querySelectorAll('#themeToggle');
+        if (!toggles.length) return;
+
+        function updateThemeToggleState(toggle, isDark) {
+          toggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+          toggle.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+        }
+
+        toggles.forEach(function (toggle) {
+          updateThemeToggleState(toggle, document.documentElement.classList.contains('dark'));
+          toggle.addEventListener('click', function () {
+            var root = document.documentElement;
+            root.classList.toggle('dark');
+            var isDark = root.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeToggleState(toggle, isDark);
+          });
+        });
+
+        window.addEventListener('storage', function (e) {
+          if (e.key !== 'theme') return;
           var root = document.documentElement;
-          root.classList.toggle('dark');
-          localStorage.setItem('theme', root.classList.contains('dark') ? 'dark' : 'light');
+          if (e.newValue === 'light') {
+            root.classList.remove('dark');
+          } else {
+            root.classList.add('dark');
+          }
+          var isDark = root.classList.contains('dark');
+          toggles.forEach(function (toggle) {
+            updateThemeToggleState(toggle, isDark);
+          });
         });
       })();
     </script>

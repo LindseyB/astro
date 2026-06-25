@@ -236,5 +236,129 @@ class TestCSS(unittest.TestCase):
             self.assertIn('@keyframes', content)
 
 
+class TestAccessibilityRegression(unittest.TestCase):
+    """Regression tests for accessibility-critical template and script behavior"""
+
+    def setUp(self):
+        self.app = app.test_client()
+        self.app.testing = True
+
+    def test_base_has_skip_link_and_theme_toggle_a11y_state_script(self):
+        response = self.app.get('/')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertIn(b'class="skip-link" href="#main-content"', response.data)
+        self.assertIn(b"setAttribute('aria-pressed'", response.data)
+        self.assertIn(b"setAttribute('aria-label'", response.data)
+
+    def test_key_pages_have_main_landmark_target(self):
+        page_responses = [
+            self.app.get('/'),
+            self.app.post('/chart', data={
+                'birth_date': '1988-08-08',
+                'birth_time': '10:30',
+                'timezone_offset': '0',
+                'latitude': '51n30',
+                'longitude': '00w07'
+            }),
+            self.app.post('/full-chart', data={
+                'birth_date': '1988-08-08',
+                'birth_time': '10:30',
+                'timezone_offset': '0',
+                'latitude': '51n30',
+                'longitude': '00w07'
+            }),
+            self.app.post('/ask-anything', data={
+                'question_prompt': 'How can I stay grounded today?',
+                'birth_date': '1988-08-08',
+                'birth_time': '10:30',
+                'timezone_offset': '0',
+                'latitude': '51n30',
+                'longitude': '00w07'
+            }),
+            self.app.post('/live-mas', data={
+                'birth_date': '1988-08-08',
+                'birth_time': '10:30',
+                'timezone_offset': '0',
+                'latitude': '51n30',
+                'longitude': '00w07',
+                'music_genre': 'any',
+                'other_genre': ''
+            }),
+        ]
+
+        for response in page_responses:
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'id="main-content"', response.data)
+
+    def test_index_dialog_semantics_and_trigger_attributes(self):
+        response = self.app.get('/')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertIn(b'id="birthInfoBtn" class="pill-btn" aria-haspopup="dialog"', response.data)
+        self.assertIn(b'aria-controls="birthPanel"', response.data)
+        self.assertIn(b'aria-expanded="false"', response.data)
+
+        self.assertIn(b'id="birthPanel" role="dialog" aria-modal="true"', response.data)
+        self.assertIn(b'aria-labelledby="panelTitle"', response.data)
+        self.assertIn(b'aria-hidden="true" inert', response.data)
+
+    def test_index_has_programmatic_labels_for_critical_fields(self):
+        response = self.app.get('/')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertIn(b'<label for="locationSearch">Birth Location</label>', response.data)
+        self.assertIn(b'<label class="sr-only" for="latitude">Latitude</label>', response.data)
+        self.assertIn(b'<label class="sr-only" for="longitude">Longitude</label>', response.data)
+        self.assertIn(b'<label class="sr-only" for="askModalInput">Your question</label>', response.data)
+
+    def test_analysis_regions_expose_live_status(self):
+        chart_response = self.app.post('/chart', data={
+            'birth_date': '1988-08-08',
+            'birth_time': '10:30',
+            'timezone_offset': '0',
+            'latitude': '51n30',
+            'longitude': '00w07'
+        })
+        ask_response = self.app.post('/ask-anything', data={
+            'question_prompt': 'What should I focus on?',
+            'birth_date': '1988-08-08',
+            'birth_time': '10:30',
+            'timezone_offset': '0',
+            'latitude': '51n30',
+            'longitude': '00w07'
+        })
+        full_response = self.app.post('/full-chart', data={
+            'birth_date': '1988-08-08',
+            'birth_time': '10:30',
+            'timezone_offset': '0',
+            'latitude': '51n30',
+            'longitude': '00w07'
+        })
+        live_mas_response = self.app.post('/live-mas', data={
+            'birth_date': '1988-08-08',
+            'birth_time': '10:30',
+            'timezone_offset': '0',
+            'latitude': '51n30',
+            'longitude': '00w07',
+            'music_genre': 'any',
+            'other_genre': ''
+        })
+
+        for response in [chart_response, ask_response, full_response, live_mas_response]:
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'id="analysisContent"', response.data)
+            self.assertIn(b'role="status"', response.data)
+            self.assertIn(b'aria-live="polite"', response.data)
+            self.assertIn(b'aria-busy="false"', response.data)
+
+    def test_streaming_script_sets_and_clears_aria_busy(self):
+        response = self.app.get('/static/js/stream-analysis.js')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertIn(b"setAttribute('aria-busy', 'true')", response.data)
+        self.assertIn(b"setAttribute('aria-busy', 'false')", response.data)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
