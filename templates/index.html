@@ -9,7 +9,7 @@
 <div id="flashToast" class="flash-toast" role="status" aria-live="polite"></div>
 
 <!-- Header -->
-<header class="site-header">
+<header class="site-header" id="siteHeader">
   <a href="/" class="logo">
     <span class="logo-mark">✦</span>
     <span class="logo-text">astro-horoscope<span class="logo-dim">.lol</span></span>
@@ -19,7 +19,7 @@
       <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
       <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
-    <button id="birthInfoBtn" class="pill-btn">
+    <button id="birthInfoBtn" class="pill-btn" aria-haspopup="dialog" aria-controls="birthPanel" aria-expanded="false">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
       Birth info
     </button>
@@ -27,7 +27,7 @@
 </header>
 
 <!-- Main -->
-<main class="page-container">
+<main class="page-container" id="main-content" tabindex="-1">
   <section class="hero">
     <h1>Your <span class="text-holo">cosmic vibe</span> check.</h1>
     <p class="lede">Four small rituals. One chart. <span class="muted">Add your birth info up top to begin.</span></p>
@@ -108,9 +108,9 @@
 
 <!-- ===== Birth Info Panel ===== -->
 <div class="panel-overlay" id="panelOverlay"></div>
-<aside class="birth-panel" id="birthPanel" aria-label="Birth information">
+<aside class="birth-panel" id="birthPanel" role="dialog" aria-modal="true" aria-labelledby="panelTitle" aria-hidden="true" inert>
   <div class="panel-header">
-    <span class="panel-title">Birth info</span>
+    <span class="panel-title" id="panelTitle">Birth info</span>
     <button class="panel-close" id="panelClose" aria-label="Close panel">×</button>
   </div>
 
@@ -221,7 +221,7 @@
 
     <!-- Location -->
     <div class="field-group">
-      <label>Birth Location</label>
+      <label for="locationSearch">Birth Location</label>
       <div class="location-search-wrap">
         <input type="text" id="locationSearch" placeholder="Search city or address…">
         <button type="button" class="location-search-btn" onclick="searchLocation()">Search</button>
@@ -229,7 +229,9 @@
       <div id="locationSearchError" class="location-search-error" role="alert" aria-live="polite" hidden></div>
       <div id="locationMap" style="margin-top:0.5rem;"></div>
       <div class="location-coords" style="margin-top:0.5rem;">
+        <label class="sr-only" for="latitude">Latitude</label>
         <input type="text" id="latitude" name="latitude" placeholder="Latitude" readonly>
+        <label class="sr-only" for="longitude">Longitude</label>
         <input type="text" id="longitude" name="longitude" placeholder="Longitude" readonly>
       </div>
     </div>
@@ -277,8 +279,9 @@
     <button class="ask-modal-close" id="askModalClose" aria-label="Close">×</button>
     <p class="eyebrow">chat</p>
     <h2 id="askModalTitle">Ask the stars</h2>
-    <p class="ask-modal-sub">Anything. The current sky will answer.</p>
-    <textarea id="askModalInput" class="ask-modal-input" rows="3" placeholder="What do you want to know?"></textarea>
+    <p class="ask-modal-sub" id="askModalDesc">Anything. The current sky will answer.</p>
+    <label class="sr-only" for="askModalInput">Your question</label>
+    <textarea id="askModalInput" class="ask-modal-input" rows="3" aria-describedby="askModalDesc" placeholder="What do you want to know?"></textarea>
     <button class="btn-primary ask-modal-submit" id="askModalSubmit">Ask the stars →</button>
   </div>
 </div>
@@ -302,14 +305,104 @@
   // ── Panel open / close ────────────────────────────────────
   var overlay  = document.getElementById('panelOverlay');
   var panel    = document.getElementById('birthPanel');
+  var main     = document.getElementById('main-content');
+  var header   = document.getElementById('siteHeader');
   var openBtn  = document.getElementById('birthInfoBtn');
   var closeBtn = document.getElementById('panelClose');
   var pending  = null; // action URL queued while panel was opened
+  var lastFocused = null;
+  var releaseTrap = null;
 
-  function openPanel(action) {
+  function isVisible(el) {
+    return !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
+  }
+
+  function getFocusable(container) {
+    if (!container) return [];
+    var selectors = [
+      'a[href]', 'area[href]', 'button:not([disabled])',
+      'input:not([disabled]):not([type="hidden"])', 'select:not([disabled])',
+      'textarea:not([disabled])', '[tabindex]:not([tabindex="-1"])'
+    ];
+    return Array.prototype.slice.call(container.querySelectorAll(selectors.join(',')))
+      .filter(function (el) { return !el.hasAttribute('inert') && isVisible(el); });
+  }
+
+  function trapFocus(container) {
+    function onKeyDown(e) {
+      if (e.key !== 'Tab') return;
+      var focusable = getFocusable(container);
+      if (!focusable.length) return;
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    container.addEventListener('keydown', onKeyDown);
+    return function () {
+      container.removeEventListener('keydown', onKeyDown);
+    };
+  }
+
+  function setBackgroundInert(isInert) {
+    [header, main].forEach(function (el) {
+      if (!el) return;
+      if (isInert) {
+        el.setAttribute('inert', '');
+      } else {
+        el.removeAttribute('inert');
+      }
+    });
+  }
+
+  function releaseFocusTrap() {
+    if (releaseTrap) {
+      releaseTrap();
+      releaseTrap = null;
+    }
+  }
+
+  function activateDialog(dialogRoot, fallbackFocusEl) {
+    releaseFocusTrap();
+    releaseTrap = trapFocus(dialogRoot);
+    var focusable = getFocusable(dialogRoot);
+    if (focusable.length) {
+      focusable[0].focus();
+    } else if (fallbackFocusEl) {
+      fallbackFocusEl.focus();
+    }
+  }
+
+  function restoreLastFocus() {
+    if (lastFocused && typeof lastFocused.focus === 'function') {
+      lastFocused.focus();
+    }
+  }
+
+  function panelIsOpen() {
+    return panel.classList.contains('open');
+  }
+
+  function askModalIsOpen() {
+    return askOverlay.classList.contains('open');
+  }
+
+  function openPanel(action, trigger) {
+    lastFocused = trigger || document.activeElement;
     pending = action || null;
     panel.classList.add('open');
     overlay.classList.add('open');
+    panel.removeAttribute('inert');
+    panel.setAttribute('aria-hidden', 'false');
+    openBtn.setAttribute('aria-expanded', 'true');
+    setBackgroundInert(true);
     document.body.style.overflow = 'hidden';
     // show/hide question textarea
     var qSection = document.getElementById('questionSection');
@@ -318,41 +411,73 @@
     } else {
       qSection.style.display = 'none';
     }
+    activateDialog(panel, closeBtn);
   }
 
-  function closePanel() {
+  function closePanel(options) {
+    options = options || {};
     panel.classList.remove('open');
     overlay.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+    panel.setAttribute('inert', '');
+    openBtn.setAttribute('aria-expanded', 'false');
+    releaseFocusTrap();
+    if (!askModalIsOpen()) {
+      setBackgroundInert(false);
+    }
     document.body.style.overflow = '';
-    pending = null;
+    if (!options.keepPending) {
+      pending = null;
+    }
+    if (options.restoreFocus !== false) {
+      restoreLastFocus();
+    }
   }
 
-  openBtn.addEventListener('click', function () { openPanel(null); });
-  closeBtn.addEventListener('click', closePanel);
-  overlay.addEventListener('click', closePanel);
+  openBtn.addEventListener('click', function () { openPanel(null, openBtn); });
+  closeBtn.addEventListener('click', function () { closePanel(); });
+  overlay.addEventListener('click', function () { closePanel(); });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { closePanel(); closeAskModal(); }
+    if (e.key !== 'Escape') return;
+    if (askModalIsOpen()) {
+      closeAskModal();
+      return;
+    }
+    if (panelIsOpen()) {
+      closePanel();
+    }
   });
 
   // ── Ask the stars modal ──────────────────────────────────
   var askOverlay = document.getElementById('askModalOverlay');
+  var askDialog  = askOverlay.querySelector('.ask-modal');
   var askInput   = document.getElementById('askModalInput');
   var askSubmit  = document.getElementById('askModalSubmit');
   var askClose   = document.getElementById('askModalClose');
 
-  function openAskModal() {
+  function openAskModal(trigger) {
+    lastFocused = trigger || document.activeElement;
     askInput.value = document.getElementById('question_prompt').value || '';
     askOverlay.classList.add('open');
     askOverlay.setAttribute('aria-hidden', 'false');
+    setBackgroundInert(true);
     document.body.style.overflow = 'hidden';
-    setTimeout(function () { askInput.focus(); }, 50);
+    activateDialog(askDialog, askInput);
   }
-  function closeAskModal() {
+  function closeAskModal(options) {
+    options = options || {};
     askOverlay.classList.remove('open');
     askOverlay.setAttribute('aria-hidden', 'true');
+    releaseFocusTrap();
+    if (!panelIsOpen()) {
+      setBackgroundInert(false);
+    }
     document.body.style.overflow = '';
+    if (options.restoreFocus !== false) {
+      restoreLastFocus();
+    }
   }
-  askClose.addEventListener('click', closeAskModal);
+  askClose.addEventListener('click', function () { closeAskModal(); });
   askOverlay.addEventListener('click', function (e) {
     if (e.target === askOverlay) closeAskModal();
   });
@@ -360,12 +485,13 @@
     var q = askInput.value.trim();
     if (!q) { askInput.focus(); return; }
     document.getElementById('question_prompt').value = q;
-    closeAskModal();
     if (hasBirthData()) {
+      closeAskModal({ restoreFocus: false });
       submitToAction('/ask-anything');
     } else {
       // still need birth info — hand off to the side panel, question is kept
-      openPanel('/ask-anything');
+      closeAskModal({ restoreFocus: false });
+      openPanel('/ask-anything', document.getElementById('askStarsTile'));
     }
   });
 
@@ -374,11 +500,11 @@
     tile.addEventListener('click', function () {
       var action = tile.dataset.action;
       if (action === '/ask-anything') {
-        openAskModal();
+        openAskModal(tile);
         return;
       }
       if (!hasBirthData()) {
-        openPanel(action);
+        openPanel(action, tile);
         return;
       }
       submitToAction(action);
@@ -404,7 +530,7 @@
       var q = document.getElementById('question_prompt').value.trim();
       if (!q) { setPanelError('Please enter your question.'); return; }
     }
-    closePanel();
+    closePanel({ restoreFocus: false });
     submitToAction(action);
   });
 
@@ -477,7 +603,7 @@
   // ── First visit: prompt for birth info ────────────────────
   // If nothing has been saved yet, open the panel and nudge the user.
   if (!hasBirthData()) {
-    openPanel(null);
+    openPanel(null, openBtn);
     showFlash('Please enter your birth information');
   }
 })();

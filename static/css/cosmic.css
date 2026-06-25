@@ -214,6 +214,39 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -3rem;
+  z-index: 2000;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  transition: top 150ms ease;
+}
+.skip-link:focus {
+  top: 0.75rem;
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Twinkling stars — fixed full-viewport overlays (no layout impact) */
 body::before,
 body::after {
@@ -518,6 +551,10 @@ a { color: inherit; text-decoration: none; }
   transition: box-shadow 200ms ease;
 }
 .icon-btn:hover { box-shadow: var(--shadow-glow); }
+.icon-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
 
 /* Dark mode sun/moon swap */
 .icon-btn .icon-moon { display: none; }

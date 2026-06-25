@@ -21,6 +21,7 @@
         if (window.marked && fullText) {
             analysisContainer.innerHTML = marked.parse(fullText);
         }
+        analysisContainer.setAttribute('aria-busy', 'false');
 
         // Only horoscope/full-chart pages load the async music suggestion.
         if (chartData.pageType === 'chart' || chartData.pageType === 'full-chart') {
@@ -72,6 +73,8 @@
             });
             return;
         }
+
+    analysisContainer.setAttribute('aria-busy', 'true');
     
     // Show loading state
     analysisContainer.innerHTML = chartData.pageType === 'ask-anything'
@@ -90,6 +93,7 @@
         endpoint = '/stream-ask-anything';
     } else {
         console.error('Unknown page type:', chartData.pageType);
+        analysisContainer.setAttribute('aria-busy', 'false');
         return;
     }
 
@@ -159,6 +163,7 @@
                             } else if (data.error) {
                                 console.error('Streaming error:', data.error);
                                 analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
+                                analysisContainer.setAttribute('aria-busy', 'false');
                                 reader.cancel();
                                 return;
                             }
@@ -172,6 +177,7 @@
             }).catch(err => {
                 console.error('Stream reading error:', err);
                 analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
+                analysisContainer.setAttribute('aria-busy', 'false');
                 reader.cancel();
             });
         }
@@ -181,6 +187,7 @@
     .catch(err => {
         console.error('Fetch error:', err);
         analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
+        analysisContainer.setAttribute('aria-busy', 'false');
     });
     }
 })();
