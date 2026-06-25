@@ -299,9 +299,11 @@ class TestAccessibilityRegression(unittest.TestCase):
         self.assertIn(b'aria-controls="birthPanel"', response.data)
         self.assertIn(b'aria-expanded="false"', response.data)
 
-        self.assertIn(b'id="birthPanel" role="dialog" aria-modal="true"', response.data)
-        self.assertIn(b'aria-labelledby="panelTitle"', response.data)
-        self.assertIn(b'aria-hidden="true" inert', response.data)
+        re = __import__('re')
+        self.assertRegex(
+            response.data.decode('utf-8', errors='ignore'),
+            r'<aside[^>]*\bid="birthPanel"[^>]*\brole="dialog"[^>]*\baria-modal="true"[^>]*\baria-labelledby="panelTitle"[^>]*\baria-hidden="true"[^>]*\binert\b'
+        )
 
     def test_index_has_programmatic_labels_for_critical_fields(self):
         response = self.app.get('/')

@@ -81,7 +81,9 @@
             root.classList.toggle('dark');
             var isDark = root.classList.contains('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            updateThemeToggleState(toggle, isDark);
+            toggles.forEach(function (t) {
+              updateThemeToggleState(t, isDark);
+            });
           });
         });
 
