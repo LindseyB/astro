@@ -93,6 +93,7 @@
         endpoint = '/stream-ask-anything';
     } else {
         console.error('Unknown page type:', chartData.pageType);
+        analysisContainer.setAttribute('aria-busy', 'false');
         return;
     }
 
