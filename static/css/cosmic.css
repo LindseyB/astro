@@ -1417,7 +1417,13 @@ body.index-page .container > h1:first-of-type { display: none; }
 .mercury-warning strong { color: var(--accent); }
 
 /* Placement / house tables */
-.placements { width: 100%; overflow-x: auto; }
+.placements { width: 100%; }
+@media (max-width: 767px) {
+  .placements { overflow-x: visible; }
+}
+@media (min-width: 768px) {
+  .placements { overflow-x: auto; }
+}
 .placements table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 .placements thead th {
   text-align: left;
@@ -1450,4 +1456,12 @@ body.index-page .container > h1:first-of-type { display: none; }
   padding: 0.15rem 0.5rem; border-radius: 999px;
   background: var(--glass-bg); border: 1px solid var(--border);
   font-size: 0.72rem; white-space: nowrap;
+}
+
+/* Hide inhabitants column on mobile (< 768px) */
+@media (max-width: 767px) {
+  .placements thead th:nth-child(4),
+  .placements tbody td:nth-child(4) {
+    display: none;
+  }
 }
