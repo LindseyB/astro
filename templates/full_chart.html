@@ -101,7 +101,11 @@
     </div>
     <div class="reading-content analysis-content" id="analysisContent" role="status" aria-live="polite" aria-busy="false" aria-atomic="false">
       {% if streaming %}
-      <div class="streaming-indicator"><p>✨ Reading your cosmic energy…</p></div>
+      <div class="streaming-analysis-text" id="analysisStreamContent"></div>
+      <div class="streaming-indicator" id="analysisStreamIndicator" aria-hidden="true">
+        <span class="streaming-indicator__icon" aria-hidden="true">✦</span>
+        <span class="sr-only">More content is still streaming in</span>
+      </div>
       {% else %}
       {{ chart_data.astrology_analysis | markdown | safe }}
       {% endif %}

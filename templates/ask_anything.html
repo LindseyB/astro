@@ -65,7 +65,11 @@
                     </p>
                     <div class="analysis-content" id="analysisContent" role="status" aria-live="polite" aria-busy="false" aria-atomic="false">
                         {% if streaming %}
-                        <!-- Content will be loaded via streaming JavaScript -->
+                        <div class="streaming-analysis-text" id="analysisStreamContent"></div>
+                        <div class="streaming-indicator" id="analysisStreamIndicator" aria-hidden="true">
+                            <span class="streaming-indicator__icon" aria-hidden="true">✦</span>
+                            <span class="sr-only">More content is still streaming in</span>
+                        </div>
                         {% endif %}
                     </div>
                     <button id="copyAnalysisBtn" class="copy-chip copy-btn-float" onclick="copyAnalysis()" title="Copy your answer" aria-label="Copy your answer">

@@ -222,6 +222,15 @@ class TestSearchButtonStyling(unittest.TestCase):
         self.assertIn('.location-search-btn:hover', css_content)
         self.assertIn('opacity', css_content)
 
+    def test_streaming_loader_styles(self):
+        response = self.app.get('/static/css/cosmic.css')
+        self.assertEqual(response.status_code, 200)
+
+        css_content = response.data.decode('utf-8')
+        self.assertIn('.streaming-indicator__icon', css_content)
+        self.assertIn('sparkle-pulse', css_content)
+        self.assertIn('.streaming-analysis-text', css_content)
+
 
 class TestFormInputStyling(unittest.TestCase):
     """Test consistent styling across form inputs"""

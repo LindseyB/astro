@@ -5,6 +5,38 @@
 
 (function() {
     'use strict';
+
+    function createStreamingIndicator() {
+        var indicator = document.createElement('div');
+        indicator.className = 'streaming-indicator';
+        indicator.setAttribute('aria-hidden', 'true');
+        indicator.innerHTML =
+            '<span class="streaming-indicator__icon" aria-hidden="true">✦</span>' +
+            '<span class="sr-only">More content is still streaming in</span>';
+        return indicator;
+    }
+
+    function ensureStreamingSurface(analysisContainer) {
+        var streamedContent = document.getElementById('analysisStreamContent');
+        if (!streamedContent) {
+            streamedContent = document.createElement('div');
+            streamedContent.id = 'analysisStreamContent';
+            streamedContent.className = 'streaming-analysis-text';
+            analysisContainer.insertBefore(streamedContent, analysisContainer.firstChild);
+        }
+
+        var streamingIndicator = document.getElementById('analysisStreamIndicator');
+        if (!streamingIndicator) {
+            streamingIndicator = createStreamingIndicator();
+            streamingIndicator.id = 'analysisStreamIndicator';
+            analysisContainer.appendChild(streamingIndicator);
+        }
+
+        return {
+            streamedContent: streamedContent,
+            streamingIndicator: streamingIndicator
+        };
+    }
     
     // Wait for DOM to be fully loaded
     if (document.readyState === 'loading') {
@@ -16,10 +48,16 @@
     /**
      * Finalize streaming: convert markdown and trigger music suggestion
      */
-    function finalizeStream(analysisContainer, fullText, chartData) {
+    function finalizeStream(analysisContainer, streamedContent, streamingIndicator, fullText, chartData) {
         // Convert markdown to HTML if we have marked.js
         if (window.marked && fullText) {
-            analysisContainer.innerHTML = marked.parse(fullText);
+            streamedContent.innerHTML = marked.parse(fullText);
+        } else {
+            streamedContent.textContent = fullText;
+        }
+        streamedContent.style.whiteSpace = 'normal';
+        if (streamingIndicator && streamingIndicator.parentNode) {
+            streamingIndicator.parentNode.removeChild(streamingIndicator);
         }
         analysisContainer.setAttribute('aria-busy', 'false');
 
@@ -57,7 +95,13 @@
                 return;
             }
             hasFinalized = true;
-            finalizeStream(analysisContainer, fullText, chartData);
+            finalizeStream(
+                analysisContainer,
+                streamingSurface.streamedContent,
+                streamingSurface.streamingIndicator,
+                fullText,
+                chartData
+            );
         }
         
         console.log('Streaming initialized:', {
@@ -74,120 +118,120 @@
             return;
         }
 
-    analysisContainer.setAttribute('aria-busy', 'true');
-    
-    // Show loading state
-    analysisContainer.innerHTML = chartData.pageType === 'ask-anything'
-        ? '<p style="font-style: italic;">💬 Thinking about your question...</p>'
-        : '<p style="font-style: italic;">✨ Consulting the stars...</p>';
-    
-    // Determine endpoint based on page type
-    let endpoint;
-    if (chartData.pageType === 'chart') {
-        endpoint = '/stream-chart-analysis';
-    } else if (chartData.pageType === 'full-chart') {
-        endpoint = '/stream-full-chart-analysis';
-    } else if (chartData.pageType === 'live-mas') {
-        endpoint = '/stream-live-mas-analysis';
-    } else if (chartData.pageType === 'ask-anything') {
-        endpoint = '/stream-ask-anything';
-    } else {
-        console.error('Unknown page type:', chartData.pageType);
-        analysisContainer.setAttribute('aria-busy', 'false');
-        return;
-    }
+        var streamingSurface = ensureStreamingSurface(analysisContainer);
 
-    const requestPayload = chartData.pageType === 'ask-anything'
-        ? {
-            question: chartData.question,
-            birth_date: chartData.birthDate,
-            birth_time: chartData.birthTime,
-            timezone_offset: chartData.timezoneOffset,
-            latitude: chartData.latitude,
-            longitude: chartData.longitude
+        analysisContainer.setAttribute('aria-busy', 'true');
+
+        streamingSurface.streamedContent.textContent = '';
+        streamingSurface.streamedContent.style.whiteSpace = 'pre-wrap';
+        if (streamingSurface.streamingIndicator) {
+            streamingSurface.streamingIndicator.setAttribute('aria-hidden', 'true');
         }
-        : {
-            birth_date: chartData.birthDate,
-            birth_time: chartData.birthTime,
-            timezone_offset: chartData.timezoneOffset,
-            latitude: chartData.latitude,
-            longitude: chartData.longitude,
-            music_genre: chartData.musicGenre
-        };
     
-    // Start streaming
-    fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestPayload)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // Determine endpoint based on page type
+        let endpoint;
+        if (chartData.pageType === 'chart') {
+            endpoint = '/stream-chart-analysis';
+        } else if (chartData.pageType === 'full-chart') {
+            endpoint = '/stream-full-chart-analysis';
+        } else if (chartData.pageType === 'live-mas') {
+            endpoint = '/stream-live-mas-analysis';
+        } else if (chartData.pageType === 'ask-anything') {
+            endpoint = '/stream-ask-anything';
+        } else {
+            console.error('Unknown page type:', chartData.pageType);
+            analysisContainer.setAttribute('aria-busy', 'false');
+            return;
         }
-        
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        
-        // Clear loading message
-        analysisContainer.innerHTML = '';
-        
-        function processStream() {
-            reader.read().then(({ done, value }) => {
-                if (done) {
-                    safeFinalizeStream();
-                    return;
-                }
-                
-                // Decode the chunk
-                buffer += decoder.decode(value, { stream: true });
-                
-                // Process complete SSE messages
-                const lines = buffer.split('\n');
-                buffer = lines.pop() || ''; // Keep incomplete line in buffer
-                
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        try {
-                            const data = JSON.parse(line.substring(6));
-                            
-                            if (data.chunk) {
-                                fullText += data.chunk;
-                                // Display raw text while streaming
-                                analysisContainer.textContent = fullText;
-                            } else if (data.done) {
-                                safeFinalizeStream();
-                            } else if (data.error) {
-                                console.error('Streaming error:', data.error);
-                                analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
-                                analysisContainer.setAttribute('aria-busy', 'false');
-                                reader.cancel();
-                                return;
+
+        const requestPayload = chartData.pageType === 'ask-anything'
+            ? {
+                question: chartData.question,
+                birth_date: chartData.birthDate,
+                birth_time: chartData.birthTime,
+                timezone_offset: chartData.timezoneOffset,
+                latitude: chartData.latitude,
+                longitude: chartData.longitude
+            }
+            : {
+                birth_date: chartData.birthDate,
+                birth_time: chartData.birthTime,
+                timezone_offset: chartData.timezoneOffset,
+                latitude: chartData.latitude,
+                longitude: chartData.longitude,
+                music_genre: chartData.musicGenre
+            };
+    
+        // Start streaming
+        fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestPayload)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            function processStream() {
+                reader.read().then(({ done, value }) => {
+                    if (done) {
+                        safeFinalizeStream();
+                        return;
+                    }
+
+                    // Decode the chunk
+                    buffer += decoder.decode(value, { stream: true });
+
+                    // Process complete SSE messages
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.substring(6));
+
+                                if (data.chunk) {
+                                    fullText += data.chunk;
+                                    // Display raw text while streaming
+                                    streamingSurface.streamedContent.textContent = fullText;
+                                } else if (data.done) {
+                                    safeFinalizeStream();
+                                } else if (data.error) {
+                                    console.error('Streaming error:', data.error);
+                                    analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
+                                    analysisContainer.setAttribute('aria-busy', 'false');
+                                    reader.cancel();
+                                    return;
+                                }
+                            } catch (e) {
+                                console.error('Error parsing SSE data:', e);
                             }
-                        } catch (e) {
-                            console.error('Error parsing SSE data:', e);
                         }
                     }
-                }
-                
-                processStream();
-            }).catch(err => {
-                console.error('Stream reading error:', err);
-                analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
-                analysisContainer.setAttribute('aria-busy', 'false');
-                reader.cancel();
-            });
-        }
-        
-        processStream();
-    })
-    .catch(err => {
-        console.error('Fetch error:', err);
-        analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
-        analysisContainer.setAttribute('aria-busy', 'false');
-    });
+
+                    processStream();
+                }).catch(err => {
+                    console.error('Stream reading error:', err);
+                    analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
+                    analysisContainer.setAttribute('aria-busy', 'false');
+                    reader.cancel();
+                });
+            }
+
+            processStream();
+        })
+        .catch(err => {
+            console.error('Fetch error:', err);
+            analysisContainer.innerHTML = '<p>☕ The AI astrologer is taking a cosmic tea break. Trust your intuition today! 🔮</p>';
+            analysisContainer.setAttribute('aria-busy', 'false');
+        });
     }
 })();

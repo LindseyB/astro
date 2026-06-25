@@ -353,6 +353,9 @@ class TestAccessibilityRegression(unittest.TestCase):
             self.assertIn(b'role="status"', response.data)
             self.assertIn(b'aria-live="polite"', response.data)
             self.assertIn(b'aria-busy="false"', response.data)
+            self.assertIn(b'id="analysisStreamContent"', response.data)
+            self.assertIn(b'id="analysisStreamIndicator"', response.data)
+            self.assertIn(b'streaming-indicator__icon', response.data)
 
     def test_streaming_script_sets_and_clears_aria_busy(self):
         response = self.app.get('/static/js/stream-analysis.js')
@@ -360,6 +363,9 @@ class TestAccessibilityRegression(unittest.TestCase):
 
         self.assertIn(b"setAttribute('aria-busy', 'true')", response.data)
         self.assertIn(b"setAttribute('aria-busy', 'false')", response.data)
+        self.assertIn(b'analysisStreamContent', response.data)
+        self.assertIn('✦'.encode('utf-8'), response.data)
+        self.assertIn(b'sr-only', response.data)
 
 
 if __name__ == '__main__':
