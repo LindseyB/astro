@@ -495,8 +495,78 @@
     }
   });
 
-  // ── Tile clicks ───────────────────────────────────────────
-  document.querySelectorAll('.tile[data-action]').forEach(function (tile) {
+  // ── Tile interactions ─────────────────────────────────────
+  var actionTiles = Array.prototype.slice.call(document.querySelectorAll('.tile[data-action]'));
+  var reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function allowTileGlowMotion() {
+    return !reduceMotionQuery.matches;
+  }
+
+  function setTileGlowPosition(tile, clientX, clientY) {
+    if (!allowTileGlowMotion()) return;
+    var rect = tile.getBoundingClientRect();
+    var x = clientX - rect.left;
+    var y = clientY - rect.top;
+    tile.style.setProperty('--edge-glow-x', x + 'px');
+    tile.style.setProperty('--edge-glow-y', y + 'px');
+  }
+
+  actionTiles.forEach(function (tile) {
+    tile.addEventListener('pointerenter', function (e) {
+      if (!allowTileGlowMotion()) return;
+      setTileGlowPosition(tile, e.clientX, e.clientY);
+      tile.classList.add('glow-active');
+    });
+
+    tile.addEventListener('pointermove', function (e) {
+      if (!allowTileGlowMotion()) return;
+      setTileGlowPosition(tile, e.clientX, e.clientY);
+    });
+
+    // Fallback for environments that dispatch mouse events but not pointer events.
+    tile.addEventListener('mouseenter', function (e) {
+      if (!allowTileGlowMotion()) return;
+      setTileGlowPosition(tile, e.clientX, e.clientY);
+      tile.classList.add('glow-active');
+    });
+
+    tile.addEventListener('mousemove', function (e) {
+      if (!allowTileGlowMotion()) return;
+      setTileGlowPosition(tile, e.clientX, e.clientY);
+    });
+
+    tile.addEventListener('pointerleave', function () {
+      tile.classList.remove('glow-active');
+      tile.style.setProperty('--edge-glow-x', '92%');
+      tile.style.setProperty('--edge-glow-y', '8%');
+    });
+
+    tile.addEventListener('mouseleave', function () {
+      tile.classList.remove('glow-active');
+      tile.style.setProperty('--edge-glow-x', '92%');
+      tile.style.setProperty('--edge-glow-y', '8%');
+    });
+
+    tile.addEventListener('focus', function () {
+      tile.classList.add('glow-active');
+      tile.style.setProperty('--edge-glow-x', '92%');
+      tile.style.setProperty('--edge-glow-y', '8%');
+    });
+
+    tile.addEventListener('blur', function () {
+      tile.classList.remove('glow-active');
+    });
+
+    // Respect reduced-motion preference changes in real-time.
+    if (typeof reduceMotionQuery.addEventListener === 'function') {
+      reduceMotionQuery.addEventListener('change', function () {
+        tile.classList.remove('glow-active');
+        tile.style.setProperty('--edge-glow-x', '92%');
+        tile.style.setProperty('--edge-glow-y', '8%');
+      });
+    }
+
     tile.addEventListener('click', function () {
       var action = tile.dataset.action;
       if (action === '/ask-anything') {
