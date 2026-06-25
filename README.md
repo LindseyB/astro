@@ -1,4 +1,4 @@
-# Astro Horoscope
+# ✦ Astro Horoscope
 
 # 🔮
 

@@ -186,7 +186,32 @@
     </div>
   </section>
 
-  <footer class="page-foot">✦ &nbsp; built under a waxing crescent &nbsp; ✦</footer>
+  <!-- Bottom navigation -->
+  <div class="reading-nav" style="margin-top: 60px;">
+    <a href="/chart" class="nav-link" onclick="submitForm(event, '/chart')">today's reading</a>
+    <a href="/live-mas" class="nav-link" onclick="submitForm(event, '/live-mas')">cosmic cravings 🌮</a>
+    <a href="/" class="nav-link">another reading</a>
+  </div>
+
+  <!-- Hidden form for navigation -->
+  <form id="navForm" method="POST" style="display: none;">
+    <input type="hidden" name="birth_date" value="{{ form_data.birth_date }}">
+    <input type="hidden" name="birth_time" value="{{ form_data.birth_time }}">
+    <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
+    <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
+    <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
+    <input type="hidden" name="music_genre" value="{{ form_data.music_genre }}">
+    <input type="hidden" name="other_genre" value="{{ form_data.other_genre }}">
+  </form>
 </main>
+
+<script>
+function submitForm(e, action) {
+    e.preventDefault();
+    var form = document.getElementById('navForm');
+    form.action = action;
+    form.submit();
+}
+</script>
 {% endblock %}
 

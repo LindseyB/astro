@@ -8,6 +8,19 @@
     </linearGradient>
   </defs>
   <rect width="512" height="512" rx="112" fill="#0b0b1a"/>
+  
+  <!-- Background stars -->
+  <circle cx="80" cy="100" r="3" fill="#818cf8" opacity="0.6"/>
+  <circle cx="430" cy="90" r="2.5" fill="#a5f3fc" opacity="0.5"/>
+  <circle cx="450" cy="380" r="2" fill="#c4b5fd" opacity="0.4"/>
+  <circle cx="70" cy="420" r="2.5" fill="#67e8f9" opacity="0.5"/>
+  <circle cx="120" cy="320" r="1.5" fill="#818cf8" opacity="0.3"/>
+  <circle cx="380" cy="440" r="2" fill="#a5f3fc" opacity="0.4"/>
+  <circle cx="460" cy="150" r="1.5" fill="#c4b5fd" opacity="0.3"/>
+  <circle cx="60" cy="200" r="2" fill="#67e8f9" opacity="0.4"/>
+  <circle cx="340" cy="100" r="1.5" fill="#818cf8" opacity="0.3"/>
+  <circle cx="420" cy="460" r="2" fill="#a5f3fc" opacity="0.4"/>
+  
   <path fill="url(#holo)" d="M256 64
     C272 168 344 240 448 256
     C344 272 272 344 256 448

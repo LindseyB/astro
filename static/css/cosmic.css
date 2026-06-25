@@ -426,42 +426,76 @@ a { color: inherit; text-decoration: none; }
   max-width: 72rem; margin: 0 auto;
 }
 
-/* Sticky headers gain a frosted backdrop once the page is scrolled, so the
-   logo and actions stay readable over content scrolling behind them. The
-   backdrop is a full-bleed pseudo-element so it spans the whole page width
-   while the header content stays centered. */
+/* Sticky headers gain a frosted pill backdrop around the logo/back-link once the page is scrolled, so the
+   content stays readable over content scrolling behind them. */
 .site-header,
 .reading-header {
   position: sticky; top: 0; z-index: 20;
 }
-.site-header::before,
-.reading-header::before {
+
+/* Site header logo pill blur */
+.site-header .logo {
+  position: relative;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+}
+.site-header .logo::before {
   content: "";
   position: absolute;
-  top: 0; bottom: 0;
-  left: 50%;
-  width: 100vw;
-  transform: translateX(-50%);
+  top: 0; bottom: 0; left: 0; right: 0;
+  border-radius: 999px;
   z-index: -1;
   pointer-events: none;
   opacity: 0;
   background: oklch(1 0 0 / 0.28);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
-  box-shadow: 0 8px 24px -16px oklch(0.3 0.15 285 / 0.25);
+  box-shadow: 0 4px 12px -8px oklch(0.3 0.15 285 / 0.25);
   transition: opacity 220ms ease;
 }
-.dark .site-header::before,
-.dark .reading-header::before {
+.dark .site-header .logo::before {
   background: oklch(0.18 0.06 285 / 0.3);
 }
-.is-scrolled .site-header::before,
-.is-scrolled .reading-header::before {
+.is-scrolled .site-header .logo::before {
   opacity: 1;
 }
+
+/* Reading header back-link pill blur */
+.reading-header {
+  position: relative;
+}
+.reading-header .back-link {
+  position: relative;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.reading-header .back-link::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  border-radius: 999px;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background: oklch(1 0 0 / 0.28);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 4px 12px -8px oklch(0.3 0.15 285 / 0.25);
+  transition: opacity 220ms ease;
+}
+.dark .reading-header .back-link::before {
+  background: oklch(0.18 0.06 285 / 0.3);
+}
+.is-scrolled .reading-header .back-link::before {
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .site-header::before,
-  .reading-header::before { transition: none; }
+  .site-header .logo::before,
+  .reading-header .back-link::before { transition: none; }
 }
 .logo {
   display: inline-flex; align-items: baseline; gap: 0.5rem;

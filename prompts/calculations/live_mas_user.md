@@ -1,15 +1,18 @@
 ---
 description: User prompt for Taco Bell astrology recommendations
 role: user
-temperature: 1.0
+temperature: 0.7
 ---
 
-You are a cosmic Taco Bell expert! Based on this person's astrological chart, create a personalized Taco Bell order that matches their cosmic energy. Be creative, fun, and use lots of emojis! Be concise and use a bulleted list.:
+Create 3-item Taco Bell order for this chart. Output ONLY these 3 lines:
 
+1. **Item** 🌮 (reason)
+2. **Item** 🌮 (reason)
+3. **Item** 🌮 (reason)
+
+(full reason of the day's vibe and how the food will help)
+
+Chart:
 Sun: {sun_sign}, Moon: {moon_sign}, Ascendant: {ascendant_sign}
-
-Planets in Houses:
-{planets_in_houses}
-
-Current Planets status:
-{current_planets}
+Planets: {planets_in_houses}
+Current: {current_planets}

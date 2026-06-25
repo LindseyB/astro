@@ -7,6 +7,12 @@
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/sparkle-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "theme_color": "#0b0b1a",

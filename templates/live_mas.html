@@ -35,18 +35,25 @@
 <script>document.body.dataset.streaming = 'true';</script>
 {% endif %}
 
-<div class="reading-page">
-  <header class="reading-header">
-    <a href="/" class="back-link">← back to main</a>
-    <div class="header-actions">
-      <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
-        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
-    </div>
-  </header>
+<header class="site-header">
+  <a href="/" class="logo">
+    <span class="logo-mark">✦</span>
+    <span class="logo-text">astro-horoscope<span class="logo-dim">.lol</span></span>
+  </a>
+  <div class="header-actions">
+    <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
+      <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</header>
 
+<div class="reading-page">
   <main class="reading-main">
+    <a href="/" class="back-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to main
+    </a>
     <div class="reading-title-section">
       <p class="reading-eyebrow">COSMIC CRAVINGS</p>
       <h1 class="reading-heading">Live Más, written in the stars</h1>
