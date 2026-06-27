@@ -7,9 +7,13 @@ from unittest.mock import patch, MagicMock
 # Add the parent directory to the path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Mock swisseph before importing any module that transitively depends on it
+# Mock swisseph before importing any module that transitively depends on it,
+# but only if it cannot be imported (e.g. Python 3.12 ABI incompatibility).
 if 'swisseph' not in sys.modules:
-    sys.modules['swisseph'] = MagicMock()
+    try:
+        import swisseph as _swisseph_check  # noqa: F401
+    except ImportError:
+        sys.modules['swisseph'] = MagicMock()
 
 from main import app
 
