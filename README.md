@@ -25,9 +25,10 @@ A web-based astrological horoscope for only the chillest of humans
 1. Click the "Code" button on GitHub
 2. Select the "Codespaces" tab
 3. Click "Create codespace on main"
-4. Set your Anthropic API key:
+4. Set required environment variables:
 
 ```bash
+export SECRET_KEY="replace-with-a-long-random-secret"
 export ANTHROPIC_TOKEN="your-api-key-here"
 ```
 
