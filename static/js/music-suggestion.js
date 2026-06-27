@@ -66,6 +66,11 @@ function loadMusicSuggestion(chartData, chartType) {
                                 container.appendChild(p);
                                 container.dataset.loaded = 'true';
                                 container.dataset.loading = 'false';
+
+                                const copyBtn = document.getElementById('copyAnalysisBtn');
+                                if (copyBtn && copyBtn.dataset.showAfterMusic === 'true') {
+                                    copyBtn.style.display = 'inline-flex';
+                                }
                             } else if (data.error) {
                                 console.error('Music suggestion error:', data.error);
                                 reader.cancel();
