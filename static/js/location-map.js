@@ -40,6 +40,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    const searchButton = document.querySelector('.location-search-btn');
+    if (searchButton) {
+        searchButton.addEventListener('click', searchLocation);
+    }
     
     // Listen for dark mode changes and update map tiles
     const observer = new MutationObserver(function(mutations) {
@@ -293,12 +298,14 @@ function updateMapTiles() {
 // Search for locations using Nominatim (OpenStreetMap's geocoding service)
 function searchLocation() {
     const searchInput = document.getElementById('locationSearch');
+    if (!searchInput) return;
     const searchValue = searchInput.value.trim();
     
     if (!searchValue) return;
     
     // Show loading state
     const searchButton = document.querySelector('.location-search-btn');
+    if (!searchButton) return;
     const originalText = searchButton.textContent;
     searchButton.textContent = 'Searching...';
     searchButton.disabled = true;
