@@ -6,14 +6,35 @@
 (function() {
     'use strict';
 
+    var STREAMING_INDICATOR_MARKUP =
+        '<span class="streaming-indicator__icon" aria-hidden="true">✦</span>' +
+        '<div class="streaming-indicator__bars" aria-hidden="true">' +
+            '<span class="streaming-indicator__bar"></span>' +
+            '<span class="streaming-indicator__bar"></span>' +
+            '<span class="streaming-indicator__bar"></span>' +
+            '<span class="streaming-indicator__bar"></span>' +
+        '</div>' +
+        '<span class="sr-only">More content is still streaming in</span>';
+
     function createStreamingIndicator() {
         var indicator = document.createElement('div');
         indicator.className = 'streaming-indicator';
-        indicator.setAttribute('aria-hidden', 'true');
-        indicator.innerHTML =
-            '<span class="streaming-indicator__icon" aria-hidden="true">✦</span>' +
-            '<span class="sr-only">More content is still streaming in</span>';
+        indicator.innerHTML = STREAMING_INDICATOR_MARKUP;
         return indicator;
+    }
+
+    function hydrateStreamingIndicator(streamingIndicator) {
+        if (!streamingIndicator) {
+            return;
+        }
+
+        // Remove aria-hidden from server-rendered containers so the sr-only text is announced.
+        streamingIndicator.removeAttribute('aria-hidden');
+
+        // Keep server-rendered indicator containers, but normalize inner markup.
+        if (!streamingIndicator.querySelector('.streaming-indicator__bars')) {
+            streamingIndicator.innerHTML = STREAMING_INDICATOR_MARKUP;
+        }
     }
 
     function ensureStreamingSurface(analysisContainer) {
@@ -30,6 +51,8 @@
             streamingIndicator = createStreamingIndicator();
             streamingIndicator.id = 'analysisStreamIndicator';
             analysisContainer.appendChild(streamingIndicator);
+        } else {
+            hydrateStreamingIndicator(streamingIndicator);
         }
 
         return {
