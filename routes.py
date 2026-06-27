@@ -145,6 +145,22 @@ def _is_birthday_today(birth_date_html, timezone_offset):
     return (birthday.month, birthday.day) == (local_today.month, local_today.day)
 
 
+def _format_birth_date_for_calculations(birth_date_text):
+    """Validate supported birth date formats and return YYYY/MM/DD."""
+    if not isinstance(birth_date_text, str):
+        raise ValueError('Birth date must be a string in YYYY-MM-DD format')
+
+    normalized = birth_date_text.strip()
+    for date_format in ('%Y-%m-%d', '%Y/%m/%d'):
+        try:
+            parsed = datetime.strptime(normalized, date_format)
+            return parsed.strftime('%Y/%m/%d')
+        except ValueError:
+            continue
+
+    raise ValueError('Birth date must be in YYYY-MM-DD format')
+
+
 @app.route('/')
 def index():
     """Render home page"""
@@ -170,10 +186,9 @@ def chart():
         else:
             music_genre = 'any'
 
-    # Convert date format from YYYY-MM-DD to YYYY/MM/DD
-    birth_date = birth_date_html.replace('-', '/')
-
     try:
+        # Validate and convert date format from YYYY-MM-DD to YYYY/MM/DD
+        birth_date = _format_birth_date_for_calculations(birth_date_html)
         logger.info(f"Rendering chart placeholder for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
         
         # Calculate basic chart data (fast - no AI)
@@ -251,9 +266,7 @@ def stream_chart_analysis():
         longitude = data.get('longitude')
         music_genre = data.get('music_genre', 'any')
         
-        # Convert date format if needed
-        if birth_date and '-' in birth_date:
-            birth_date = birth_date.replace('-', '/')
+        birth_date = _format_birth_date_for_calculations(birth_date)
         
         logger.info(f"Streaming chart analysis for: {birth_date} {birth_time}")
         
@@ -292,10 +305,9 @@ def full_chart():
         else:
             music_genre = 'any'
 
-    # Convert date format from YYYY-MM-DD to YYYY/MM/DD
-    birth_date = birth_date_html.replace('-', '/')
-
     try:
+        # Validate and convert date format from YYYY-MM-DD to YYYY/MM/DD
+        birth_date = _format_birth_date_for_calculations(birth_date_html)
         logger.info(f"Rendering full chart placeholder for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
         
         # Calculate chart structure (fast - no AI)
@@ -352,8 +364,7 @@ def stream_full_chart_analysis():
         longitude = data.get('longitude')
         music_genre = data.get('music_genre', 'any')
         
-        if birth_date and '-' in birth_date:
-            birth_date = birth_date.replace('-', '/')
+        birth_date = _format_birth_date_for_calculations(birth_date)
         
         logger.info(f"Streaming full chart analysis for: {birth_date} {birth_time}")
         
@@ -383,10 +394,9 @@ def live_mas():
     latitude = request.form['latitude']
     longitude = request.form['longitude']
 
-    # Convert date format from YYYY-MM-DD to YYYY/MM/DD
-    birth_date = birth_date_html.replace('-', '/')
-
     try:
+        # Validate and convert date format from YYYY-MM-DD to YYYY/MM/DD
+        birth_date = _format_birth_date_for_calculations(birth_date_html)
         logger.info(f"Rendering Live Más placeholder for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
         
         # Calculate basic chart data (fast - no AI)
@@ -491,8 +501,7 @@ def stream_live_mas_analysis():
         latitude = data.get('latitude')
         longitude = data.get('longitude')
         
-        if birth_date and '-' in birth_date:
-            birth_date = birth_date.replace('-', '/')
+        birth_date = _format_birth_date_for_calculations(birth_date)
         
         logger.info(f"Streaming live mas analysis for: {birth_date} {birth_time}")
         
@@ -549,8 +558,7 @@ def stream_ask_anything():
         if missing_fields:
             return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
 
-        if birth_date and '-' in birth_date:
-            birth_date = birth_date.replace('-', '/')
+        birth_date = _format_birth_date_for_calculations(birth_date)
         from ai_service import get_client
         try:
             get_client()
@@ -610,9 +618,7 @@ def music_suggestion():
 
         logger.info(f"Generating music suggestion for chart type: {chart_type}, genre: {music_genre}")
 
-        # Convert date format if needed
-        if '-' in birth_date:
-            birth_date = birth_date.replace('-', '/')
+        birth_date = _format_birth_date_for_calculations(birth_date)
 
         # Setup charts
         chart, today_chart = create_charts(birth_date, birth_time, timezone_offset, latitude, longitude)
