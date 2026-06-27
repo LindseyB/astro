@@ -53,24 +53,27 @@ For local development and running tests, install dev dependencies instead (this 
 pip install -r requirements-dev.txt
 ```
 
-2. Set your Anthropic API key. The easiest way for local development is a `.env` file (loaded automatically on startup):
+2. Set required environment variables. The easiest way for local development is a `.env` file (loaded automatically on startup):
 
 ```bash
 cp .env.example .env        # macOS/Linux
 # Copy-Item .env.example .env  # Windows PowerShell
 ```
 
-Then open `.env` and set your key (get one at https://console.anthropic.com/):
+Then open `.env` and set your values:
 
 ```
+SECRET_KEY=replace-with-a-long-random-secret
 ANTHROPIC_TOKEN=your-api-key-here
 ```
 
-`.env` is git-ignored, so your key stays out of version control. Alternatively, you can export it in your shell instead of using a file:
+`SECRET_KEY` is required at startup, and `.env` is git-ignored so secrets stay out of version control. Alternatively, you can export variables in your shell instead of using a file:
 
 ```bash
-export ANTHROPIC_TOKEN="your-api-key-here"          # macOS/Linux
-# $env:ANTHROPIC_TOKEN = "your-api-key-here"        # Windows PowerShell
+export SECRET_KEY="replace-with-a-long-random-secret"     # macOS/Linux
+export ANTHROPIC_TOKEN="your-api-key-here"                # macOS/Linux
+# $env:SECRET_KEY = "replace-with-a-long-random-secret"   # Windows PowerShell
+# $env:ANTHROPIC_TOKEN = "your-api-key-here"              # Windows PowerShell
 ```
 
 > **Optional:** set `LAST_FM_API_KEY` (from https://www.last.fm/api/account/create) to enable real song recommendations. Without it, the app still runs and falls back to AI-suggested songs.
