@@ -47,6 +47,12 @@ The environment will automatically set up Python 3.10 and install all dependenci
 pip install -r requirements.txt
 ```
 
+For local development and running tests, install dev dependencies instead (this includes runtime dependencies):
+
+```bash
+pip install -r requirements-dev.txt
+```
+
 2. Set your Anthropic API key. The easiest way for local development is a `.env` file (loaded automatically on startup):
 
 ```bash
