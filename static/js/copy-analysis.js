@@ -29,7 +29,7 @@ function copyAnalysis() {
 
 function showCopySuccess(copyBtn) {
     const originalText = copyBtn.innerHTML;
-    copyBtn.innerHTML = '✅';
+    copyBtn.innerHTML = '✓';
     copyBtn.style.background = '#22c55e';
     
     // Reset button after 2 seconds
