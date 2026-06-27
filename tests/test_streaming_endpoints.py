@@ -390,7 +390,7 @@ class TestStreamingEndpointsSSE(unittest.TestCase):
         response_data = json.loads(response.data)
         self.assertIn('error', response_data)
 
-    @patch('routes.stream_calculate_ask_anything')
+    @patch('ask_routes.stream_calculate_ask_anything')
     @patch('ai_service.get_client')
     def test_stream_ask_anything_sse_format(self, mock_get_client, mock_stream_ask_anything):
         """Test /stream-ask-anything returns properly formatted SSE stream"""
@@ -421,7 +421,7 @@ class TestStreamingEndpointsSSE(unittest.TestCase):
         self.assertEqual(len(done_messages), 1)
         self.assertTrue(done_messages[0]['done'])
 
-    @patch('routes.stream_calculate_ask_anything')
+    @patch('ask_routes.stream_calculate_ask_anything')
     @patch('ai_service.get_client')
     def test_stream_ask_anything_normalizes_legacy_birth_formats(self, mock_get_client, mock_stream_ask_anything):
         """Test /stream-ask-anything normalizes legacy timezone and decimal coordinates"""

@@ -8,7 +8,7 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from routes import app
-from routes import _is_birthday_today
+from validation import _is_birthday_today
 from formatters import format_planets_for_api, markdown_filter, prepare_music_genre_text
 
 
@@ -96,7 +96,7 @@ class TestAstroApp(unittest.TestCase):
         # Should contain the streaming placeholder setup
         self.assertIn(b'document.body.dataset.streaming', response.data)
 
-    @patch('routes._get_user_local_today', return_value=date(2026, 6, 25))
+    @patch('validation._get_user_local_today', return_value=date(2026, 6, 25))
     def test_chart_route_shows_birthday_flash_when_birthdate_matches_today(self, _mock_today):
         """Chart page should include birthday flash message on matching local date."""
         form_data = {
@@ -247,11 +247,11 @@ class TestUtilityFunctions(unittest.TestCase):
 
 class TestBirthdayHelpers(unittest.TestCase):
 
-    @patch('routes._get_user_local_today', return_value=date(2026, 6, 25))
+    @patch('validation._get_user_local_today', return_value=date(2026, 6, 25))
     def test_is_birthday_today_true(self, _mock_today):
         self.assertTrue(_is_birthday_today('1990-06-25', '+00:00'))
 
-    @patch('routes._get_user_local_today', return_value=date(2026, 6, 25))
+    @patch('validation._get_user_local_today', return_value=date(2026, 6, 25))
     def test_is_birthday_today_false(self, _mock_today):
         self.assertFalse(_is_birthday_today('1990-06-24', '+00:00'))
 

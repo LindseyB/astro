@@ -22,7 +22,7 @@ class TestFormatBirthDateForCalculations(unittest.TestCase):
     """Unit tests for the _format_birth_date_for_calculations helper function"""
 
     def setUp(self):
-        from routes import _format_birth_date_for_calculations
+        from validation import _format_birth_date_for_calculations
         self.format_birth_date = _format_birth_date_for_calculations
 
     def test_yyyy_mm_dd_format_is_normalized_to_slashes(self):
