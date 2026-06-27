@@ -118,7 +118,7 @@ def test_music_suggestion_with_lastfm_integration(client):
         mock_get_client.return_value = MagicMock()
         
         # Mock Last.fm service to return tracks
-        with patch('routes.get_top_tracks_by_genre') as mock_lastfm:
+        with patch('music_routes.get_top_tracks_by_genre') as mock_lastfm:
             mock_lastfm.return_value = [
                 {'name': 'Stayin\' Alive', 'artist': 'Bee Gees'},
                 {'name': 'Le Freak', 'artist': 'Chic'},
@@ -159,7 +159,7 @@ def test_music_suggestion_lastfm_no_tracks_found(client):
         mock_get_client.return_value = MagicMock()
         
         # Mock Last.fm to return empty list
-        with patch('routes.get_top_tracks_by_genre') as mock_lastfm:
+        with patch('music_routes.get_top_tracks_by_genre') as mock_lastfm:
             mock_lastfm.return_value = []
             
             with patch('ai_service.stream_ai_api') as mock_stream:
@@ -194,7 +194,7 @@ def test_music_suggestion_any_genre_skips_lastfm(client):
         mock_get_client.return_value = MagicMock()
         
         # Mock Last.fm to return empty (simulating skip)
-        with patch('routes.get_top_tracks_by_genre') as mock_lastfm:
+        with patch('music_routes.get_top_tracks_by_genre') as mock_lastfm:
             mock_lastfm.return_value = []
             
             with patch('ai_service.stream_ai_api') as mock_stream:
