@@ -19,7 +19,6 @@
     function createStreamingIndicator() {
         var indicator = document.createElement('div');
         indicator.className = 'streaming-indicator';
-        indicator.setAttribute('aria-hidden', 'true');
         indicator.innerHTML = STREAMING_INDICATOR_MARKUP;
         return indicator;
     }
@@ -28,6 +27,9 @@
         if (!streamingIndicator) {
             return;
         }
+
+        // Remove aria-hidden from server-rendered containers so the sr-only text is announced.
+        streamingIndicator.removeAttribute('aria-hidden');
 
         // Keep server-rendered indicator containers, but normalize inner markup.
         if (!streamingIndicator.querySelector('.streaming-indicator__bars')) {
