@@ -554,13 +554,67 @@ class ChartWheel {
 // Initialize chart when page loads
 document.addEventListener('DOMContentLoaded', function() {
     const chartCanvas = document.getElementById('chartWheel');
+    const downloadButton = document.getElementById('downloadChartWheelBtn');
+
     if (chartCanvas && window.chartData) {
         const wheel = new ChartWheel('chartWheel', window.chartData);
+
         // Redraw on dark/light theme changes so the wheel colors stay in sync
         const observer = new MutationObserver(function() {
             wheel.theme = wheel.resolveTheme();
             wheel.draw();
         });
         observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+        if (downloadButton) {
+            downloadButton.addEventListener('click', function() {
+                const getExportCanvas = function() {
+                    const exportCanvas = document.createElement('canvas');
+                    exportCanvas.width = chartCanvas.width;
+                    exportCanvas.height = chartCanvas.height;
+
+                    const exportCtx = exportCanvas.getContext('2d');
+                    if (!exportCtx) {
+                        return chartCanvas;
+                    }
+
+                    // Use the resolved page background so exported PNG has no transparency.
+                    const pageBackground = getComputedStyle(document.body).backgroundColor || '#ffffff';
+                    exportCtx.fillStyle = pageBackground;
+                    exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+                    exportCtx.drawImage(chartCanvas, 0, 0);
+
+                    return exportCanvas;
+                };
+
+                const triggerDownload = function(url) {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'chartWheel.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                };
+
+                const exportCanvas = getExportCanvas();
+
+                if (exportCanvas.toBlob) {
+                    exportCanvas.toBlob(function(blob) {
+                        if (!blob) {
+                            return;
+                        }
+                        const objectUrl = URL.createObjectURL(blob);
+                        triggerDownload(objectUrl);
+                        window.setTimeout(function() {
+                            URL.revokeObjectURL(objectUrl);
+                        }, 1000);
+                    }, 'image/png');
+                    return;
+                }
+
+                const dataUrl = exportCanvas.toDataURL('image/png');
+                triggerDownload(dataUrl);
+            });
+        }
     }
 });
