@@ -312,7 +312,11 @@
 
   // Clear data
   document.getElementById('clearDataBtn').addEventListener('click', function () {
-    localStorage.removeItem('astro_form_data');
+    try {
+      localStorage.removeItem('astro_form_data');
+    } catch (e) {
+      console.warn('Failed to clear form data from localStorage:', e);
+    }
     ['birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude', 'music_genre', 'other_genre', 'question_prompt']
       .forEach(function (id) {
         var el = document.getElementById(id);
