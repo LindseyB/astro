@@ -261,15 +261,6 @@
       tile.classList.remove('glow-active');
     });
 
-    // Respect reduced-motion preference changes in real-time.
-    if (typeof reduceMotionQuery.addEventListener === 'function') {
-      reduceMotionQuery.addEventListener('change', function () {
-        tile.classList.remove('glow-active');
-        tile.style.setProperty('--edge-glow-x', '92%');
-        tile.style.setProperty('--edge-glow-y', '8%');
-      });
-    }
-
     tile.addEventListener('click', function () {
       var action = tile.dataset.action;
       if (action === '/ask-anything') {
@@ -283,6 +274,17 @@
       submitToAction(action);
     });
   });
+
+  // Respect reduced-motion preference changes in real-time (one listener for all tiles).
+  if (typeof reduceMotionQuery.addEventListener === 'function') {
+    reduceMotionQuery.addEventListener('change', function () {
+      actionTiles.forEach(function (tile) {
+        tile.classList.remove('glow-active');
+        tile.style.setProperty('--edge-glow-x', '92%');
+        tile.style.setProperty('--edge-glow-y', '8%');
+      });
+    });
+  }
 
   // Save & continue
   function setPanelError(message) {

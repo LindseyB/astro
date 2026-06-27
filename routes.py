@@ -21,7 +21,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'astro-dev-secret-key')
 SITE_META = {
     'site_name': 'Astro Horoscope',
     'default_title': 'Astro Horoscope',
-    'default_social_title': 'Astro Horoscope - Your Cosmic Vibe Check',
+    'default_social_title': 'Astro Horoscope - Your Birth Chart & Daily Cosmic Vibe',
     'og_description': 'Your cosmic vibe check starts here. See your sun, moon, rising, and today\'s astrology in one beautiful experience.',
     'twitter_description': 'Cosmic vibe check: sun, moon, rising, and your daily astrology snapshot.',
     'meta_description': 'Get a fun, personalized astrology experience with your birth chart, daily horoscope, and chart-based insights.',
