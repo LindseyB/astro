@@ -18,6 +18,24 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'astro-dev-secret-key')
 
+SITE_META = {
+    'site_name': 'Astro Horoscope',
+    'default_title': 'Astro Horoscope',
+    'default_social_title': 'Astro Horoscope - Your Cosmic Vibe Check',
+    'og_description': 'Your cosmic vibe check starts here. See your sun, moon, rising, and today\'s astrology in one beautiful experience.',
+    'twitter_description': 'Cosmic vibe check: sun, moon, rising, and your daily astrology snapshot.',
+    'meta_description': 'Get a fun, personalized astrology experience with your birth chart, daily horoscope, and chart-based insights.',
+    'keywords': 'astrology app, cosmic vibe check, birth chart, horoscope, zodiac signs, sun moon rising, natal astrology, daily astrology',
+    'twitter_image_alt': 'Astro Horoscope - Personalized astrological charts with cosmic animations',
+    'author': 'Astro Horoscope'
+}
+
+
+@app.context_processor
+def inject_site_meta():
+    """Expose shared site copy to all templates to avoid repeated strings."""
+    return {'site_meta': SITE_META}
+
 # In development, disable static file caching so CSS/JS edits show on reload
 if os.environ.get('FLASK_ENV') == 'development' or os.environ.get('FLASK_DEBUG') == '1':
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0

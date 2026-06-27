@@ -40,6 +40,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    const searchButton = document.querySelector('.location-search-btn');
+    if (searchButton) {
+        searchButton.addEventListener('click', searchLocation);
+    }
     
     // Listen for dark mode changes and update map tiles
     const observer = new MutationObserver(function(mutations) {
@@ -293,16 +298,19 @@ function updateMapTiles() {
 // Search for locations using Nominatim (OpenStreetMap's geocoding service)
 function searchLocation() {
     const searchInput = document.getElementById('locationSearch');
+    if (!searchInput) return;
     const searchValue = searchInput.value.trim();
     
     if (!searchValue) return;
     
-    // Show loading state
+    // Show loading state (button is optional; search also works via Enter key)
     const searchButton = document.querySelector('.location-search-btn');
-    const originalText = searchButton.textContent;
-    searchButton.textContent = 'Searching...';
-    searchButton.disabled = true;
-    
+    const originalText = searchButton ? searchButton.textContent : null;
+    if (searchButton) {
+        searchButton.textContent = 'Searching...';
+        searchButton.disabled = true;
+    }
+
     // Use Nominatim API for geocoding
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchValue)}&limit=1`;
     
@@ -331,9 +339,11 @@ function searchLocation() {
             showSearchError('Could not search right now. Please try again.');
         })
         .finally(() => {
-            // Reset button state
-            searchButton.textContent = originalText;
-            searchButton.disabled = false;
+            // Reset button state if button exists
+            if (searchButton) {
+                searchButton.textContent = originalText;
+                searchButton.disabled = false;
+            }
         });
 }
 

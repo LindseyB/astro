@@ -3,30 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Astro Horoscope{% endblock %}</title>
+  <title>{% block title %}{{ site_meta.default_title }}{% endblock %}</title>
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ request.url }}">
-    <meta property="og:title" content="{% block og_title %}Astro Horoscope - Your Cosmic Vibe Check{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}Get your personalized astrological chart with AI-powered cosmic insights. Discover your sun, moon, and rising signs with beautiful animations and zoomer astrology vibes! ✨🌙⭐{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{{ site_meta.default_social_title }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ site_meta.og_description }}{% endblock %}">
     <meta property="og:image" content="{{ url_for('static', filename='images/og-image.png', _external=True) }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:site_name" content="Astro Horoscope">
+    <meta property="og:site_name" content="{{ site_meta.site_name }}">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="{{ request.url }}">
-    <meta name="twitter:title" content="{% block twitter_title %}Astro Horoscope - Your Cosmic Vibe Check{% endblock %}">
-    <meta name="twitter:description" content="{% block twitter_description %}Get your personalized astrological chart with AI-powered cosmic insights. Discover your sun, moon, and rising signs! ✨🌙⭐{% endblock %}">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ site_meta.default_social_title }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ site_meta.twitter_description }}{% endblock %}">
     <meta name="twitter:image" content="{{ url_for('static', filename='images/twitter-card.png', _external=True) }}">
-    <meta name="twitter:image:alt" content="Astro Horoscope - Personalized astrological charts with cosmic animations">
+    <meta name="twitter:image:alt" content="{{ site_meta.twitter_image_alt }}">
     
     <!-- General Meta -->
-    <meta name="description" content="{% block meta_description %}Get your personalized astrological chart with AI-powered cosmic insights. Beautiful animations, zoomer astrology vibes, and accurate planetary positions.{% endblock %}">
-    <meta name="keywords" content="astrology, horoscope, natal chart, zodiac, sun sign, moon sign, rising sign, astrological chart, cosmic, AI astrology">
-    <meta name="author" content="Astro Horoscope">
+    <meta name="description" content="{% block meta_description %}{{ site_meta.meta_description }}{% endblock %}">
+    <meta name="keywords" content="{{ site_meta.keywords }}">
+    <meta name="author" content="{{ site_meta.author }}">
     
     <!-- Favicons and Icons -->
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/sparkle.svg') }}" />
