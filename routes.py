@@ -8,7 +8,6 @@ from formatters import markdown_filter, prepare_music_genre_text, format_planets
 from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas, stream_calculate_ask_anything
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets, get_full_chart_structure
 import ai_service
-from ai_service import stream_ai_api
 from lastfm_service import get_top_tracks_by_genre, format_tracks_for_prompt, LASTFM_API_KEY
 from prompt_templates import load_prompt_template, load_prompt_text
 import json
@@ -679,7 +678,7 @@ def music_suggestion():
         def generate():
             """Generator function for streaming response"""
             try:
-                for chunk in stream_ai_api(system_content, user_prompt, temperature=user_template.metadata.get("temperature", 1.0)):
+                for chunk in ai_service.stream_ai_api(system_content, user_prompt, temperature=user_template.metadata.get("temperature", 1.0)):
                     if chunk:
                         yield f"data: {json.dumps({'chunk': chunk})}\n\n"
                 yield f"data: {json.dumps({'done': True})}\n\n"
