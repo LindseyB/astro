@@ -16,7 +16,10 @@ import os
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'astro-dev-secret-key')
+secret_key = os.environ.get('SECRET_KEY', '').strip()
+if not secret_key:
+    raise RuntimeError('SECRET_KEY environment variable is required at startup.')
+app.config['SECRET_KEY'] = secret_key
 
 SITE_META = {
     'site_name': 'Astro Horoscope',
