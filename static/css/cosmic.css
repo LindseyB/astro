@@ -1160,6 +1160,7 @@ html.dark .tile::after,
   width: 0.32rem;
   height: 1rem;
   border-radius: 999px;
+  background: var(--highlight);
   background: color-mix(in oklab, var(--highlight) 78%, white 22%);
   transform-origin: 50% 100%;
   animation: loading-bars-scale-fade 1.05s ease-in-out infinite;
