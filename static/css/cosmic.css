@@ -1573,7 +1573,27 @@ body.index-page .container > h1:first-of-type { display: none; }
   .chart-grid { grid-template-columns: 1fr 1fr; align-items: start; }
 }
 
-.panel--wheel { display: flex; align-items: center; justify-content: center; }
+.panel--wheel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.wheel-cap {
+  width: 100%;
+  margin-bottom: 0.25rem;
+}
+.download-wheel-btn {
+  padding: 0.45rem 0.72rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.download-wheel-btn svg {
+  width: 13px;
+  height: 13px;
+}
 .wheel-wrap {
   width: 100%; max-width: 420px;
   aspect-ratio: 1 / 1;
