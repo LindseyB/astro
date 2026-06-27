@@ -7,7 +7,7 @@ from config import logger, HOUSE_NAMES
 from formatters import markdown_filter, prepare_music_genre_text, format_planets_for_api, format_planets_in_houses_for_prompt
 from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas, stream_calculate_ask_anything
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets, get_full_chart_structure
-from ai_service import stream_ai_api
+import ai_service
 from lastfm_service import get_top_tracks_by_genre, format_tracks_for_prompt, LASTFM_API_KEY
 from prompt_templates import load_prompt_template, load_prompt_text
 import json
@@ -180,7 +180,6 @@ def chart():
         logger.info(f"Rendering chart placeholder for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
         
         # Calculate basic chart data (fast - no AI)
-        from chart_data import create_charts, get_main_positions, get_current_planets
         chart_obj, today_chart = create_charts(birth_date, birth_time, timezone_offset, latitude, longitude)
         sun, moon, ascendant = get_main_positions(chart_obj)
         current_planets = get_current_planets(today_chart)
@@ -231,9 +230,8 @@ def stream_chart_analysis():
     """Stream daily horoscope analysis"""
     try:
         # Validate API token early, before starting stream
-        from ai_service import get_client
         try:
-            get_client()
+            ai_service.get_client()
         except ValueError as e:
             logger.error(f"AI service not available: {e}")
             return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
@@ -332,9 +330,8 @@ def stream_full_chart_analysis():
     """Stream full natal chart analysis"""
     try:
         # Validate API token early, before starting stream
-        from ai_service import get_client
         try:
-            get_client()
+            ai_service.get_client()
         except ValueError as e:
             logger.error(f"AI service not available: {e}")
             return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
@@ -393,7 +390,6 @@ def live_mas():
         logger.info(f"Rendering Live Más placeholder for: {birth_date} {birth_time} {timezone_offset} {latitude} {longitude}")
         
         # Calculate basic chart data (fast - no AI)
-        from chart_data import create_charts, get_main_positions, get_current_planets
         chart_obj, today_chart = create_charts(birth_date, birth_time, timezone_offset, latitude, longitude)
         sun, moon, ascendant = get_main_positions(chart_obj)
         current_planets = get_current_planets(today_chart)
@@ -472,9 +468,8 @@ def stream_live_mas_analysis():
     """Stream Taco Bell order analysis"""
     try:
         # Validate API token early, before starting stream
-        from ai_service import get_client
         try:
-            get_client()
+            ai_service.get_client()
         except ValueError as e:
             logger.error(f"AI service not available: {e}")
             return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
@@ -554,9 +549,8 @@ def stream_ask_anything():
 
         if birth_date and '-' in birth_date:
             birth_date = birth_date.replace('-', '/')
-        from ai_service import get_client
         try:
-            get_client()
+            ai_service.get_client()
         except ValueError as e:
             logger.error(f"AI service not available: {e}")
             return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
@@ -583,9 +577,8 @@ def music_suggestion():
     """Handle async music suggestion request with streaming"""
     try:
         # Validate API token early, before starting stream
-        from ai_service import get_client
         try:
-            get_client()
+            ai_service.get_client()
         except ValueError as e:
             logger.error(f"AI service not available: {e}")
             return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
@@ -688,7 +681,7 @@ def music_suggestion():
         def generate():
             """Generator function for streaming response"""
             try:
-                for chunk in stream_ai_api(system_content, user_prompt, temperature=user_template.metadata.get("temperature", 1.0)):
+                for chunk in ai_service.stream_ai_api(system_content, user_prompt, temperature=user_template.metadata.get("temperature", 1.0)):
                     if chunk:
                         yield f"data: {json.dumps({'chunk': chunk})}\n\n"
                 yield f"data: {json.dumps({'done': True})}\n\n"

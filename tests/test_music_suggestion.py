@@ -91,7 +91,7 @@ def test_music_suggestion_success(client):
     with patch('ai_service.get_client') as mock_get_client:
         mock_get_client.return_value = MagicMock()
         
-        with patch('routes.stream_ai_api') as mock_stream:
+        with patch('ai_service.stream_ai_api') as mock_stream:
             mock_stream.return_value = iter(['Song: Bohemian Rhapsody by Queen'])
             
             response = client.post('/music-suggestion',
@@ -125,7 +125,7 @@ def test_music_suggestion_with_lastfm_integration(client):
                 {'name': 'I Will Survive', 'artist': 'Gloria Gaynor'}
             ]
             
-            with patch('routes.stream_ai_api') as mock_stream:
+            with patch('ai_service.stream_ai_api') as mock_stream:
                 mock_stream.return_value = iter(['Song: Stayin\' Alive by Bee Gees'])
                 
                 response = client.post('/music-suggestion',
@@ -162,7 +162,7 @@ def test_music_suggestion_lastfm_no_tracks_found(client):
         with patch('routes.get_top_tracks_by_genre') as mock_lastfm:
             mock_lastfm.return_value = []
             
-            with patch('routes.stream_ai_api') as mock_stream:
+            with patch('ai_service.stream_ai_api') as mock_stream:
                 mock_stream.return_value = iter(['Song: Test Song by Test Artist'])
                 
                 response = client.post('/music-suggestion',
@@ -197,7 +197,7 @@ def test_music_suggestion_any_genre_skips_lastfm(client):
         with patch('routes.get_top_tracks_by_genre') as mock_lastfm:
             mock_lastfm.return_value = []
             
-            with patch('routes.stream_ai_api') as mock_stream:
+            with patch('ai_service.stream_ai_api') as mock_stream:
                 mock_stream.return_value = iter(['Song: Test Song by Test Artist'])
                 
                 response = client.post('/music-suggestion',
