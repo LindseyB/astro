@@ -10,7 +10,7 @@ This repository is configured to work with GitHub Codespaces.
 
 The environment will automatically:
 - Install Python 3.10
-- Install all dependencies from requirements.txt
+- Install all dependencies from requirements-dev.txt
 - Set up the Flask development environment
 
 ## Swiss Ephemeris Setup
