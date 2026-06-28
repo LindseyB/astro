@@ -3,7 +3,6 @@
 {% block title %}Ask the stars - Astro Horoscope{% endblock %}
 
 {% block extra_scripts %}
-<script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
 {% if streaming %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="{{ url_for('static', filename='js/stream-analysis.js') }}"></script>
@@ -23,10 +22,6 @@
 {% endblock %}
 
 {% block content %}
-<script>
-    document.body.dataset.disableTrail = 'true';
-    document.body.classList.add('ask-page');
-</script>
 {% if streaming %}
 <script>document.body.dataset.streaming = 'true';</script>
 {% endif %}
@@ -73,9 +68,11 @@
                         </div>
                         {% endif %}
                     </div>
-                    <button id="copyAnalysisBtn" class="copy-chip copy-btn-float" onclick="copyAnalysis()" title="Copy your answer" aria-label="Copy your answer">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                    </button>
+                    <astro-copy-analysis source-selector="#analysisContent" section-selector=".analysis-section">
+                        <button id="copyAnalysisBtn" class="copy-chip copy-btn-float" type="button" title="Copy your answer" aria-label="Copy your answer">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        </button>
+                    </astro-copy-analysis>
                 </div>
             </div>
 
@@ -88,9 +85,11 @@
                 <input type="hidden" name="personality" value="{{ form_data.personality }}">
                 <label class="sr-only" for="chatQuestionInput">Ask anything</label>
                 <textarea class="chat-input" id="chatQuestionInput" name="question_prompt" rows="1" placeholder="Ask anything…" required></textarea>
-                <button class="send-btn" type="submit" aria-label="Send">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-                </button>
+                <astro-button style="display: contents;" loading-text="Sending..." require-input-selector="#chatQuestionInput" validation-message="Please enter a question for Ask Anything mode.">
+                    <button class="send-btn" type="submit" aria-label="Send">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    </button>
+                </astro-button>
             </form>
         </section>
 
@@ -114,44 +113,8 @@
         </form>
     </main>
 </div>
+{% endblock %}
 
-<script>
-    // Auto-grow the textarea and submit on Enter (Shift+Enter for newline)
-    (function () {
-        var input = document.querySelector('.chat-input');
-        if (!input) return;
-        function grow() {
-            var cs = getComputedStyle(input);
-            // Under box-sizing: border-box, height must include the borders or
-            // the content box ends up too short and forces a scrollbar.
-            var borderY = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
-            var maxPx = parseFloat(cs.maxHeight);
-            input.style.height = 'auto';
-            var needed = input.scrollHeight + borderY;
-            if (needed > maxPx) {
-                input.style.height = maxPx + 'px';
-                input.style.overflowY = 'auto';
-            } else {
-                input.style.height = needed + 'px';
-                input.style.overflowY = 'hidden';
-            }
-        }
-        grow();
-        input.addEventListener('input', grow);
-        input.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                if (input.value.trim()) input.form.submit();
-            }
-        });
-    })();
-
-    // Handle navigation form submission
-    function submitFormNav(e, action) {
-        e.preventDefault();
-        var form = document.getElementById('navForm');
-        form.action = action;
-        form.submit();
-    }
-</script>
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/ask-anything-page.js') }}"></script>
 {% endblock %}

@@ -13,8 +13,8 @@ class TestTemplates(unittest.TestCase):
 
     def setUp(self):
         """Set up test client"""
+        app.testing = True
         self.app = app.test_client()
-        self.app.testing = True
 
     def test_static_css_accessible(self):
         """Test that CSS file is accessible"""
@@ -83,6 +83,14 @@ class TestTemplates(unittest.TestCase):
         self.assertIn(b'latitude', response.data)
         self.assertIn(b'longitude', response.data)
         self.assertIn(b'timezone_offset', response.data)
+        self.assertIn(b'astro-datetime-input', response.data)
+        self.assertIn(b'astro-timezone-select', response.data)
+
+    def test_base_loads_web_component_registry(self):
+        """Test that base template loads the centralized web component module"""
+        response = self.app.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'js/components/index.js', response.data)
 
     def test_chart_template_structure(self):
         """Test chart template structure with streaming placeholder"""
@@ -136,6 +144,8 @@ class TestTemplates(unittest.TestCase):
         self.assertIn(b'document.body.dataset.streaming', response.data)
         self.assertIn(b'stream-analysis.js', response.data)
         self.assertIn(b'pageType: \'ask-anything\'', response.data)
+        self.assertIn(b'astro-copy-analysis', response.data)
+        self.assertIn(b'astro-button', response.data)
 
 
 class TestErrorHandling(unittest.TestCase):
@@ -143,8 +153,8 @@ class TestErrorHandling(unittest.TestCase):
 
     def setUp(self):
         """Set up test client"""
+        app.testing = True
         self.app = app.test_client()
-        self.app.testing = True
 
     def test_invalid_static_file(self):
         """Test requesting non-existent static file"""
@@ -264,6 +274,47 @@ class TestJavaScriptFunctionality(unittest.TestCase):
             # Test for accessibility
             self.assertIn('aria-expanded', content)
 
+    def test_web_component_files_exist(self):
+        """Test that web component files are present in static/js/components"""
+        base_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'js', 'components')
+        required = [
+            'index.js',
+            'registry.js',
+            'astro-button.js',
+            'astro-chart-wheel.js',
+            'astro-section-toggle.js',
+            'astro-copy-analysis.js',
+            'astro-datetime-input.js',
+            'astro-timezone-select.js',
+        ]
+
+        for filename in required:
+            full_path = os.path.join(base_path, filename)
+            self.assertTrue(os.path.exists(full_path), f'{filename} should exist')
+
+            with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+
+            if filename.startswith('astro-'):
+                self.assertIn('customElements.define', content, f'{filename} should define a custom element')
+    def test_web_component_registry_accessible(self):
+        """Test that component registry module is served as a static asset"""
+        response = app.test_client().get('/static/js/components/index.js')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'registerAstroComponents', response.data)
+
+    def test_full_chart_uses_chart_wheel_component(self):
+        """Test full chart template uses astro-chart-wheel wrapper"""
+        response = app.test_client().post('/full-chart', data={
+            'birth_date': '1988-08-08',
+            'birth_time': '10:30',
+            'timezone_offset': '0',
+            'latitude': '51n30',
+            'longitude': '00w07'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'astro-chart-wheel', response.data)
+
 
 class TestCSS(unittest.TestCase):
     """Test CSS file structure and key styles"""
@@ -285,8 +336,8 @@ class TestAccessibilityRegression(unittest.TestCase):
     """Regression tests for accessibility-critical template and script behavior"""
 
     def setUp(self):
+        app.testing = True
         self.app = app.test_client()
-        self.app.testing = True
 
     def test_base_has_skip_link_and_theme_toggle_a11y_state_script(self):
         response = self.app.get('/')

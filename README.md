@@ -220,6 +220,83 @@ The shared loader lives in `prompt_templates.py`. Current prompt groups are orga
 - `prompts/routes/` for route-level prompts such as music suggestions
 - `prompts/ai_service/` for service-level prompts such as song verification
 
+### Frontend Web Components
+
+Reusable UI behavior is now componentized under `static/js/components/` and registered once from `static/js/components/index.js` (loaded in `templates/base.html`).
+
+Component API quick reference:
+
+`astro-button`
+
+- Purpose: submit-button loading/disable UX with optional validation
+- Slot: include one `<button type="submit">...</button>` child
+- Attributes:
+  - `loading-text` (optional, default `Loading...`)
+  - `disable-all-submit` (optional, default `true`)
+  - `require-input-selector` (optional CSS selector)
+  - `validation-message` (optional)
+- Events:
+  - `astro:button-loading`
+
+`astro-section-toggle`
+
+- Purpose: expand/collapse a target section with persisted state
+- Slot: include one `<button>...</button>` child (optionally with `.toggle-btn` icon span)
+- Attributes:
+  - `target` (required CSS selector)
+  - `storage-key` (optional localStorage key)
+  - `expanded` (optional default expanded state)
+- Events:
+  - `astro:section-toggle`
+
+`astro-copy-analysis`
+
+- Purpose: copy analysis text with chart context and feedback
+- Slot: include one copy button child (recommended)
+- Attributes:
+  - `source-selector` (optional, default `#analysisContent`)
+  - `section-selector` (optional, default `.analysis-section`)
+  - `success-text` (optional, default `✓`)
+  - `footer-text` (optional)
+- Events:
+  - `astro:copy-success`
+  - `astro:copy-failure`
+
+`astro-datetime-input`
+
+- Purpose: digit-only date/time entry with auto-formatting and native picker sync
+- Wraps an existing date/time field group in light DOM
+- Attributes:
+  - `kind` (`date` or `time`)
+  - `input-selector` (required selector for visible input)
+  - `native-selector` (required selector for hidden native picker input)
+  - `trigger-selector` (required selector for picker button)
+
+`astro-timezone-select`
+
+- Purpose: timezone select enhancement + Select2 initialization + localStorage sync
+- Wraps an existing timezone `<select>` in light DOM
+- Attributes:
+  - `select-selector` (required selector for timezone select)
+
+`astro-chart-wheel`
+
+- Purpose: owns chart wheel render lifecycle, theme-aware redraws, and PNG download behavior
+- Wraps an existing chart wheel block in light DOM
+- Attributes:
+  - `data-source` (optional global data key, default `chartData`)
+  - `canvas-selector` (optional, default `#chartWheel`)
+  - `download-selector` (optional, default `#downloadChartWheelBtn`)
+  - `download-filename` (optional, default `chartWheel.png`)
+
+Legacy compatibility adapters remain at:
+
+- `static/js/button-loading.js`
+- `static/js/section-toggle.js`
+- `static/js/copy-analysis.js`
+
+These files are deprecated and kept only for backward compatibility with old template includes.
+
 ### Run all tests
 
 ```bash

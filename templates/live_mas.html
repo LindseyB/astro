@@ -3,7 +3,6 @@
 {% block title %}Your Cosmic Taco Bell Order - Astro Horoscope{% endblock %}
 
 {% block extra_scripts %}
-<script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
 {% if streaming %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="{{ url_for('static', filename='js/stream-analysis.js') }}"></script>
@@ -16,8 +15,8 @@
         timezoneOffset: {{ form_data.timezone_offset | tojson }},
         latitude: {{ form_data.latitude | tojson }},
         longitude: {{ form_data.longitude | tojson }},
-      musicGenre: {{ (form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre) | tojson }},
-      personality: {{ form_data.personality | tojson }}
+        musicGenre: {{ (form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre) | tojson }},
+        personality: {{ form_data.personality | tojson }}
     };
 </script>
 {% endif %}
@@ -75,9 +74,11 @@
          data-ascendant="{{ chart_data.ascendant }}">
       <div class="section-cap">
         <h2 class="section-title">🌮 Your personalized order</h2>
-        <button id="copyAnalysisBtn" class="copy-chip" onclick="copyAnalysis()" title="Copy your Taco Bell order" aria-label="Copy your Taco Bell order">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        </button>
+        <astro-copy-analysis source-selector="#analysisContent" section-selector=".analysis-section">
+          <button id="copyAnalysisBtn" class="copy-chip" type="button" title="Copy your Taco Bell order" aria-label="Copy your Taco Bell order">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </astro-copy-analysis>
       </div>
       <div class="reading-content" id="analysisContent" role="status" aria-live="polite" aria-busy="false" aria-atomic="false">
         {% if streaming %}
