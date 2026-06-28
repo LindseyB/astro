@@ -7,6 +7,27 @@ before any other astrological libraries are imported, then starts the Flask appl
 import os
 import logging
 
+try:
+    from dotenv import load_dotenv
+    PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+    load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, '.env'), override=False)
+except ImportError:
+    # python-dotenv is optional; env vars can still be set in the shell.
+    pass
+
+
+def _is_debug_enabled():
+    """Return True when runtime should enable Flask debug behavior."""
+    return os.environ.get('FLASK_DEBUG', '').strip() == '1'
+
+# Ensure direct script execution defaults to local development behavior.
+if __name__ == '__main__':
+    resolved_flask_env = os.environ.get('FLASK_ENV', '').strip().lower()
+    if not resolved_flask_env:
+        os.environ['FLASK_ENV'] = 'development'
+        resolved_flask_env = 'development'
+    os.environ.setdefault('FLASK_DEBUG', '1' if resolved_flask_env == 'development' else '0')
+
 # Configure logging
 log_level = os.environ.get('LOG_LEVEL', 'INFO')
 logging.basicConfig(level=getattr(logging, log_level), format='%(asctime)s - %(levelname)s - %(message)s')
@@ -43,4 +64,4 @@ logger.info(f"pyswisseph configured with absolute path: {abs_ephe_path}")
 from routes import app
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=_is_debug_enabled())
