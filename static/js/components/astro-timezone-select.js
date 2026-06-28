@@ -1,3 +1,5 @@
+import { safeLocalStorageGet, safeLocalStorageSet } from './helpers.js';
+
 const ELEMENT_NAME = 'astro-timezone-select';
 
 class AstroTimezoneSelect extends HTMLElement {
