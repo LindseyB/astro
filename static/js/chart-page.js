@@ -106,7 +106,7 @@
 
         var form = document.createElement('form');
         form.method = 'POST';
-        form.action = String(config.askAnythingPath || '/ask-anything');
+        form.action = '/ask-anything';
 
         var fields = {
             question_prompt: question,
