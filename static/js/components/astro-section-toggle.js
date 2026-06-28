@@ -79,6 +79,11 @@ class AstroSectionToggle extends HTMLElement {
             return;
         }
 
+        if (persisted === 'collapsed') {
+            this.updateSectionState(false);
+            return;
+        }
+
         const expandedByAttribute = this.hasAttribute('expanded');
         this.updateSectionState(expandedByAttribute);
     }

@@ -59,8 +59,9 @@
                     legacyButton.style.background = '';
                 }, 2000);
             }).catch(function () {
+                var textArea = null;
                 try {
-                    var textArea = document.createElement('textarea');
+                    textArea = document.createElement('textarea');
                     textArea.value = fullText;
                     textArea.style.position = 'fixed';
                     textArea.style.left = '-999999px';
@@ -68,10 +69,22 @@
                     document.body.appendChild(textArea);
                     textArea.focus();
                     textArea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textArea);
+                    var success = document.execCommand('copy');
+                    if (success) {
+                        var originalText = legacyButton.innerHTML;
+                        legacyButton.innerHTML = '✓';
+                        legacyButton.style.background = '#22c55e';
+                        window.setTimeout(function () {
+                            legacyButton.innerHTML = originalText;
+                            legacyButton.style.background = '';
+                        }, 2000);
+                    }
                 } catch (err) {
                     // Ignore legacy copy failures.
+                } finally {
+                    if (textArea && textArea.parentNode) {
+                        textArea.parentNode.removeChild(textArea);
+                    }
                 }
             });
         }
