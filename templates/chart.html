@@ -10,21 +10,6 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="{{ url_for('static', filename='js/stream-analysis.js') }}"></script>
 {% endif %}
-<script>
-    window.chartDataForStreaming = {
-        pageType: 'chart',
-        birthDate: {{ form_data.birth_date | tojson }},
-        birthTime: {{ form_data.birth_time | tojson }},
-        timezoneOffset: {{ form_data.timezone_offset | tojson }},
-        latitude: {{ form_data.latitude | tojson }},
-        longitude: {{ form_data.longitude | tojson }},
-        musicGenre: {{ (form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre) | tojson }},
-        personality: {{ form_data.personality | tojson }}
-    };
-    window.birthdayCelebration = {
-        isBirthday: {{ is_birthday | tojson }}
-    };
-</script>
 {% if is_birthday %}
 <script src="{{ url_for('static', filename='js/birthday-confetti.js') }}"></script>
 {% endif %}
@@ -37,46 +22,19 @@
 {% block meta_description %}Personalized astrological chart showing {{ chart_data.sun }} sun sign, {{ chart_data.moon }} moon sign, and {{ chart_data.ascendant }} rising sign with AI-powered cosmic insights.{% endblock %}
 
 {% block content %}
-{% if streaming %}
-<script>document.body.dataset.streaming = 'true';</script>
-{% endif %}
-<script>
-    // Seed localStorage with THIS reading's birth info so the home page
-    // (and "ask the stars") reflects the current chart rather than any
-    // stale, previously saved values.
-    (function () {
-        var mg = {{ form_data.music_genre | tojson }};
-        var otherGenre = {{ form_data.other_genre | tojson }};
-        var isOther = !!(otherGenre && otherGenre.trim());
-        var data = {
-            birth_date: {{ form_data.birth_date | tojson }},
-            birth_time: {{ form_data.birth_time | tojson }},
-            timezone_offset: {{ form_data.timezone_offset | tojson }},
-            latitude: {{ form_data.latitude | tojson }},
-            longitude: {{ form_data.longitude | tojson }},
-            personality: {{ form_data.personality | tojson }},
-            music_genre: isOther ? 'other' : (mg || 'any'),
-            other_genre: isOther ? otherGenre : ''
-        };
-        try {
-            localStorage.setItem('astro_form_data', JSON.stringify({ data: data, timestamp: Date.now() }));
-            if (data.timezone_offset) {
-                localStorage.setItem('timezone_offset', data.timezone_offset);
-            }
-        } catch (e) { /* ignore storage errors */ }
-    })();
-</script>
-<script>
-    // Pass chart data to JavaScript for the streamed song suggestion
-    window.chartDataForMusic = {
-        birthDate: {{ form_data.birth_date | tojson }},
-        birthTime: {{ form_data.birth_time | tojson }},
-        timezoneOffset: {{ form_data.timezone_offset | tojson }},
-        latitude: {{ form_data.latitude | tojson }},
-        longitude: {{ form_data.longitude | tojson }},
-        musicGenre: {{ (form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre) | tojson }}
-    };
-</script>
+<script id="chart-page-config" type="application/json">{{ {
+    'streaming': streaming,
+    'isBirthday': is_birthday,
+    'birthDate': form_data.birth_date,
+    'birthTime': form_data.birth_time,
+    'timezoneOffset': form_data.timezone_offset,
+    'latitude': form_data.latitude,
+    'longitude': form_data.longitude,
+    'musicGenre': form_data.music_genre,
+    'otherGenre': form_data.other_genre,
+    'personality': form_data.personality,
+    'askAnythingPath': '/ask-anything'
+} | tojson }}</script>
 <header class="site-header">
   <a href="/" class="logo">
     <span class="logo-mark">✦</span>
@@ -203,45 +161,8 @@
     </main>
 </div>
 
-<script>
-// ── Listening-section helpers ─────────────────────────────────
-function askPrompt(prompt) {
-    document.getElementById('askInput').value = prompt;
-    sendQuestion();
-}
+{% endblock %}
 
-function sendQuestion() {
-    const question = document.getElementById('askInput').value;
-    if (question.trim()) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/ask-anything';
-        const fields = {
-            question_prompt: question,
-            birth_date: {{ form_data.birth_date | tojson }},
-            birth_time: {{ form_data.birth_time | tojson }},
-            timezone_offset: {{ form_data.timezone_offset | tojson }},
-            latitude: {{ form_data.latitude | tojson }},
-            longitude: {{ form_data.longitude | tojson }},
-            personality: {{ form_data.personality | tojson }}
-        };
-        for (const name in fields) {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            input.value = fields[name];
-            form.appendChild(input);
-        }
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
-function submitForm(e, action) {
-    e.preventDefault();
-    document.getElementById('navForm').action = action;
-    document.getElementById('navForm').submit();
-}
-</script>
-
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/chart-page.js') }}"></script>
 {% endblock %}
