@@ -185,7 +185,7 @@ def stream_calculate_full_chart(
         str: Text chunks from AI streaming response
     """
     # Setup chart
-    dt = Datetime(birth_date, birth_time, timezone_offset)
+    dt = Datetime(birth_date, cast(Any, birth_time), cast(Any, timezone_offset))
     pos = GeoPos(latitude, longitude)
     chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
 

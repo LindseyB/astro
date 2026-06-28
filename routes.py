@@ -1,7 +1,6 @@
 """Flask application bootstrap and blueprint registration."""
 
-import os
-from collections.abc import Mapping
+from typing import Any
 
 from flask import Flask, request
 
@@ -30,7 +29,7 @@ SITE_META = {
 
 
 @app.context_processor
-def inject_site_meta() -> Mapping[str, dict[str, str]]:
+def inject_site_meta() -> dict[str, Any]:
     """Expose shared site copy to all templates to avoid repeated strings."""
     return {'site_meta': SITE_META}
 
@@ -49,10 +48,14 @@ app.register_blueprint(ask_bp)
 
 def get_user_ip() -> str:
     """Get the user's IP address for feature flag evaluation."""
-    if request.headers.get('X-Forwarded-For'):
-        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
-    if request.headers.get('X-Real-IP'):
-        return request.headers.get('X-Real-IP')
+    forwarded_for = request.headers.get('X-Forwarded-For')
+    if forwarded_for:
+        return forwarded_for.split(',')[0].strip()
+
+    real_ip = request.headers.get('X-Real-IP')
+    if real_ip:
+        return real_ip
+
     return request.remote_addr or '127.0.0.1'
 
 
