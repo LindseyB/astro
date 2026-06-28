@@ -10,6 +10,7 @@ from config import HOUSE_NAMES, logger
 from formatters import format_planets_for_api, format_planets_in_houses_for_prompt, prepare_music_genre_text
 from lastfm_service import LASTFM_API_KEY, format_tracks_for_prompt, get_top_tracks_by_genre
 from prompt_templates import load_prompt_template, load_prompt_text
+from route_helpers import _require_ai_client
 from validation import _format_birth_date_for_calculations, find_missing_fields
 
 
@@ -20,11 +21,9 @@ music_bp = Blueprint('music', __name__)
 def music_suggestion():
     """Handle async music suggestion request with streaming."""
     try:
-        try:
-            ai_service.get_client()
-        except ValueError as e:
-            logger.error("AI service not available: %s", e)
-            return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
+        ai_client_error = _require_ai_client()
+        if ai_client_error:
+            return ai_client_error
 
         data = request.get_json()
         missing_fields = find_missing_fields(data, ['birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude'])

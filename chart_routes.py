@@ -4,10 +4,10 @@ import json
 
 from flask import Blueprint, Response, current_app, flash, jsonify, render_template, request, stream_with_context
 
-import ai_service
 from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas
 from chart_data import create_charts, get_current_planets, get_full_chart_structure, get_main_positions
 from config import logger
+from route_helpers import _require_ai_client
 from validation import _format_birth_date_for_calculations, _is_birthday_today, find_missing_fields
 
 
@@ -92,11 +92,9 @@ def chart():
 def stream_chart_analysis():
     """Stream daily horoscope analysis."""
     try:
-        try:
-            ai_service.get_client()
-        except ValueError as e:
-            logger.error("AI service not available: %s", e)
-            return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
+        ai_client_error = _require_ai_client()
+        if ai_client_error:
+            return ai_client_error
 
         data = request.get_json()
         missing_fields = find_missing_fields(data, ['birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude'])
@@ -186,11 +184,9 @@ def full_chart():
 def stream_full_chart_analysis():
     """Stream full natal chart analysis."""
     try:
-        try:
-            ai_service.get_client()
-        except ValueError as e:
-            logger.error("AI service not available: %s", e)
-            return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
+        ai_client_error = _require_ai_client()
+        if ai_client_error:
+            return ai_client_error
 
         data = request.get_json()
         missing_fields = find_missing_fields(data, ['birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude'])
@@ -284,11 +280,9 @@ def live_mas():
 def stream_live_mas_analysis():
     """Stream Taco Bell order analysis."""
     try:
-        try:
-            ai_service.get_client()
-        except ValueError as e:
-            logger.error("AI service not available: %s", e)
-            return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
+        ai_client_error = _require_ai_client()
+        if ai_client_error:
+            return ai_client_error
 
         data = request.get_json()
         missing_fields = find_missing_fields(data, ['birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude'])
