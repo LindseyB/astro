@@ -1,16 +1,41 @@
 /*
- * Free-typing date/time fields with a native picker fallback.
+ * Date/time fields with digit-only input, auto-delimiter insertion, clear on
+ * focus, and a native picker fallback.
  *
- * The visible Date/Time fields are plain text inputs so users can type a
- * far-away birth date directly (native <input type="date"> only lets you
- * edit fixed segments). A calendar/clock button opens the native picker,
- * and typed text is normalized to the canonical format on blur:
- *   date -> YYYY-MM-DD   time -> HH:MM (24h)
+ * UX behaviour:
+ *   - Focusing a field clears it so the user can type fresh.
+ *   - Only digit keys (0-9) are accepted; all other printable characters are
+ *     blocked.
+ *   - Delimiters are inserted automatically as the user types:
+ *       date: YYYY-MM-DD  (dashes added after position 4 and 6 of digits)
+ *       time: HH:MM       (colon added after position 2 of digits)
+ *   - On blur the value is validated; invalid entries are cleared.
+ *   - A calendar/clock button opens the native picker as a fallback.
  */
 (function () {
   'use strict';
 
   function pad(n) { return String(n).padStart(2, '0'); }
+
+  // Strip everything except digits.
+  function digitsOnly(s) {
+    return (s || '').replace(/\D/g, '');
+  }
+
+  // Format up-to-8 raw digits as YYYY-MM-DD (partial is fine while typing).
+  function formatDateDigits(digits) {
+    var d = digits.slice(0, 8);
+    if (d.length <= 4) return d;
+    if (d.length <= 6) return d.slice(0, 4) + '-' + d.slice(4);
+    return d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6);
+  }
+
+  // Format up-to-4 raw digits as HH:MM (partial is fine while typing).
+  function formatTimeDigits(digits) {
+    var d = digits.slice(0, 4);
+    if (d.length <= 2) return d;
+    return d.slice(0, 2) + ':' + d.slice(2);
+  }
 
   function buildDate(y, mo, d) {
     var year = parseInt(y, 10);
@@ -22,51 +47,56 @@
     return String(year).padStart(4, '0') + '-' + pad(month) + '-' + pad(day);
   }
 
-  // Parse flexible date text into YYYY-MM-DD, or '' if unparseable.
+  // Validate a date string/digits into YYYY-MM-DD, or '' if invalid.
   function normalizeDate(text) {
-    var s = (text || '').trim();
-    if (!s) return '';
-    var m;
-    // YYYY-MM-DD / YYYY/MM/DD / YYYY.MM.DD
-    if ((m = s.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/))) {
-      return buildDate(m[1], m[2], m[3]);
-    }
-    // MM/DD/YYYY / M/D/YYYY / MM-DD-YYYY (US order)
-    if ((m = s.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/))) {
-      return buildDate(m[3], m[1], m[2]);
-    }
-    // Plain 8 digits: YYYYMMDD
-    if ((m = s.match(/^(\d{4})(\d{2})(\d{2})$/))) {
-      return buildDate(m[1], m[2], m[3]);
-    }
-    // Month names: "July 15, 1990" / "15 Jul 1990"
-    var d = new Date(s);
-    if (!isNaN(d.getTime())) {
-      return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
-    }
-    return '';
+    var digits = digitsOnly(text);
+    if (digits.length !== 8) return '';
+    return buildDate(digits.slice(0, 4), digits.slice(4, 6), digits.slice(6, 8));
   }
 
-  // Parse flexible time text into HH:MM (24h), or '' if unparseable.
+  // Validate a time string/digits into HH:MM (24h), or '' if invalid.
   function normalizeTime(text) {
-    var s = (text || '').trim();
-    if (!s) return '';
-    var m = s.match(/^(\d{1,2})(?::?(\d{2}))?\s*([ap]\.?m\.?)?$/i);
-    if (!m) return '';
-    var h = parseInt(m[1], 10);
-    var min = m[2] ? parseInt(m[2], 10) : 0;
-    var ampm = m[3] ? m[3].toLowerCase().charAt(0) : '';
-    if (ampm === 'p' && h < 12) h += 12;
-    if (ampm === 'a' && h === 12) h = 0;
-    if (h > 23 || min > 59) return '';
-    return pad(h) + ':' + pad(min);
+    var digits = digitsOnly(text);
+    if (digits.length !== 4) return '';
+    var h = parseInt(digits.slice(0, 2), 10);
+    var m = parseInt(digits.slice(2, 4), 10);
+    if (h > 23 || m > 59) return '';
+    return pad(h) + ':' + pad(m);
   }
 
-  function wire(textId, nativeId, btnId, normalizer) {
+  function wire(textId, nativeId, btnId, formatter, normalizer) {
     var text = document.getElementById(textId);
     if (!text) return;
     var native = document.getElementById(nativeId);
     var btn = document.getElementById(btnId);
+
+    // Requirement 1: clear field on focus so the user can type fresh.
+    text.addEventListener('focus', function () {
+      text.value = '';
+    });
+
+    // Requirement 3: only accept digit keys (plus navigation/editing keys).
+    text.addEventListener('keydown', function (e) {
+      var navigation = [
+        'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight',
+        'ArrowUp', 'ArrowDown', 'Tab', 'Home', 'End'
+      ];
+      if (navigation.indexOf(e.key) !== -1) return;
+      if (e.ctrlKey || e.metaKey) return; // allow copy / paste / select-all
+      // Only block printable characters; allow Enter/Escape/function keys, etc.
+      if (e.key.length === 1 && !/^\d$/.test(e.key)) {
+        e.preventDefault();
+      }
+    });
+
+    // Requirement 2: auto-insert delimiters as digits accumulate.
+    text.addEventListener('input', function () {
+      var digits = digitsOnly(text.value);
+      var formatted = formatter(digits);
+      if (text.value !== formatted) {
+        text.value = formatted;
+      }
+    });
 
     if (btn && native) {
       btn.addEventListener('click', function () {
@@ -86,7 +116,7 @@
       });
     }
 
-    // Normalize free-typed text when the field loses focus.
+    // Validate and normalize when the field loses focus.
     text.addEventListener('blur', function () {
       var normalized = normalizer(text.value);
       var raw = (text.value || '').trim();
@@ -103,7 +133,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    wire('birth_date', 'birth_date_native', 'birth_date_btn', normalizeDate);
-    wire('birth_time', 'birth_time_native', 'birth_time_btn', normalizeTime);
+    wire('birth_date', 'birth_date_native', 'birth_date_btn', formatDateDigits, normalizeDate);
+    wire('birth_time', 'birth_time_native', 'birth_time_btn', formatTimeDigits, normalizeTime);
   });
 })();
