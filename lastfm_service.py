@@ -41,7 +41,7 @@ def select_varied_tracks(tracks: Sequence[TrackInfo], limit: int = 30, seed_key:
         return []
 
     if len(tracks) <= limit:
-        return tracks[:]
+        return list(tracks)
 
     top_end = max(1, int(len(tracks) * TOP_TIER_RATIO))
     mid_end = max(top_end + 1, int(len(tracks) * MID_TIER_RATIO))
@@ -63,7 +63,7 @@ def select_varied_tracks(tracks: Sequence[TrackInfo], limit: int = 30, seed_key:
         if count <= 0 or not tier:
             return []
         if len(tier) <= count:
-            picked = tier[:]
+            picked = list(tier)
             rng.shuffle(picked)
             return picked
         return rng.sample(tier, count)
@@ -130,14 +130,16 @@ def get_top_tracks_by_genre(genre: str, limit: int = 30) -> list[TrackInfo]:
         
         tracks: list[TrackInfo] = []
         for track in data['tracks']['track']:
-            track_info = {
-                'name': track.get('name', ''),
-                'artist': track.get('artist', {}).get('name', '') if isinstance(track.get('artist'), dict) else track.get('artist', '')
-            }
+            track_name = str(track.get('name', '') or '')
+            artist_value = track.get('artist', {})
+            if isinstance(artist_value, dict):
+                artist_name = str(artist_value.get('name', '') or '')
+            else:
+                artist_name = str(artist_value or '')
             
             # Only add tracks with both name and artist
-            if track_info['name'] and track_info['artist']:
-                tracks.append(track_info)
+            if track_name and artist_name:
+                tracks.append({'name': track_name, 'artist': artist_name})
         
         logger.info(f"Found {len(tracks)} tracks for genre: {genre_tag}")
         return tracks

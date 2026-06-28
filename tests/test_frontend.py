@@ -54,7 +54,8 @@ class TestTemplates(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Check for streaming setup
-        self.assertIn(b'document.body.dataset.streaming', response.data)
+        self.assertIn(b'chart-page-config', response.data)
+        self.assertIn(b'chart-page.js', response.data)
         self.assertIn(b'reading-page', response.data)
         self.assertIn(b'stream-analysis.js', response.data)
         self.assertIn(b'Today, in three breaths', response.data)
