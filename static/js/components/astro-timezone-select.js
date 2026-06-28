@@ -51,13 +51,7 @@ class AstroTimezoneSelect extends HTMLElement {
     }
 
     restoreValue() {
-        let storedValue = null;
-        try {
-            storedValue = window.localStorage.getItem('timezone_offset');
-        } catch (err) {
-            storedValue = null;
-        }
-
+        const storedValue = safeLocalStorageGet('timezone_offset');
         if (!storedValue) {
             return;
         }
