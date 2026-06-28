@@ -40,6 +40,7 @@
     <input type="hidden" id="f_timezone_offset"   name="timezone_offset">
     <input type="hidden" id="f_latitude"          name="latitude">
     <input type="hidden" id="f_longitude"         name="longitude">
+    <input type="hidden" id="f_personality"       name="personality">
     <input type="hidden" id="f_music_genre"       name="music_genre">
     <input type="hidden" id="f_other_genre"       name="other_genre">
     <input type="hidden" id="f_question_prompt"   name="question_prompt">
@@ -256,6 +257,16 @@
       <div id="other_genre_div">
         <input type="text" id="other_genre" name="other_genre" placeholder="Specify your preferred genre…" style="margin-top:0.5rem;">
       </div>
+    </div>
+
+    <div class="field-group">
+      <label for="personality">Personality (optional)</label>
+      <select id="personality" name="personality" aria-describedby="personality_hint" data-default-personality="{{ default_personality }}">
+        {% for personality_value, personality_label in personality_choices %}
+        <option value="{{ personality_value }}" {% if personality_value == default_personality %}selected{% endif %}>{{ personality_label }}</option>
+        {% endfor %}
+      </select>
+      <span id="personality_hint" class="field-hint">Optional voice style for responses. Leave as Default for the standard tone.</span>
     </div>
 
     <!-- Ask Anything question (only shown for that tile) -->

@@ -9,6 +9,7 @@ from flask.typing import ResponseReturnValue
 from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas
 from chart_data import create_charts, get_current_planets, get_full_chart_structure, get_main_positions
 from config import logger
+from personality import DEFAULT_PERSONALITY, get_personality_choices, normalize_personality
 from route_helpers import _require_ai_client
 from validation import _format_birth_date_for_calculations, _is_birthday_today, find_missing_fields
 
@@ -19,7 +20,11 @@ chart_bp = Blueprint('chart', __name__)
 @chart_bp.route('/')
 def index() -> ResponseReturnValue:
     """Render home page."""
-    return render_template('index.html')
+    return render_template(
+        'index.html',
+        personality_choices=get_personality_choices(),
+        default_personality=DEFAULT_PERSONALITY,
+    )
 
 
 @chart_bp.route('/chart', methods=['POST'])
@@ -31,6 +36,7 @@ def chart() -> ResponseReturnValue:
     latitude = request.form['latitude']
     longitude = request.form['longitude']
     music_genre = request.form.get('music_genre', 'any')
+    personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
 
     if music_genre == 'other':
         other_genre = request.form.get('other_genre', '').strip()
@@ -67,6 +73,7 @@ def chart() -> ResponseReturnValue:
             'longitude': longitude,
             'music_genre': music_genre,
             'other_genre': request.form.get('other_genre', ''),
+            'personality': personality,
         }
 
         is_birthday = _is_birthday_today(birth_date_html, timezone_offset)
@@ -109,6 +116,7 @@ def stream_chart_analysis() -> ResponseReturnValue:
         latitude = data.get('latitude')
         longitude = data.get('longitude')
         music_genre = data.get('music_genre', 'any')
+        personality = normalize_personality(data.get('personality'))
 
         try:
             birth_date = _format_birth_date_for_calculations(birth_date)
@@ -119,7 +127,15 @@ def stream_chart_analysis() -> ResponseReturnValue:
 
         def generate() -> Iterator[str]:
             try:
-                for chunk in stream_calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre):
+                for chunk in stream_calculate_chart(
+                    birth_date,
+                    birth_time,
+                    timezone_offset,
+                    latitude,
+                    longitude,
+                    music_genre,
+                    personality,
+                ):
                     if chunk:
                         yield f"data: {json.dumps({'chunk': chunk})}\n\n"
                 yield f"data: {json.dumps({'done': True})}\n\n"
@@ -142,6 +158,7 @@ def full_chart() -> ResponseReturnValue:
     latitude = request.form['latitude']
     longitude = request.form['longitude']
     music_genre = request.form.get('music_genre', 'any')
+    personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
 
     if music_genre == 'other':
         other_genre = request.form.get('other_genre', '').strip()
@@ -169,6 +186,7 @@ def full_chart() -> ResponseReturnValue:
             'longitude': longitude,
             'music_genre': music_genre,
             'other_genre': request.form.get('other_genre', ''),
+            'personality': personality,
         }
 
         return render_template('full_chart.html', chart_data=full_chart_data, form_data=form_data, streaming=True)
@@ -201,6 +219,7 @@ def stream_full_chart_analysis() -> ResponseReturnValue:
         latitude = data.get('latitude')
         longitude = data.get('longitude')
         music_genre = data.get('music_genre', 'any')
+        personality = normalize_personality(data.get('personality'))
 
         try:
             birth_date = _format_birth_date_for_calculations(birth_date)
@@ -211,7 +230,15 @@ def stream_full_chart_analysis() -> ResponseReturnValue:
 
         def generate() -> Iterator[str]:
             try:
-                for chunk in stream_calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre):
+                for chunk in stream_calculate_full_chart(
+                    birth_date,
+                    birth_time,
+                    timezone_offset,
+                    latitude,
+                    longitude,
+                    music_genre,
+                    personality,
+                ):
                     if chunk:
                         yield f"data: {json.dumps({'chunk': chunk})}\n\n"
                 yield f"data: {json.dumps({'done': True})}\n\n"
@@ -233,6 +260,7 @@ def live_mas() -> ResponseReturnValue:
     timezone_offset = request.form['timezone_offset']
     latitude = request.form['latitude']
     longitude = request.form['longitude']
+    personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
 
     try:
         birth_date = _format_birth_date_for_calculations(birth_date_html)
@@ -265,6 +293,7 @@ def live_mas() -> ResponseReturnValue:
             'longitude': longitude,
             'music_genre': 'any',
             'other_genre': '',
+            'personality': personality,
         }
 
         return render_template('live_mas.html', chart_data=live_mas_data, form_data=form_data, streaming=True)
@@ -296,6 +325,7 @@ def stream_live_mas_analysis() -> ResponseReturnValue:
         timezone_offset = data.get('timezone_offset')
         latitude = data.get('latitude')
         longitude = data.get('longitude')
+        personality = normalize_personality(data.get('personality'))
 
         try:
             birth_date = _format_birth_date_for_calculations(birth_date)
@@ -306,7 +336,14 @@ def stream_live_mas_analysis() -> ResponseReturnValue:
 
         def generate() -> Iterator[str]:
             try:
-                for chunk in stream_calculate_live_mas(birth_date, birth_time, timezone_offset, latitude, longitude):
+                for chunk in stream_calculate_live_mas(
+                    birth_date,
+                    birth_time,
+                    timezone_offset,
+                    latitude,
+                    longitude,
+                    personality,
+                ):
                     if chunk:
                         yield f"data: {json.dumps({'chunk': chunk})}\n\n"
                 yield f"data: {json.dumps({'done': True})}\n\n"

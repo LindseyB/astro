@@ -18,7 +18,8 @@
         timezoneOffset: "{{ form_data.timezone_offset }}",
         latitude: "{{ form_data.latitude }}",
         longitude: "{{ form_data.longitude }}",
-        musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
+        musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}",
+        personality: "{{ form_data.personality }}"
     };
     window.birthdayCelebration = {
         isBirthday: {{ is_birthday | tojson }}
@@ -53,6 +54,7 @@
             timezone_offset: {{ form_data.timezone_offset | tojson }},
             latitude: {{ form_data.latitude | tojson }},
             longitude: {{ form_data.longitude | tojson }},
+            personality: {{ form_data.personality | tojson }},
             music_genre: isOther ? 'other' : (mg || 'any'),
             other_genre: isOther ? otherGenre : ''
         };
@@ -194,6 +196,7 @@
             <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
             <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
             <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
+            <input type="hidden" name="personality" value="{{ form_data.personality }}">
             <input type="hidden" name="music_genre" value="{{ form_data.music_genre }}">
             <input type="hidden" name="other_genre" value="{{ form_data.other_genre }}">
         </form>
@@ -219,7 +222,8 @@ function sendQuestion() {
             birth_time: {{ form_data.birth_time | tojson }},
             timezone_offset: {{ form_data.timezone_offset | tojson }},
             latitude: {{ form_data.latitude | tojson }},
-            longitude: {{ form_data.longitude | tojson }}
+            longitude: {{ form_data.longitude | tojson }},
+            personality: {{ form_data.personality | tojson }}
         };
         for (const name in fields) {
             const input = document.createElement('input');

@@ -319,7 +319,7 @@
     } catch (e) {
       console.warn('Failed to clear form data from localStorage:', e);
     }
-    ['birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude', 'music_genre', 'other_genre', 'question_prompt']
+    ['birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude', 'personality', 'music_genre', 'other_genre', 'question_prompt']
       .forEach(function (id) {
         var el = document.getElementById(id);
         if (el) el.value = '';
@@ -359,6 +359,12 @@
     );
   }
 
+  function getDefaultPersonality() {
+    var select = document.getElementById('personality');
+    if (!select) return 'default';
+    return select.getAttribute('data-default-personality') || select.value || 'default';
+  }
+
   function submitToAction(action) {
     var form = document.getElementById('masterForm');
     form.action = action;
@@ -367,6 +373,7 @@
     document.getElementById('f_timezone_offset').value = fieldVal('timezone_offset');
     document.getElementById('f_latitude').value = fieldVal('latitude');
     document.getElementById('f_longitude').value = fieldVal('longitude');
+    document.getElementById('f_personality').value = fieldVal('personality') || getDefaultPersonality();
     document.getElementById('f_music_genre').value = fieldVal('music_genre');
     document.getElementById('f_other_genre').value = fieldVal('other_genre');
     document.getElementById('f_question_prompt').value = document.getElementById('question_prompt').value || '';
