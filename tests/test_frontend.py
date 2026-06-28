@@ -287,9 +287,16 @@ class TestJavaScriptFunctionality(unittest.TestCase):
             'astro-datetime-input.js',
             'astro-timezone-select.js',
         ]
-        for filename in required:
-            self.assertTrue(os.path.exists(os.path.join(base_path, filename)), f'{filename} should exist')
 
+        for filename in required:
+            full_path = os.path.join(base_path, filename)
+            self.assertTrue(os.path.exists(full_path), f'{filename} should exist')
+
+            with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+
+            if filename.startswith('astro-'):
+                self.assertIn('customElements.define', content, f'{filename} should define a custom element')
     def test_web_component_registry_accessible(self):
         """Test that component registry module is served as a static asset"""
         response = app.test_client().get('/static/js/components/index.js')
