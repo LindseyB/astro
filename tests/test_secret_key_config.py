@@ -20,6 +20,8 @@ def _run_import_routes_with_env(env):
 def test_routes_import_fails_without_secret_key():
     env = os.environ.copy()
     env.pop('SECRET_KEY', None)
+    env['FLASK_ENV'] = 'production'
+    env.pop('FLASK_DEBUG', None)
 
     result = _run_import_routes_with_env(env)
 
@@ -30,6 +32,8 @@ def test_routes_import_fails_without_secret_key():
 def test_routes_import_succeeds_with_secret_key():
     env = os.environ.copy()
     env['SECRET_KEY'] = 'integration-test-secret-key'
+    env['FLASK_ENV'] = 'production'
+    env.pop('FLASK_DEBUG', None)
 
     result = _run_import_routes_with_env(env)
 

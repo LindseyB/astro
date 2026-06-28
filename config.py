@@ -2,21 +2,40 @@
 Configuration and constants for the astrology application
 """
 import logging
+import os
 
-# Load environment variables from a .env file (if present) before anything
-# else reads them (e.g. ai_service.py reading ANTHROPIC_TOKEN at import time).
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    # python-dotenv is optional; env vars can still be set in the shell.
-    pass
+
+def is_development_mode():
+    """Return True when Flask is running in development/debug mode."""
+    flask_env = os.environ.get('FLASK_ENV', '').strip().lower()
+    flask_debug = os.environ.get('FLASK_DEBUG', '').strip()
+    return flask_env == 'development' or flask_debug == '1'
+
+
+IS_DEVELOPMENT = is_development_mode()
+
+# In development, load variables from a local .env file if present.
+if IS_DEVELOPMENT:
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        # python-dotenv is optional; env vars can still be set in the shell.
+        pass
 
 from flatlib import const
 
 # Configure logging
 # Logging configuration is handled in main.py
 logger = logging.getLogger(__name__)
+
+
+def get_secret_key():
+    """Return configured Flask secret key or fail fast with a clear error."""
+    secret_key = os.environ.get('SECRET_KEY', '').strip()
+    if not secret_key:
+        raise RuntimeError('SECRET_KEY environment variable is required at startup.')
+    return secret_key
 
 # Filter for planets only (exclude house cusps, angles, etc.)
 PLANET_NAMES = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto', 'Chiron']

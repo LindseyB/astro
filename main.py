@@ -7,6 +7,11 @@ before any other astrological libraries are imported, then starts the Flask appl
 import os
 import logging
 
+# Ensure direct script execution defaults to local development behavior.
+if __name__ == '__main__':
+    os.environ.setdefault('FLASK_ENV', 'development')
+    os.environ.setdefault('FLASK_DEBUG', '1')
+
 # Configure logging
 log_level = os.environ.get('LOG_LEVEL', 'INFO')
 logging.basicConfig(level=getattr(logging, log_level), format='%(asctime)s - %(levelname)s - %(message)s')

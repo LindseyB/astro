@@ -4,9 +4,14 @@ Astro Chart Calculator - Flask Web Application
 Run this script to start the web server
 """
 
+import os
+
 if __name__ == '__main__':
+    # Running via this helper implies local development unless explicitly overridden.
+    os.environ.setdefault('FLASK_ENV', 'development')
+    os.environ.setdefault('FLASK_DEBUG', '1')
+
     from main import app
-    import os
 
     port = int(os.environ.get("PORT", 8080))
 

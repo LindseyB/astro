@@ -1,23 +1,17 @@
 """Flask application bootstrap and blueprint registration."""
 
-import os
-
 from flask import Flask, request
-
-secret_key = os.environ.get('SECRET_KEY', '').strip()
-if not secret_key:
-    raise RuntimeError('SECRET_KEY environment variable is required at startup.')
 
 
 from ask_routes import ask_bp
 from chart_routes import chart_bp
-from config import logger
+from config import IS_DEVELOPMENT, get_secret_key, logger
 from formatters import markdown_filter
 from music_routes import music_bp
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = secret_key
+app.config['SECRET_KEY'] = get_secret_key()
 
 SITE_META = {
     'site_name': 'Astro Horoscope',
@@ -39,7 +33,7 @@ def inject_site_meta():
 
 
 # In development, disable static file caching so CSS/JS edits show on reload.
-if os.environ.get('FLASK_ENV') == 'development' or os.environ.get('FLASK_DEBUG') == '1':
+if IS_DEVELOPMENT:
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 app.template_filter('markdown')(markdown_filter)
