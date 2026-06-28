@@ -94,7 +94,8 @@ class TestAstroApp(unittest.TestCase):
         response = self.app.post('/chart', data=form_data)
         self.assertEqual(response.status_code, 200)
         # Should contain the streaming placeholder setup
-        self.assertIn(b'document.body.dataset.streaming', response.data)
+        self.assertIn(b'chart-page-config', response.data)
+        self.assertIn(b'chart-page.js', response.data)
 
     @patch('validation._get_user_local_today', return_value=date(2026, 6, 25))
     def test_chart_route_shows_birthday_flash_when_birthdate_matches_today(self, _mock_today):
@@ -304,7 +305,8 @@ class TestMusicGenreFeature(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         # Check for streaming setup
-        self.assertIn(b'document.body.dataset.streaming', response.data)
+        self.assertIn(b'chart-page-config', response.data)
+        self.assertIn(b'chart-page.js', response.data)
 
     def test_music_genre_other_custom_preference(self):
         """Test that custom 'other' genre preference is handled correctly"""
@@ -322,7 +324,8 @@ class TestMusicGenreFeature(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         # Check for streaming setup
-        self.assertIn(b'document.body.dataset.streaming', response.data)
+        self.assertIn(b'chart-page-config', response.data)
+        self.assertIn(b'chart-page.js', response.data)
 
     def test_music_genre_other_empty_fallback(self):
         """Test that empty 'other' genre falls back to 'any'"""
@@ -340,7 +343,8 @@ class TestMusicGenreFeature(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         # Check for streaming setup
-        self.assertIn(b'document.body.dataset.streaming', response.data)
+        self.assertIn(b'chart-page-config', response.data)
+        self.assertIn(b'chart-page.js', response.data)
 
     def test_full_chart_music_genre_integration(self):
         """Test that full chart route also handles music genre correctly"""
@@ -382,7 +386,8 @@ class TestIntegration(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         # Check for streaming setup
-        self.assertIn(b'document.body.dataset.streaming', response.data)
+        self.assertIn(b'chart-page-config', response.data)
+        self.assertIn(b'chart-page.js', response.data)
 
     def test_full_chart_route_generation_flow(self):
         """Test the complete flow from form submission to full chart display"""
@@ -445,7 +450,8 @@ class TestFormPersistenceIntegration(unittest.TestCase):
         response = self.app.post('/chart', data=form_data)
         self.assertEqual(response.status_code, 200)
         # Check for streaming setup
-        self.assertIn(b'document.body.dataset.streaming', response.data)
+        self.assertIn(b'chart-page-config', response.data)
+        self.assertIn(b'chart-page.js', response.data)
 
     def test_timezone_offset_regex_pattern(self):
         """Test that the timezone offset pattern validation works correctly"""
@@ -500,7 +506,8 @@ class TestFormPersistenceIntegration(unittest.TestCase):
         response = self.app.post('/chart', data=form_data)
         self.assertEqual(response.status_code, 200)
         # Check for streaming setup
-        self.assertIn(b'document.body.dataset.streaming', response.data)
+        self.assertIn(b'chart-page-config', response.data)
+        self.assertIn(b'chart-page.js', response.data)
 
     def test_form_persistence_elements_exist(self):
         """Test that form persistence related elements exist in HTML"""
