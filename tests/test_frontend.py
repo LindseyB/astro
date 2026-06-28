@@ -28,6 +28,48 @@ class TestTemplates(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'normalizeDate', response.data)
 
+    def test_datetime_input_clears_on_focus(self):
+        """Test that datetime input JS includes clear-on-focus behaviour"""
+        response = self.app.get('/static/js/datetime-input.js')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'focus', response.data)
+        self.assertIn(b"text.value = ''", response.data)
+
+    def test_datetime_input_digits_only(self):
+        """Test that datetime input JS restricts input to digits only"""
+        response = self.app.get('/static/js/datetime-input.js')
+        self.assertEqual(response.status_code, 200)
+        # Keydown handler that blocks non-digit keys
+        self.assertIn(b'keydown', response.data)
+        self.assertIn(b'preventDefault', response.data)
+        self.assertIn(b'/^\\d$/', response.data)
+
+    def test_datetime_input_auto_delimiter(self):
+        """Test that datetime input JS auto-inserts delimiters while typing"""
+        response = self.app.get('/static/js/datetime-input.js')
+        self.assertEqual(response.status_code, 200)
+        # Formatter functions for date and time
+        self.assertIn(b'formatDateDigits', response.data)
+        self.assertIn(b'formatTimeDigits', response.data)
+        # Input event handler drives auto-formatting
+        self.assertIn(b"addEventListener('input'", response.data)
+
+    def test_datetime_input_date_hint_updated(self):
+        """Test that the date field placeholder reflects digits-only format"""
+        response = self.app.get('/')
+        self.assertEqual(response.status_code, 200)
+        response_text = response.data.decode('utf-8')
+        # birth_date field should be present
+        self.assertIn('id="birth_date"', response_text)
+
+    def test_datetime_input_time_hint_updated(self):
+        """Test that the time field placeholder reflects digits-only format"""
+        response = self.app.get('/')
+        self.assertEqual(response.status_code, 200)
+        response_text = response.data.decode('utf-8')
+        # birth_time field should be present
+        self.assertIn('id="birth_time"', response_text)
+
     def test_index_template_renders(self):
         """Test that index template renders correctly"""
         response = self.app.get('/')
