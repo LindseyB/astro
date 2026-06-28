@@ -83,7 +83,8 @@
       ];
       if (navigation.indexOf(e.key) !== -1) return;
       if (e.ctrlKey || e.metaKey) return; // allow copy / paste / select-all
-      if (!/^\d$/.test(e.key)) {
+      // Only block printable characters; allow Enter/Escape/function keys, etc.
+      if (e.key.length === 1 && !/^\d$/.test(e.key)) {
         e.preventDefault();
       }
     });

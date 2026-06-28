@@ -55,21 +55,23 @@ class TestTemplates(unittest.TestCase):
         self.assertIn(b"addEventListener('input'", response.data)
 
     def test_datetime_input_date_hint_updated(self):
-        """Test that the date field placeholder reflects digits-only format"""
+        """Test that the date field hint reflects digits-only input and example formatting"""
         response = self.app.get('/')
         self.assertEqual(response.status_code, 200)
         response_text = response.data.decode('utf-8')
-        # birth_date field should be present
         self.assertIn('id="birth_date"', response_text)
-
+        self.assertIn('id="birth_date_hint"', response_text)
+        self.assertIn('19900715', response_text)
+        self.assertIn('1990-07-15', response_text)
     def test_datetime_input_time_hint_updated(self):
-        """Test that the time field placeholder reflects digits-only format"""
+        """Test that the time field hint reflects digits-only input and example formatting"""
         response = self.app.get('/')
         self.assertEqual(response.status_code, 200)
         response_text = response.data.decode('utf-8')
-        # birth_time field should be present
         self.assertIn('id="birth_time"', response_text)
-
+        self.assertIn('id="birth_time_hint"', response_text)
+        self.assertIn('0930', response_text)
+        self.assertIn('09:30', response_text)
     def test_index_template_renders(self):
         """Test that index template renders correctly"""
         response = self.app.get('/')
