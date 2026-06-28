@@ -16,8 +16,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            button.disabled = true;
-            button.classList.add('loading');
+            var submitButtons = form.querySelectorAll('button[type="submit"]');
+            submitButtons.forEach(function (submitButton) {
+                submitButton.disabled = true;
+                submitButton.classList.add('loading');
+            });
+
             button.dataset.originalText = button.innerHTML;
             button.innerHTML = '<span class="spinner"></span> Loading...';
         });
