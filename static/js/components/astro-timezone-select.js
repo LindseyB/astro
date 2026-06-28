@@ -78,11 +78,7 @@ class AstroTimezoneSelect extends HTMLElement {
             return;
         }
 
-        try {
-            window.localStorage.setItem('timezone_offset', this.select.value);
-        } catch (err) {
-            // Ignore storage write failures.
-        }
+        safeLocalStorageSet('timezone_offset', this.select.value);
     }
 }
 
