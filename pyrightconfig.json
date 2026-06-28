@@ -1,0 +1,38 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/pyright/main/packages/vscode-pyright/schemas/pyrightconfig.schema.json",
+  "include": [
+    "ai_service.py",
+    "ask_routes.py",
+    "calculations.py",
+    "chart_data.py",
+    "chart_routes.py",
+    "config.py",
+    "formatters.py",
+    "lastfm_service.py",
+    "launchdarkly_service.py",
+    "main.py",
+    "music_routes.py",
+    "prompt_templates.py",
+    "route_helpers.py",
+    "routes.py",
+    "validation.py",
+    "tests"
+  ],
+  "exclude": [
+    ".venv",
+    "docs",
+    "static",
+    "swisseph"
+  ],
+  "venvPath": ".",
+  "venv": ".venv",
+  "pythonVersion": "3.10",
+  "typeCheckingMode": "basic",
+  "reportMissingTypeStubs": false,
+  "reportUnknownParameterType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownMemberType": "none",
+  "reportMissingParameterType": "warning",
+  "reportMissingTypeArgument": "none"
+}

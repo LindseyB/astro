@@ -1,17 +1,20 @@
 """
 Formatting utilities for astrology data
 """
+from collections.abc import Mapping
+from typing import Any
+
 import markdown as md
 
 
-def markdown_filter(text):
+def markdown_filter(text: str | None) -> str:
     """Convert markdown text to HTML"""
     if not text:
         return ""
     return md.markdown(text, extensions=['nl2br'])
 
 
-def prepare_music_genre_text(music_genre, chart_type="daily"):
+def prepare_music_genre_text(music_genre: str | None, chart_type: str = "daily") -> str:
     """
     Prepare music genre preference text for AI prompts
 
@@ -34,7 +37,10 @@ def prepare_music_genre_text(music_genre, chart_type="daily"):
         return f"(Please prioritize {music_genre} genre if possible)"
 
 
-def format_planets_in_houses_for_prompt(planets_in_houses, house_names):
+def format_planets_in_houses_for_prompt(
+    planets_in_houses: Mapping[int, Mapping[str, Any]],
+    house_names: Mapping[int, str],
+) -> str:
     """Format house placement data for prompt consumption."""
     return "\n".join(
         f"{house_names[house_number]}: "
@@ -43,7 +49,7 @@ def format_planets_in_houses_for_prompt(planets_in_houses, house_names):
     )
 
 
-def format_planets_for_api(current_planets):
+def format_planets_for_api(current_planets: Mapping[str, Mapping[str, Any]]) -> str:
     """
     Format planet positions for AI API consumption
 
