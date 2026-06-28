@@ -57,7 +57,7 @@ pip install -r requirements-dev.txt
 2. Set required environment variables. The easiest way for local development is a `.env` file (loaded automatically on startup):
 
 ```bash
-cp .env.example .env        # macOS/Linux
+cp .env.example .env           # macOS/Linux
 # Copy-Item .env.example .env  # Windows PowerShell
 ```
 

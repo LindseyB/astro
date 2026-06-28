@@ -245,18 +245,18 @@ class TestFormatTracksForPrompt:
         valid_options = {f'- Song {i} by Artist {i}' for i in range(1, 11)}
         assert all(line in valid_options for line in lines)
     
-    def test_default_limit_is_20(self):
-        """Test that default limit is 20 tracks"""
+    def test_default_limit_is_30(self):
+        """Test that default limit is 30 tracks"""
         tracks = [
             {'name': f'Song {i}', 'artist': f'Artist {i}'}
-            for i in range(1, 25)
+            for i in range(1, 35)
         ]
         result = format_tracks_for_prompt(tracks)
 
         lines = [line for line in result.splitlines() if line.startswith('- ')]
-        assert len(lines) == 20
+        assert len(lines) == 30
 
-        valid_options = {f'- Song {i} by Artist {i}' for i in range(1, 25)}
+        valid_options = {f'- Song {i} by Artist {i}' for i in range(1, 35)}
         assert all(line in valid_options for line in lines)
     
     def test_handles_fewer_tracks_than_limit(self):
