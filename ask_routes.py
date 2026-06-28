@@ -4,9 +4,9 @@ import json
 
 from flask import Blueprint, Response, jsonify, render_template, request, stream_with_context
 
-import ai_service
 from calculations import stream_calculate_ask_anything
 from config import logger
+from route_helpers import _require_ai_client
 from validation import _format_birth_date_for_calculations, _normalize_birth_inputs
 
 
@@ -94,11 +94,9 @@ def stream_ask_anything():
         except ValueError as e:
             return jsonify({'error': str(e)}), 400
 
-        try:
-            ai_service.get_client()
-        except ValueError as e:
-            logger.error("AI service not available: %s", e)
-            return jsonify({'error': 'AI service is currently unavailable. Please try again later.'}), 503
+        ai_client_error = _require_ai_client()
+        if ai_client_error:
+            return ai_client_error
 
         logger.info("Streaming ask-anything response")
 
