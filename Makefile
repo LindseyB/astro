@@ -1,6 +1,6 @@
 # Makefile for Astro Horoscope project
 
-.PHONY: help test test-unit test-integration test-frontend test-coverage clean run
+.PHONY: help test test-unit test-integration test-frontend test-coverage typecheck clean run
 
 help:			## Show this help message
 	@echo "🌟 Astro Horoscope - Available Commands 🌟"
@@ -24,6 +24,9 @@ test-frontend:		## Run frontend tests
 
 test-coverage:		## Run tests with coverage
 	python -m pytest tests/ --cov=main --cov-report=term-missing
+
+typecheck:		## Run Pyright with the repo's incremental configuration
+	pyright
 
 run:			## Start the development server
 	python run.py

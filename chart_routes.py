@@ -1,8 +1,10 @@
 """Chart-related Flask routes and streaming endpoints."""
 
 import json
+from collections.abc import Iterator
 
 from flask import Blueprint, Response, current_app, flash, jsonify, render_template, request, stream_with_context
+from flask.typing import ResponseReturnValue
 
 from calculations import stream_calculate_chart, stream_calculate_full_chart, stream_calculate_live_mas
 from chart_data import create_charts, get_current_planets, get_full_chart_structure, get_main_positions
@@ -15,13 +17,13 @@ chart_bp = Blueprint('chart', __name__)
 
 
 @chart_bp.route('/')
-def index():
+def index() -> ResponseReturnValue:
     """Render home page."""
     return render_template('index.html')
 
 
 @chart_bp.route('/chart', methods=['POST'])
-def chart():
+def chart() -> ResponseReturnValue:
     """Handle daily horoscope request and render placeholder page immediately."""
     birth_date_html = request.form['birth_date']
     birth_time = request.form['birth_time']
@@ -89,7 +91,7 @@ def chart():
 
 
 @chart_bp.route('/stream-chart-analysis', methods=['POST'])
-def stream_chart_analysis():
+def stream_chart_analysis() -> ResponseReturnValue:
     """Stream daily horoscope analysis."""
     try:
         ai_client_error = _require_ai_client()
@@ -115,7 +117,7 @@ def stream_chart_analysis():
 
         logger.info("Streaming chart analysis for: %s %s", birth_date, birth_time)
 
-        def generate():
+        def generate() -> Iterator[str]:
             try:
                 for chunk in stream_calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre):
                     if chunk:
@@ -132,7 +134,7 @@ def stream_chart_analysis():
 
 
 @chart_bp.route('/full-chart', methods=['POST'])
-def full_chart():
+def full_chart() -> ResponseReturnValue:
     """Handle full natal chart request and render placeholder page immediately."""
     birth_date_html = request.form['birth_date']
     birth_time = request.form['birth_time']
@@ -181,7 +183,7 @@ def full_chart():
 
 
 @chart_bp.route('/stream-full-chart-analysis', methods=['POST'])
-def stream_full_chart_analysis():
+def stream_full_chart_analysis() -> ResponseReturnValue:
     """Stream full natal chart analysis."""
     try:
         ai_client_error = _require_ai_client()
@@ -207,7 +209,7 @@ def stream_full_chart_analysis():
 
         logger.info("Streaming full chart analysis for: %s %s", birth_date, birth_time)
 
-        def generate():
+        def generate() -> Iterator[str]:
             try:
                 for chunk in stream_calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre):
                     if chunk:
@@ -224,7 +226,7 @@ def stream_full_chart_analysis():
 
 
 @chart_bp.route('/live-mas', methods=['POST'])
-def live_mas():
+def live_mas() -> ResponseReturnValue:
     """Handle Taco Bell order request and render placeholder page immediately."""
     birth_date_html = request.form['birth_date']
     birth_time = request.form['birth_time']
@@ -277,7 +279,7 @@ def live_mas():
 
 
 @chart_bp.route('/stream-live-mas-analysis', methods=['POST'])
-def stream_live_mas_analysis():
+def stream_live_mas_analysis() -> ResponseReturnValue:
     """Stream Taco Bell order analysis."""
     try:
         ai_client_error = _require_ai_client()
@@ -302,7 +304,7 @@ def stream_live_mas_analysis():
 
         logger.info("Streaming live mas analysis for: %s %s", birth_date, birth_time)
 
-        def generate():
+        def generate() -> Iterator[str]:
             try:
                 for chunk in stream_calculate_live_mas(birth_date, birth_time, timezone_offset, latitude, longitude):
                     if chunk:

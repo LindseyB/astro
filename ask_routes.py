@@ -1,8 +1,11 @@
 """Ask Anything routes."""
 
 import json
+from collections.abc import Iterator
+from typing import Any
 
 from flask import Blueprint, Response, jsonify, render_template, request, stream_with_context
+from flask.typing import ResponseReturnValue
 
 from calculations import stream_calculate_ask_anything
 from config import logger
@@ -14,7 +17,7 @@ ask_bp = Blueprint('ask', __name__)
 
 
 @ask_bp.route('/ask-anything', methods=['POST'])
-def ask_anything():
+def ask_anything() -> ResponseReturnValue:
     """Render Ask Anything placeholder page immediately."""
     question = request.form.get('question_prompt', '').strip()
     birth_date_html = request.form.get('birth_date', '').strip()
@@ -52,13 +55,13 @@ def ask_anything():
 
 
 @ask_bp.route('/stream-ask-anything', methods=['POST'])
-def stream_ask_anything():
+def stream_ask_anything() -> ResponseReturnValue:
     """Stream free-form Ask Anything responses."""
     try:
         data = request.get_json() or {}
         question = (data.get('question') or '').strip()
 
-        def _norm(value):
+        def _norm(value: Any) -> Any:
             return value.strip() if isinstance(value, str) else value
 
         birth_date = _norm(data.get('birth_date'))
@@ -100,7 +103,7 @@ def stream_ask_anything():
 
         logger.info("Streaming ask-anything response")
 
-        def generate():
+        def generate() -> Iterator[str]:
             try:
                 for chunk in stream_calculate_ask_anything(
                     question,

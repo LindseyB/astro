@@ -2,23 +2,25 @@
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
+from typing import TypeAlias
 
 
 PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
+PromptMetadataValue: TypeAlias = bool | int | float | str
 
 
 @dataclass(frozen=True)
 class PromptTemplate:
     """Structured prompt template with lightweight frontmatter metadata."""
 
-    metadata: dict[str, object]
+    metadata: dict[str, PromptMetadataValue]
     content: str
 
-    def render(self, **context):
+    def render(self, **context: object) -> str:
         return self.content.format(**context)
 
 
-def _coerce_metadata_value(value):
+def _coerce_metadata_value(value: str) -> PromptMetadataValue:
     if value.lower() in {"true", "false"}:
         return value.lower() == "true"
 
@@ -42,7 +44,7 @@ def _coerce_metadata_value(value):
     return value
 
 
-def _parse_prompt_file(raw_text):
+def _parse_prompt_file(raw_text: str) -> PromptTemplate:
     if not raw_text.startswith("---\n"):
         return PromptTemplate(metadata={}, content=raw_text.strip())
 
@@ -68,18 +70,18 @@ def _parse_prompt_file(raw_text):
 
 
 @lru_cache(maxsize=None)
-def load_prompt_template(relative_path):
+def load_prompt_template(relative_path: str) -> PromptTemplate:
     """Load a prompt template from the prompts directory."""
     template_path = PROMPTS_DIR / relative_path
     raw_text = template_path.read_text(encoding="utf-8")
     return _parse_prompt_file(raw_text)
 
 
-def load_prompt_text(relative_path):
+def load_prompt_text(relative_path: str) -> str:
     """Load only the prompt body text."""
     return load_prompt_template(relative_path).content
 
 
-def render_prompt_template(relative_path, **context):
+def render_prompt_template(relative_path: str, **context: object) -> str:
     """Render a prompt template with the supplied string context."""
     return load_prompt_template(relative_path).render(**context)

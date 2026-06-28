@@ -1,5 +1,8 @@
 """Flask application bootstrap and blueprint registration."""
 
+import os
+from collections.abc import Mapping
+
 from flask import Flask, request
 
 
@@ -27,7 +30,7 @@ SITE_META = {
 
 
 @app.context_processor
-def inject_site_meta():
+def inject_site_meta() -> Mapping[str, dict[str, str]]:
     """Expose shared site copy to all templates to avoid repeated strings."""
     return {'site_meta': SITE_META}
 
@@ -44,7 +47,7 @@ app.register_blueprint(music_bp)
 app.register_blueprint(ask_bp)
 
 
-def get_user_ip():
+def get_user_ip() -> str:
     """Get the user's IP address for feature flag evaluation."""
     if request.headers.get('X-Forwarded-For'):
         return request.headers.get('X-Forwarded-For').split(',')[0].strip()

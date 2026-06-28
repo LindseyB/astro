@@ -3,18 +3,20 @@ LaunchDarkly feature flag service
 """
 import os
 import logging
+from typing import Any
+
 import ldclient
 from ldclient.context import Context
 
 logger = logging.getLogger(__name__)
 
 class LaunchDarklyService:
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize LaunchDarkly client"""
-        self.client = None
+        self.client: Any = None
         self._initialize_client()
     
-    def _initialize_client(self):
+    def _initialize_client(self) -> None:
         """Initialize the LaunchDarkly client with SDK key from environment"""
         sdk_key = os.environ.get('LAUNCHDARKLY_SDK_KEY')
         
@@ -37,7 +39,7 @@ class LaunchDarklyService:
             logger.error(f"Failed to initialize LaunchDarkly client: {str(e)}")
             self.client = None
     
-    def should_show_chart_wheel(self, user_ip="127.0.0.1"):
+    def should_show_chart_wheel(self, user_ip: str = "127.0.0.1") -> bool:
         """
         Check the 'show-new-chart' flag to determine if chart wheel should be shown
         
@@ -68,7 +70,7 @@ class LaunchDarklyService:
             logger.error(f"Error evaluating feature flag '{flag_key}': {str(e)}")
             return default_value
     
-    def close(self):
+    def close(self) -> None:
         """Close the LaunchDarkly client"""
         if self.client:
             self.client.close()
@@ -77,14 +79,14 @@ class LaunchDarklyService:
 # Global instance
 _launchdarkly_service = None
 
-def get_launchdarkly_service():
+def get_launchdarkly_service() -> LaunchDarklyService:
     """Get the global LaunchDarkly service instance"""
     global _launchdarkly_service
     if _launchdarkly_service is None:
         _launchdarkly_service = LaunchDarklyService()
     return _launchdarkly_service
 
-def should_show_chart_wheel(user_ip="127.0.0.1"):
+def should_show_chart_wheel(user_ip: str = "127.0.0.1") -> bool:
     """Convenience function to check if chart wheel should be shown"""
     service = get_launchdarkly_service()
     return service.should_show_chart_wheel(user_ip)

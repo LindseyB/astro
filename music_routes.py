@@ -1,8 +1,10 @@
 """Music suggestion routes."""
 
 import json
+from collections.abc import Iterator
 
 from flask import Blueprint, Response, jsonify, request, stream_with_context
+from flask.typing import ResponseReturnValue
 
 import ai_service
 from chart_data import create_charts, get_current_planets, get_main_positions, get_planets_in_houses
@@ -18,7 +20,7 @@ music_bp = Blueprint('music', __name__)
 
 
 @music_bp.route('/music-suggestion', methods=['POST'])
-def music_suggestion():
+def music_suggestion() -> ResponseReturnValue:
     """Handle async music suggestion request with streaming."""
     try:
         ai_client_error = _require_ai_client()
@@ -104,7 +106,7 @@ def music_suggestion():
         logger.debug(user_prompt)
         logger.debug("=== END PROMPT ===")
 
-        def generate():
+        def generate() -> Iterator[str]:
             try:
                 for chunk in ai_service.stream_ai_api(
                     system_content,
