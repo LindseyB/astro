@@ -7,7 +7,7 @@ from config import logger
 
 
 def _require_ai_client():
-    """Return a 503 JSON response when the AI client is unavailable."""
+    """Return None when the AI client is available; otherwise return a (JSON response, 503) tuple."""
     try:
         ai_service.get_client()
     except ValueError as e:
