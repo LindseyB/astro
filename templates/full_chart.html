@@ -3,9 +3,7 @@
 {% block title %}Your Complete Natal Chart - Astro Horoscope{% endblock %}
 
 {% block extra_scripts %}
-<script src="{{ url_for('static', filename='js/copy-analysis.js') }}"></script>
 <script src="{{ url_for('static', filename='js/music-suggestion.js') }}"></script>
-<script src="{{ url_for('static', filename='js/section-toggle.js') }}"></script>
 {% if streaming %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="{{ url_for('static', filename='js/stream-analysis.js') }}"></script>
@@ -97,9 +95,11 @@
        data-ascendant="{{ chart_data.ascendant }}">
     <div class="section-cap">
       <h3 class="section-title">Chart analysis</h3>
-      <button id="copyAnalysisBtn" class="copy-chip" onclick="copyAnalysis()" title="Copy your chart analysis" aria-label="Copy your chart analysis">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-      </button>
+      <astro-copy-analysis source-selector="#analysisContent" section-selector=".analysis-section">
+        <button id="copyAnalysisBtn" class="copy-chip" type="button" title="Copy your chart analysis" aria-label="Copy your chart analysis">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </astro-copy-analysis>
     </div>
     <div class="reading-content analysis-content" id="analysisContent" role="status" aria-live="polite" aria-busy="false" aria-atomic="false">
       {% if streaming %}
@@ -118,16 +118,18 @@
   <!-- Chart wheel + placements -->
   <section class="chart-grid">
     <div class="chrome-border glass panel panel--wheel">
-      <div class="section-cap wheel-cap">
-        <h3 class="section-title">Chart wheel</h3>
-        <button id="downloadChartWheelBtn" class="pill-btn download-wheel-btn" type="button" aria-label="Download chart wheel image as PNG">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>Download PNG</span>
-        </button>
-      </div>
-      <div class="wheel-wrap">
-        <canvas id="chartWheel" aria-label="Zodiac wheel natal chart visualization" role="img">Natal chart zodiac wheel</canvas>
-      </div>
+      <astro-chart-wheel data-source="chartData" canvas-selector="#chartWheel" download-selector="#downloadChartWheelBtn" download-filename="chartWheel.png">
+        <div class="section-cap wheel-cap">
+          <h3 class="section-title">Chart wheel</h3>
+          <button id="downloadChartWheelBtn" class="pill-btn download-wheel-btn" type="button" aria-label="Download chart wheel image as PNG">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Download PNG</span>
+          </button>
+        </div>
+        <div class="wheel-wrap">
+          <canvas id="chartWheel" aria-label="Zodiac wheel natal chart visualization" role="img">Natal chart zodiac wheel</canvas>
+        </div>
+      </astro-chart-wheel>
     </div>
 
     <div class="chrome-border glass panel">
@@ -146,8 +148,15 @@
         </div>
       </div>
 
-      <h3 class="section-title">Placements</h3>
-      <div class="placements">
+      <div class="section-cap" style="margin-top: 20px;">
+        <h3 class="section-title">Placements</h3>
+        <astro-section-toggle target="#placementsContent" storage-key="section-placements" expanded>
+          <button class="pill-btn" type="button" aria-expanded="true">
+            <span class="toggle-btn">▼</span>
+          </button>
+        </astro-section-toggle>
+      </div>
+      <div class="placements section-content" id="placementsContent">
         <table>
           <thead>
             <tr><th>Body</th><th>Sign</th><th>House</th><th>°</th></tr>
@@ -169,8 +178,15 @@
 
   <!-- Houses -->
   <section class="chrome-border glass panel panel--houses">
-    <h3 class="section-title">Houses</h3>
-    <div class="placements">
+    <div class="section-cap">
+      <h3 class="section-title">Houses</h3>
+      <astro-section-toggle target="#housesContent" storage-key="section-houses" expanded>
+        <button class="pill-btn" type="button" aria-expanded="true">
+          <span class="toggle-btn">▼</span>
+        </button>
+      </astro-section-toggle>
+    </div>
+    <div class="placements section-content" id="housesContent">
       <table>
         <thead>
           <tr><th>House</th><th>Sign</th><th>°</th><th>Inhabitants</th></tr>

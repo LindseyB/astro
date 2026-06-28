@@ -1,79 +1,25 @@
-// Button Loading State Handler
+// Deprecated compatibility adapter. New behavior lives in js/components/astro-button.js.
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.console && window.console.warn) {
+        window.console.warn('button-loading.js is deprecated. Use <astro-button> instead.');
+    }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const submitButtons = document.querySelectorAll('button[type="submit"]');
-    const questionInput = document.getElementById('question_prompt');
-    
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            // Use event.submitter to find which button was clicked
-            const clickedButton = e.submitter;
+    var legacyButtons = document.querySelectorAll('button[type="submit"][data-legacy-loading]');
+    legacyButtons.forEach(function (button) {
+        var form = button.closest('form');
+        if (!form) {
+            return;
+        }
 
-            if (!clickedButton || clickedButton.type !== 'submit') {
+        form.addEventListener('submit', function (event) {
+            if (event.submitter !== button) {
                 return;
             }
 
-            const submitMode = clickedButton.dataset.submitMode || '';
-            const isAskAnythingMode = submitMode === 'ask-anything';
-
-            if (questionInput) {
-                if (isAskAnythingMode) {
-                    const questionValue = questionInput.value.trim();
-                    if (!questionValue) {
-                        e.preventDefault();
-                        questionInput.focus();
-                        questionInput.setCustomValidity('Please enter a question for Ask Anything mode.');
-                        questionInput.reportValidity();
-                        return;
-                    }
-                    questionInput.setCustomValidity('');
-                } else {
-                    questionInput.setCustomValidity('');
-                }
-            }
-            
-            // Disable all submit buttons
-            submitButtons.forEach(btn => {
-                btn.disabled = true;
-                btn.classList.add('loading');
-            });
-
-            // Store the original text and add spinner to the clicked button
-            const originalText = clickedButton.innerHTML;
-            clickedButton.setAttribute('data-original-text', originalText);
-            clickedButton.innerHTML = '<span class="spinner"></span> Loading...';
+            button.disabled = true;
+            button.classList.add('loading');
+            button.dataset.originalText = button.innerHTML;
+            button.innerHTML = '<span class="spinner"></span> Loading...';
         });
-    }
-
-    // Index now has multiple forms (main + Ask Anything modal), so wire up Ask Anything too.
-    const askAnythingForm = document.querySelector('#askAnythingModal form');
-    if (askAnythingForm && askAnythingForm !== form) {
-        askAnythingForm.addEventListener('submit', function(e) {
-            const questionInput = askAnythingForm.querySelector('#question_prompt');
-            if (questionInput) {
-                const questionValue = questionInput.value.trim();
-                if (!questionValue) {
-                    e.preventDefault();
-                    questionInput.focus();
-                    questionInput.setCustomValidity('Please enter a question for Ask Anything mode.');
-                    questionInput.reportValidity();
-                    return;
-                }
-                questionInput.setCustomValidity('');
-            }
-
-            const clickedButton = e.submitter;
-            if (!clickedButton || clickedButton.type !== 'submit') {
-                return;
-            }
-
-            clickedButton.disabled = true;
-            clickedButton.classList.add('loading');
-
-            const originalText = clickedButton.innerHTML;
-            clickedButton.setAttribute('data-original-text', originalText);
-            clickedButton.innerHTML = '<span class="spinner"></span> Loading...';
-        });
-    }
+    });
 });

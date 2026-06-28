@@ -551,70 +551,104 @@ class ChartWheel {
     }
 }
 
-// Initialize chart when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    const chartCanvas = document.getElementById('chartWheel');
-    const downloadButton = document.getElementById('downloadChartWheelBtn');
+function initializeChartWheel(options) {
+    const config = options || {};
+    const root = config.root || document;
+    const canvasSelector = config.canvasSelector || '#chartWheel';
+    const downloadSelector = config.downloadSelector || '#downloadChartWheelBtn';
+    const downloadFilename = config.downloadFilename || 'chartWheel.png';
+    const chartData = config.chartData || window.chartData;
 
-    if (chartCanvas && window.chartData) {
-        const wheel = new ChartWheel('chartWheel', window.chartData);
+    const chartCanvas = root.querySelector ? root.querySelector(canvasSelector) : document.querySelector(canvasSelector);
+    const downloadButton = root.querySelector ? root.querySelector(downloadSelector) : document.querySelector(downloadSelector);
 
-        // Redraw on dark/light theme changes so the wheel colors stay in sync
-        const observer = new MutationObserver(function() {
-            wheel.theme = wheel.resolveTheme();
-            wheel.draw();
-        });
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    if (!chartCanvas || !chartData) {
+        return null;
+    }
 
-        if (downloadButton) {
-            downloadButton.addEventListener('click', function() {
-                const getExportCanvas = function() {
-                    const exportCanvas = document.createElement('canvas');
-                    exportCanvas.width = chartCanvas.width;
-                    exportCanvas.height = chartCanvas.height;
+    const wheel = new ChartWheel(chartCanvas.id, chartData);
+    if (!wheel || !wheel.canvas) {
+        return null;
+    }
 
-                    const exportCtx = exportCanvas.getContext('2d');
-                    if (!exportCtx) {
-                        return chartCanvas;
-                    }
+    const observer = new MutationObserver(function() {
+        wheel.theme = wheel.resolveTheme();
+        wheel.draw();
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
-                    // Use the resolved page background so exported PNG has no transparency.
-                    const pageBackground = getComputedStyle(document.body).backgroundColor || '#ffffff';
-                    exportCtx.fillStyle = pageBackground;
-                    exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-                    exportCtx.drawImage(chartCanvas, 0, 0);
+    let handleDownload = null;
+    if (downloadButton) {
+        handleDownload = function() {
+            const getExportCanvas = function() {
+                const exportCanvas = document.createElement('canvas');
+                exportCanvas.width = chartCanvas.width;
+                exportCanvas.height = chartCanvas.height;
 
-                    return exportCanvas;
-                };
-
-                const triggerDownload = function(url) {
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = 'chartWheel.png';
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
-                };
-
-                const exportCanvas = getExportCanvas();
-
-                if (exportCanvas.toBlob) {
-                    exportCanvas.toBlob(function(blob) {
-                        if (!blob) {
-                            return;
-                        }
-                        const objectUrl = URL.createObjectURL(blob);
-                        triggerDownload(objectUrl);
-                        window.setTimeout(function() {
-                            URL.revokeObjectURL(objectUrl);
-                        }, 1000);
-                    }, 'image/png');
-                    return;
+                const exportCtx = exportCanvas.getContext('2d');
+                if (!exportCtx) {
+                    return chartCanvas;
                 }
 
-                const dataUrl = exportCanvas.toDataURL('image/png');
-                triggerDownload(dataUrl);
-            });
-        }
+                // Use the resolved page background so exported PNG has no transparency.
+                const pageBackground = getComputedStyle(document.body).backgroundColor || '#ffffff';
+                exportCtx.fillStyle = pageBackground;
+                exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+                exportCtx.drawImage(chartCanvas, 0, 0);
+
+                return exportCanvas;
+            };
+
+            const triggerDownload = function(url) {
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = downloadFilename;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            };
+
+            const exportCanvas = getExportCanvas();
+
+            if (exportCanvas.toBlob) {
+                exportCanvas.toBlob(function(blob) {
+                    if (!blob) {
+                        return;
+                    }
+                    const objectUrl = URL.createObjectURL(blob);
+                    triggerDownload(objectUrl);
+                    window.setTimeout(function() {
+                        URL.revokeObjectURL(objectUrl);
+                    }, 1000);
+                }, 'image/png');
+                return;
+            }
+
+            const dataUrl = exportCanvas.toDataURL('image/png');
+            triggerDownload(dataUrl);
+        };
+
+        downloadButton.addEventListener('click', handleDownload);
     }
+
+    return {
+        wheel,
+        cleanup: function() {
+            observer.disconnect();
+            if (downloadButton && handleDownload) {
+                downloadButton.removeEventListener('click', handleDownload);
+            }
+        }
+    };
+}
+
+window.ChartWheel = ChartWheel;
+window.initChartWheel = initializeChartWheel;
+
+// Legacy fallback: initialize automatically if no Web Component is controlling lifecycle.
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.querySelector('astro-chart-wheel')) {
+        return;
+    }
+    initializeChartWheel();
 });
