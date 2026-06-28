@@ -29,7 +29,8 @@
         timezoneOffset: String(config.timezoneOffset || ''),
         latitude: String(config.latitude || ''),
         longitude: String(config.longitude || ''),
-        musicGenre: effectiveGenre
+        musicGenre: effectiveGenre,
+        personality: String(config.personality || 'default')
     };
 
     window.chartDataForStreaming = {
@@ -39,7 +40,8 @@
         timezoneOffset: chartData.timezoneOffset,
         latitude: chartData.latitude,
         longitude: chartData.longitude,
-        musicGenre: chartData.musicGenre
+        musicGenre: chartData.musicGenre,
+        personality: chartData.personality
     };
 
     window.chartDataForMusic = {
@@ -48,7 +50,8 @@
         timezoneOffset: chartData.timezoneOffset,
         latitude: chartData.latitude,
         longitude: chartData.longitude,
-        musicGenre: chartData.musicGenre
+        musicGenre: chartData.musicGenre,
+        personality: chartData.personality
     };
 
     window.birthdayCelebration = {
@@ -69,6 +72,7 @@
             timezone_offset: chartData.timezoneOffset,
             latitude: chartData.latitude,
             longitude: chartData.longitude,
+            personality: chartData.personality,
             music_genre: isOther ? 'other' : (String(config.musicGenre || '').trim() || 'any'),
             other_genre: isOther ? rawOtherGenre : ''
         };
@@ -102,7 +106,7 @@
 
         var form = document.createElement('form');
         form.method = 'POST';
-        form.action = String(config.askAnythingPath || '/ask-anything');
+        form.action = '/ask-anything';
 
         var fields = {
             question_prompt: question,
@@ -110,7 +114,8 @@
             birth_time: chartData.birthTime,
             timezone_offset: chartData.timezoneOffset,
             latitude: chartData.latitude,
-            longitude: chartData.longitude
+            longitude: chartData.longitude,
+            personality: chartData.personality
         };
 
         for (var name in fields) {

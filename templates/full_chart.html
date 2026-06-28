@@ -14,9 +14,9 @@
 <script>
     // Pass chart data to JavaScript
     window.chartData = {
-        sun: "{{ chart_data.sun }}",
-        moon: "{{ chart_data.moon }}",
-        ascendant: "{{ chart_data.ascendant }}",
+        sun: {{ chart_data.sun | tojson }},
+        moon: {{ chart_data.moon | tojson }},
+        ascendant: {{ chart_data.ascendant | tojson }},
         planets: {{ chart_data.planets | tojson | safe }},
         houses: {{ chart_data.houses | tojson | safe }}
     };
@@ -24,24 +24,26 @@
 <script>
     // Pass chart data to JavaScript for music suggestion
     window.chartDataForMusic = {
-        birthDate: "{{ form_data.birth_date }}",
-        birthTime: "{{ form_data.birth_time }}",
-        timezoneOffset: "{{ form_data.timezone_offset }}",
-        latitude: "{{ form_data.latitude }}",
-        longitude: "{{ form_data.longitude }}",
-        musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
+        birthDate: {{ form_data.birth_date | tojson }},
+        birthTime: {{ form_data.birth_time | tojson }},
+        timezoneOffset: {{ form_data.timezone_offset | tojson }},
+        latitude: {{ form_data.latitude | tojson }},
+        longitude: {{ form_data.longitude | tojson }},
+        musicGenre: {{ (form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre) | tojson }},
+        personality: {{ form_data.personality | tojson }}
     };
     
     {% if streaming %}
     // Pass chart data for streaming analysis
     window.chartDataForStreaming = {
         pageType: 'full-chart',
-        birthDate: "{{ form_data.birth_date }}",
-        birthTime: "{{ form_data.birth_time }}",
-        timezoneOffset: "{{ form_data.timezone_offset }}",
-        latitude: "{{ form_data.latitude }}",
-        longitude: "{{ form_data.longitude }}",
-        musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
+        birthDate: {{ form_data.birth_date | tojson }},
+        birthTime: {{ form_data.birth_time | tojson }},
+        timezoneOffset: {{ form_data.timezone_offset | tojson }},
+        latitude: {{ form_data.latitude | tojson }},
+        longitude: {{ form_data.longitude | tojson }},
+      musicGenre: {{ (form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre) | tojson }},
+      personality: {{ form_data.personality | tojson }}
     };
     {% endif %}
 </script>
@@ -211,6 +213,7 @@
     <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
     <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
     <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
+    <input type="hidden" name="personality" value="{{ form_data.personality }}">
     <input type="hidden" name="music_genre" value="{{ form_data.music_genre }}">
     <input type="hidden" name="other_genre" value="{{ form_data.other_genre }}">
   </form>
@@ -225,4 +228,3 @@ function submitForm(e, action) {
 }
 </script>
 {% endblock %}
-

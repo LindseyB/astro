@@ -446,7 +446,8 @@ class TestStreamingEndpointsSSE(unittest.TestCase):
             '10:30',
             '-05:00',
             '51n30',
-            '0w06'
+            '0w06',
+            'default'
         )
 
     def test_stream_ask_anything_missing_question(self):

@@ -32,6 +32,7 @@
     'longitude': form_data.longitude,
     'musicGenre': form_data.music_genre,
     'otherGenre': form_data.other_genre,
+    'personality': form_data.personality,
     'askAnythingPath': '/ask-anything'
 } | tojson }}</script>
 <header class="site-header">
@@ -153,6 +154,7 @@
             <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
             <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
             <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
+            <input type="hidden" name="personality" value="{{ form_data.personality }}">
             <input type="hidden" name="music_genre" value="{{ form_data.music_genre }}">
             <input type="hidden" name="other_genre" value="{{ form_data.other_genre }}">
         </form>

@@ -10,6 +10,7 @@ class FormPersistence {
             'timezone_offset',
             'latitude',
             'longitude',
+            'personality',
             'music_genre',
             'other_genre'
         ];
@@ -156,6 +157,12 @@ class FormPersistence {
         if (latitude && longitude && !latitude.value && !longitude.value) {
             latitude.value = '40n42';
             longitude.value = '74w00';
+        }
+
+        // Default bot personality.
+        const personality = document.getElementById('personality');
+        if (personality && !personality.value) {
+            personality.value = personality.getAttribute('data-default-personality') || 'default';
         }
         
         // Music genre defaults to "any"

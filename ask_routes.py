@@ -9,6 +9,7 @@ from flask.typing import ResponseReturnValue
 
 from calculations import stream_calculate_ask_anything
 from config import logger
+from personality import DEFAULT_PERSONALITY, normalize_personality
 from route_helpers import _require_ai_client
 from validation import _format_birth_date_for_calculations, _normalize_birth_inputs
 
@@ -25,6 +26,7 @@ def ask_anything() -> ResponseReturnValue:
     timezone_offset = request.form.get('timezone_offset', '').strip()
     latitude = request.form.get('latitude', '').strip()
     longitude = request.form.get('longitude', '').strip()
+    personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
 
     birth_date_html, timezone_offset, latitude, longitude = _normalize_birth_inputs(
         birth_date_html, timezone_offset, latitude, longitude
@@ -50,6 +52,7 @@ def ask_anything() -> ResponseReturnValue:
         'timezone_offset': timezone_offset,
         'latitude': latitude,
         'longitude': longitude,
+        'personality': personality,
     }
     return render_template('ask_anything.html', question=question, form_data=form_data, streaming=True)
 
@@ -69,6 +72,7 @@ def stream_ask_anything() -> ResponseReturnValue:
         timezone_offset = _norm(data.get('timezone_offset'))
         latitude = _norm(data.get('latitude'))
         longitude = _norm(data.get('longitude'))
+        personality = normalize_personality(_norm(data.get('personality')))
 
         birth_date, timezone_offset, latitude, longitude = _normalize_birth_inputs(
             birth_date, timezone_offset, latitude, longitude
@@ -112,6 +116,7 @@ def stream_ask_anything() -> ResponseReturnValue:
                     timezone_offset,
                     latitude,
                     longitude,
+                    personality,
                 ):
                     if chunk:
                         yield f"data: {json.dumps({'chunk': chunk})}\n\n"

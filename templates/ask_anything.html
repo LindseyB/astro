@@ -15,7 +15,8 @@
         birthTime: {{ form_data.birth_time | tojson }},
         timezoneOffset: {{ form_data.timezone_offset | tojson }},
         latitude: {{ form_data.latitude | tojson }},
-        longitude: {{ form_data.longitude | tojson }}
+        longitude: {{ form_data.longitude | tojson }},
+        personality: {{ form_data.personality | tojson }}
     };
 </script>
 {% endif %}
@@ -84,6 +85,7 @@
                 <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
                 <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
                 <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
+                <input type="hidden" name="personality" value="{{ form_data.personality }}">
                 <label class="sr-only" for="chatQuestionInput">Ask anything</label>
                 <textarea class="chat-input" id="chatQuestionInput" name="question_prompt" rows="1" placeholder="Ask anything…" required></textarea>
                 <button class="send-btn" type="submit" aria-label="Send">
@@ -106,6 +108,7 @@
             <input type="hidden" name="timezone_offset" value="{{ form_data.timezone_offset }}">
             <input type="hidden" name="latitude" value="{{ form_data.latitude }}">
             <input type="hidden" name="longitude" value="{{ form_data.longitude }}">
+            <input type="hidden" name="personality" value="{{ form_data.personality }}">
             <input type="hidden" name="music_genre" value="any">
             <input type="hidden" name="other_genre" value="">
         </form>

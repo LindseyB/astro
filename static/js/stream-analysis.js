@@ -174,7 +174,8 @@
                 birth_time: chartData.birthTime,
                 timezone_offset: chartData.timezoneOffset,
                 latitude: chartData.latitude,
-                longitude: chartData.longitude
+                longitude: chartData.longitude,
+                personality: chartData.personality || 'default'
             }
             : {
                 birth_date: chartData.birthDate,
@@ -182,7 +183,8 @@
                 timezone_offset: chartData.timezoneOffset,
                 latitude: chartData.latitude,
                 longitude: chartData.longitude,
-                music_genre: chartData.musicGenre
+                music_genre: chartData.musicGenre,
+                personality: chartData.personality || 'default'
             };
     
         // Start streaming

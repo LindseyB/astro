@@ -315,6 +315,14 @@ class TestAccessibilityRegression(unittest.TestCase):
         self.assertIn(b'<label class="sr-only" for="longitude">Longitude</label>', response.data)
         self.assertIn(b'<label class="sr-only" for="askModalInput">Your question</label>', response.data)
 
+    def test_personality_field_is_optional_and_described_for_screen_readers(self):
+        response = self.app.get('/')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertIn(b'<label for="personality">Personality (optional)</label>', response.data)
+        self.assertIn(b'id="personality" name="personality" aria-describedby="personality_hint"', response.data)
+        self.assertIn(b'id="personality_hint" class="field-hint">Optional voice style for responses.', response.data)
+
     def test_analysis_regions_expose_live_status(self):
         chart_response = self.app.post('/chart', data={
             'birth_date': '1988-08-08',

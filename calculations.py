@@ -12,6 +12,7 @@ from chart_data import FullChartHouseInfo, FullChartPlanetInfo, PlanetsInHouse
 from config import PLANET_CONSTANTS, HOUSE_NAMES, logger
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets
 from formatters import format_planets_for_api, format_planets_in_houses_for_prompt
+from personality import apply_personality_to_system_prompt, normalize_personality
 from prompt_templates import load_prompt_template, load_prompt_text
 from ai_service import stream_ai_api
 
@@ -58,6 +59,7 @@ def stream_calculate_chart(
     latitude: str,
     longitude: str,
     music_genre: str = "any",
+    personality: str = "default",
 ) -> Iterator[str]:
     """
     Calculate daily horoscope with current transits, yielding streaming chunks
@@ -69,6 +71,7 @@ def stream_calculate_chart(
         latitude (float): Latitude
         longitude (float): Longitude
         music_genre (str): Music genre preference (default "any")
+        personality (str): Personality style ("default", "witchy", or "goth")
 
     Yields:
         str: Text chunks from AI streaming response
@@ -99,7 +102,10 @@ def stream_calculate_chart(
     logger.debug(user_prompt)
     logger.debug("=== END PROMPT ===")
 
-    system_content = load_prompt_text("calculations/shared_astrologer_system.md")
+    system_content = apply_personality_to_system_prompt(
+        load_prompt_text("calculations/shared_astrologer_system.md"),
+        normalize_personality(personality),
+    )
 
     # Stream AI response
     try:
@@ -116,6 +122,7 @@ def stream_calculate_live_mas(
     timezone_offset: str,
     latitude: str,
     longitude: str,
+    personality: str = "default",
 ) -> Iterator[str]:
     """
     Calculate Taco Bell order based on astrological data, yielding streaming chunks
@@ -126,6 +133,7 @@ def stream_calculate_live_mas(
         timezone_offset (str): Timezone offset
         latitude (float): Latitude
         longitude (float): Longitude
+        personality (str): Personality style ("default", "witchy", or "goth")
 
     Yields:
         str: Text chunks from AI streaming response
@@ -151,7 +159,10 @@ def stream_calculate_live_mas(
         current_planets=format_planets_for_api(current_planets),
     )
 
-    system_content = load_prompt_text("calculations/live_mas_system.md")
+    system_content = apply_personality_to_system_prompt(
+        load_prompt_text("calculations/live_mas_system.md"),
+        normalize_personality(personality),
+    )
 
     # Stream AI response
     try:
@@ -169,6 +180,7 @@ def stream_calculate_full_chart(
     latitude: str,
     longitude: str,
     music_genre: str = "any",
+    personality: str = "default",
 ) -> Iterator[str]:
     """
     Calculate comprehensive natal chart data, yielding streaming chunks
@@ -180,6 +192,7 @@ def stream_calculate_full_chart(
         latitude (float): Latitude
         longitude (float): Longitude
         music_genre (str): Music genre preference (default "any")
+        personality (str): Personality style ("default", "witchy", or "goth")
 
     Yields:
         str: Text chunks from AI streaming response
@@ -243,7 +256,10 @@ def stream_calculate_full_chart(
         houses=_format_full_chart_houses(house_data),
     )
 
-    system_content = load_prompt_text("calculations/shared_astrologer_system.md")
+    system_content = apply_personality_to_system_prompt(
+        load_prompt_text("calculations/shared_astrologer_system.md"),
+        normalize_personality(personality),
+    )
 
     # Stream AI response
     try:
@@ -261,6 +277,7 @@ def stream_calculate_ask_anything(
     timezone_offset: str,
     latitude: str,
     longitude: str,
+    personality: str = "default",
 ) -> Iterator[str]:
     """
     Stream a general purpose answer for free-form questions with astrological context.
@@ -272,6 +289,7 @@ def stream_calculate_ask_anything(
         timezone_offset (str): Timezone offset
         latitude (str): Latitude in flatlib format (e.g., 40n42)
         longitude (str): Longitude in flatlib format (e.g., 74w00)
+        personality (str): Personality style ("default", "witchy", or "goth")
 
     Yields:
         str: Text chunks from AI streaming response
@@ -291,7 +309,10 @@ def stream_calculate_ask_anything(
         current_planets=format_planets_for_api(current_planets),
     )
 
-    system_content = load_prompt_text("calculations/ask_anything_system.md")
+    system_content = apply_personality_to_system_prompt(
+        load_prompt_text("calculations/ask_anything_system.md"),
+        normalize_personality(personality),
+    )
 
     try:
         for chunk in stream_ai_api(system_content, user_prompt, temperature=_prompt_temperature(user_template.metadata)):
