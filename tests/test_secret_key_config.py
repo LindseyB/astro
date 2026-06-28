@@ -1,12 +1,13 @@
 import os
 import subprocess
 import sys
+from collections.abc import Mapping
 
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def _run_import_routes_with_env(env):
+def _run_import_routes_with_env(env: Mapping[str, str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, '-c', 'import routes'],
         cwd=PROJECT_ROOT,

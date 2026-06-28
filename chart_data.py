@@ -1,6 +1,8 @@
 """
 Core chart data extraction functions
 """
+from typing import Any, TypedDict
+
 from datetime import datetime
 from flatlib.chart import Chart
 from flatlib.datetime import Datetime
@@ -9,7 +11,56 @@ from flatlib import const
 from config import PLANET_NAMES, PLANET_CONSTANTS, logger
 
 
-def create_charts(birth_date, birth_time, timezone_offset, latitude, longitude):
+class HousePlanetInfo(TypedDict):
+    name: str
+    sign: str
+    object: Any
+
+
+class PlanetsInHouse(TypedDict):
+    house_obj: Any
+    planets: list[HousePlanetInfo]
+
+
+class CurrentPlanetInfo(TypedDict):
+    sign: str
+    degree: float
+    retrograde: bool
+
+
+class FullChartPlanetInfo(TypedDict):
+    sign: str
+    degree: float
+    house: int | None
+
+
+class FullChartHousePlanetInfo(TypedDict):
+    name: str
+    sign: str
+    degree: float
+
+
+class FullChartHouseInfo(TypedDict):
+    sign: str
+    degree: float
+    planets: list[FullChartHousePlanetInfo]
+
+
+class FullChartStructure(TypedDict):
+    sun: str
+    moon: str
+    ascendant: str
+    planets: dict[str, FullChartPlanetInfo]
+    houses: dict[int, FullChartHouseInfo]
+
+
+def create_charts(
+    birth_date: str,
+    birth_time: str,
+    timezone_offset: str,
+    latitude: str,
+    longitude: str,
+) -> tuple[Chart, Chart]:
     """
     Create natal and current charts
 
@@ -36,7 +87,7 @@ def create_charts(birth_date, birth_time, timezone_offset, latitude, longitude):
     return chart, today_chart
 
 
-def get_main_positions(chart):
+def get_main_positions(chart: Chart) -> tuple[Any, Any, Any]:
     """
     Get sun, moon, and ascendant from chart
 
@@ -49,7 +100,7 @@ def get_main_positions(chart):
     return chart.get('Sun'), chart.get('Moon'), chart.get('House1')
 
 
-def get_planets_in_houses(chart):
+def get_planets_in_houses(chart: Chart) -> dict[int, PlanetsInHouse]:
     """
     Get all planets organized by houses
 
@@ -60,7 +111,7 @@ def get_planets_in_houses(chart):
         dict: Dictionary keyed by house number with planet data
     """
     houses = chart.houses
-    planets_in_houses = {}
+    planets_in_houses: dict[int, PlanetsInHouse] = {}
 
     for house in houses:
         house_number = int(house.id.replace('House', ''))
@@ -83,7 +134,7 @@ def get_planets_in_houses(chart):
     return planets_in_houses
 
 
-def get_current_planets(today_chart):
+def get_current_planets(today_chart: Chart) -> dict[str, CurrentPlanetInfo]:
     """
     Get current planet positions and retrograde status
 
@@ -93,7 +144,7 @@ def get_current_planets(today_chart):
     Returns:
         dict: Dictionary with planet positions and retrograde status
     """
-    current_planets = {}
+    current_planets: dict[str, CurrentPlanetInfo] = {}
 
     for planet_name, planet_const in PLANET_CONSTANTS.items():
         try:
@@ -123,7 +174,13 @@ def get_current_planets(today_chart):
     return current_planets
 
 
-def get_full_chart_structure(birth_date, birth_time, timezone_offset, latitude, longitude):
+def get_full_chart_structure(
+    birth_date: str,
+    birth_time: str,
+    timezone_offset: str,
+    latitude: str,
+    longitude: str,
+) -> FullChartStructure:
     """
     Get complete natal chart structure with all planets and houses
     
@@ -148,7 +205,7 @@ def get_full_chart_structure(birth_date, birth_time, timezone_offset, latitude, 
     ascendant = chart_obj.get('House1')
     
     # Get all planets with detailed information
-    planets = {}
+    planets: dict[str, FullChartPlanetInfo] = {}
     for planet_name, planet_const in PLANET_CONSTANTS.items():
         try:
             planet_obj = chart_obj.get(planet_const)
@@ -164,7 +221,7 @@ def get_full_chart_structure(birth_date, birth_time, timezone_offset, latitude, 
     
     # Get all houses
     houses = chart_obj.houses
-    house_data = {}
+    house_data: dict[int, FullChartHouseInfo] = {}
     
     for house in houses:
         house_number = int(house.id.replace('House', ''))

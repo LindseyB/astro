@@ -1,10 +1,14 @@
 """
 Chart calculation business logic
 """
+from collections.abc import Iterator, Mapping
+from typing import Any, cast
+
 from flatlib.chart import Chart
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
 from flatlib import const
+from chart_data import FullChartHouseInfo, FullChartPlanetInfo, PlanetsInHouse
 from config import PLANET_CONSTANTS, HOUSE_NAMES, logger
 from chart_data import create_charts, get_main_positions, get_planets_in_houses, get_current_planets
 from formatters import format_planets_for_api, format_planets_in_houses_for_prompt
@@ -12,18 +16,23 @@ from prompt_templates import load_prompt_template, load_prompt_text
 from ai_service import stream_ai_api
 
 
-def _format_planets_in_houses(planets_in_houses):
+def _prompt_temperature(metadata: Mapping[str, object]) -> float:
+    value = metadata.get("temperature", 1.0)
+    return float(value) if isinstance(value, (int, float)) else 1.0
+
+
+def _format_planets_in_houses(planets_in_houses: dict[int, PlanetsInHouse]) -> str:
     return format_planets_in_houses_for_prompt(planets_in_houses, HOUSE_NAMES)
 
 
-def _format_full_chart_planets(planets):
+def _format_full_chart_planets(planets: dict[str, FullChartPlanetInfo]) -> str:
     return "\n".join(
         f"- {name}: {data['sign']} at {data['degree']:.2f}° in House {data['house'] or 'N/A'}"
         for name, data in planets.items()
     )
 
 
-def _format_full_chart_houses(house_data):
+def _format_full_chart_houses(house_data: dict[int, FullChartHouseInfo]) -> str:
     house_lines = []
 
     for house_number in sorted(house_data.keys()):
@@ -40,7 +49,14 @@ def _format_full_chart_houses(house_data):
     return "\n".join(house_lines)
 
 
-def stream_calculate_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre="any"):
+def stream_calculate_chart(
+    birth_date: str,
+    birth_time: str,
+    timezone_offset: str,
+    latitude: str,
+    longitude: str,
+    music_genre: str = "any",
+) -> Iterator[str]:
     """
     Calculate daily horoscope with current transits, yielding streaming chunks
 
@@ -85,14 +101,20 @@ def stream_calculate_chart(birth_date, birth_time, timezone_offset, latitude, lo
 
     # Stream AI response
     try:
-        for chunk in stream_ai_api(system_content, user_prompt, temperature=user_template.metadata.get("temperature", 1.0)):
+        for chunk in stream_ai_api(system_content, user_prompt, temperature=_prompt_temperature(user_template.metadata)):
             yield chunk
     except Exception as e:
         logger.error(f"Error streaming chart calculation: {e}")
         yield f"**Cosmic Note:** The AI astrologer is taking a cosmic tea break. ☕ Trust your intuition today! 🔮"
 
 
-def stream_calculate_live_mas(birth_date, birth_time, timezone_offset, latitude, longitude):
+def stream_calculate_live_mas(
+    birth_date: str,
+    birth_time: str,
+    timezone_offset: str,
+    latitude: str,
+    longitude: str,
+) -> Iterator[str]:
     """
     Calculate Taco Bell order based on astrological data, yielding streaming chunks
 
@@ -131,14 +153,21 @@ def stream_calculate_live_mas(birth_date, birth_time, timezone_offset, latitude,
 
     # Stream AI response
     try:
-        for chunk in stream_ai_api(system_content, user_prompt, temperature=user_template.metadata.get("temperature", 1.0)):
+        for chunk in stream_ai_api(system_content, user_prompt, temperature=_prompt_temperature(user_template.metadata)):
             yield chunk
     except Exception as e:
         logger.error(f"Error streaming live mas calculation: {e}")
         yield "🌮 **Cosmic Note:** The cosmic Taco Bell oracle is taking a nacho break! ☕ Try a Crunchwrap Supreme - it's universally delicious! 🔔✨"
 
 
-def stream_calculate_full_chart(birth_date, birth_time, timezone_offset, latitude, longitude, music_genre="any"):
+def stream_calculate_full_chart(
+    birth_date: str,
+    birth_time: str,
+    timezone_offset: str,
+    latitude: str,
+    longitude: str,
+    music_genre: str = "any",
+) -> Iterator[str]:
     """
     Calculate comprehensive natal chart data, yielding streaming chunks
 
@@ -154,8 +183,8 @@ def stream_calculate_full_chart(birth_date, birth_time, timezone_offset, latitud
         str: Text chunks from AI streaming response
     """
     # Setup chart
-    dt = Datetime(birth_date, birth_time, timezone_offset)
-    pos = GeoPos(latitude, longitude)
+    dt = Datetime(birth_date, cast(Any, birth_time), cast(Any, timezone_offset))
+    pos = GeoPos(cast(Any, latitude), cast(Any, longitude))
     chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
 
     # Calculate main positions
@@ -164,7 +193,7 @@ def stream_calculate_full_chart(birth_date, birth_time, timezone_offset, latitud
     ascendant = chart.get('House1')
 
     # Get all planets with detailed information
-    planets = {}
+    planets: dict[str, FullChartPlanetInfo] = {}
 
     for planet_name, planet_const in PLANET_CONSTANTS.items():
         try:
@@ -181,7 +210,7 @@ def stream_calculate_full_chart(birth_date, birth_time, timezone_offset, latitud
 
     # Get all houses and their objects
     houses = chart.houses
-    house_data = {}
+    house_data: dict[int, FullChartHouseInfo] = {}
 
     for house in houses:
         house_number = int(house.id.replace('House', ''))
@@ -216,14 +245,21 @@ def stream_calculate_full_chart(birth_date, birth_time, timezone_offset, latitud
 
     # Stream AI response
     try:
-        for chunk in stream_ai_api(system_content, user_prompt, temperature=user_template.metadata.get("temperature", 1.0)):
+        for chunk in stream_ai_api(system_content, user_prompt, temperature=_prompt_temperature(user_template.metadata)):
             yield chunk
     except Exception as e:
         logger.error(f"Error streaming full chart calculation: {e}")
         yield f"**Cosmic Note:** The AI astrologer is taking a cosmic tea break. ☕ You're as special and unique as the stars! 🔮"
 
 
-def stream_calculate_ask_anything(question, birth_date, birth_time, timezone_offset, latitude, longitude):
+def stream_calculate_ask_anything(
+    question: str,
+    birth_date: str,
+    birth_time: str,
+    timezone_offset: str,
+    latitude: str,
+    longitude: str,
+) -> Iterator[str]:
     """
     Stream a general purpose answer for free-form questions with astrological context.
 
@@ -256,7 +292,7 @@ def stream_calculate_ask_anything(question, birth_date, birth_time, timezone_off
     system_content = load_prompt_text("calculations/ask_anything_system.md")
 
     try:
-        for chunk in stream_ai_api(system_content, user_prompt, temperature=user_template.metadata.get("temperature", 1.0)):
+        for chunk in stream_ai_api(system_content, user_prompt, temperature=_prompt_temperature(user_template.metadata)):
             yield chunk
     except Exception as e:
         logger.error(f"Error streaming ask-anything response: {e}")

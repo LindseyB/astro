@@ -4,6 +4,9 @@ AI service for astrological analysis using Anthropic Claude
 import os
 import json
 import re
+from collections.abc import Iterator
+from typing import TypedDict, cast
+
 from anthropic import Anthropic
 from config import logger
 from prompt_templates import load_prompt_template, load_prompt_text
@@ -14,9 +17,15 @@ model = "claude-haiku-4-5-20251001"
 MAX_TOKENS = 20000
 
 # Initialize client as None, will be created when needed
-client = None
+client: Anthropic | None = None
 
-def get_client():
+
+class SongVerificationResult(TypedDict):
+    is_real: bool
+    explanation: str
+
+
+def get_client() -> Anthropic:
     """Get or create Anthropic client with validation"""
     global client
     if client is None:
@@ -29,7 +38,7 @@ def get_client():
     return client
 
 
-def call_ai_api(system_content, user_prompt, temperature=1.0):
+def call_ai_api(system_content: str, user_prompt: str, temperature: float = 1.0) -> str | None:
     """
     Make AI API call with error handling
 
@@ -71,7 +80,7 @@ def call_ai_api(system_content, user_prompt, temperature=1.0):
         return None
 
 
-def stream_ai_api(system_content, user_prompt, temperature=1.0):
+def stream_ai_api(system_content: str, user_prompt: str, temperature: float = 1.0) -> Iterator[str]:
     """
     Make AI API call with streaming response
 
@@ -114,7 +123,7 @@ def stream_ai_api(system_content, user_prompt, temperature=1.0):
         raise e
 
 
-def verify_song_exists(song_info):
+def verify_song_exists(song_info: str) -> SongVerificationResult:
     """
     Verify if a song suggestion is real using AI to double-check
 
@@ -153,7 +162,7 @@ def verify_song_exists(song_info):
             result_text = match.group(1)
         result_text = result_text.strip()
         
-        result = json.loads(result_text)
+        result = cast(SongVerificationResult, json.loads(result_text))
         return result
 
     except Exception as e:

@@ -3,7 +3,10 @@ Last.fm API service for fetching top tracks by genre
 """
 import os
 import random
+from collections.abc import Sequence
 from datetime import datetime
+from typing import TypedDict
+
 import requests
 from config import logger
 
@@ -16,7 +19,12 @@ TOP_TARGET_RATIO = 0.40
 MID_TARGET_RATIO = 0.35
 
 
-def select_varied_tracks(tracks, limit=30, seed_key=None):
+class TrackInfo(TypedDict):
+    name: str
+    artist: str
+
+
+def select_varied_tracks(tracks: Sequence[TrackInfo], limit: int = 30, seed_key: str | None = None) -> list[TrackInfo]:
     """
     Select a varied mix of tracks from popularity tiers while staying in-genre.
 
@@ -51,7 +59,7 @@ def select_varied_tracks(tracks, limit=30, seed_key=None):
 
     rng = random.Random(str(seed_key))
 
-    def sample_tier(tier, count):
+    def sample_tier(tier: Sequence[TrackInfo], count: int) -> list[TrackInfo]:
         if count <= 0 or not tier:
             return []
         if len(tier) <= count:
@@ -75,7 +83,7 @@ def select_varied_tracks(tracks, limit=30, seed_key=None):
     return selected[:limit]
 
 
-def get_top_tracks_by_genre(genre, limit=30):
+def get_top_tracks_by_genre(genre: str, limit: int = 30) -> list[TrackInfo]:
     """
     Fetch top tracks for a given genre from Last.fm API
     
@@ -120,7 +128,7 @@ def get_top_tracks_by_genre(genre, limit=30):
             logger.warning(f"No tracks found for genre: {genre_tag}")
             return []
         
-        tracks = []
+        tracks: list[TrackInfo] = []
         for track in data['tracks']['track']:
             track_info = {
                 'name': track.get('name', ''),
@@ -145,7 +153,7 @@ def get_top_tracks_by_genre(genre, limit=30):
         return []
 
 
-def format_tracks_for_prompt(tracks, limit=30):
+def format_tracks_for_prompt(tracks: Sequence[TrackInfo], limit: int = 30) -> str:
     """
     Format track list for inclusion in AI prompt
     

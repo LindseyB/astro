@@ -4,7 +4,11 @@ import os
 import sys
 import tempfile
 import unittest
+from collections.abc import Iterator
+from typing import Any
 from unittest.mock import patch, MagicMock
+
+from flask.testing import FlaskClient
 
 # Test data constants
 SAMPLE_BIRTH_DATA = {
@@ -50,24 +54,24 @@ SAMPLE_CHART_RESULT = {
 class AstroTestCase(unittest.TestCase):
     """Base test case with common utilities"""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test environment"""
         # Create a temporary directory for test files
         self.test_dir = tempfile.mkdtemp()
         
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test environment"""
         # Clean up temporary files
         import shutil
         shutil.rmtree(self.test_dir, ignore_errors=True)
     
-    def mock_openai_response(self, content="Test astrology response"):
+    def mock_openai_response(self, content: str = "Test astrology response") -> MagicMock:
         """Helper to mock OpenAI API response"""
         mock_response = MagicMock()
         mock_response.choices[0].message.content = content
         return mock_response
     
-    def mock_chart_objects(self, sun_sign='Leo', moon_sign='Virgo', asc_sign='Gemini'):
+    def mock_chart_objects(self, sun_sign: str = 'Leo', moon_sign: str = 'Virgo', asc_sign: str = 'Gemini') -> tuple[MagicMock, MagicMock, MagicMock]:
         """Helper to mock astrological chart objects"""
         mock_sun = MagicMock()
         mock_sun.sign = sun_sign
@@ -81,7 +85,7 @@ class AstroTestCase(unittest.TestCase):
         return mock_sun, mock_moon, mock_ascendant
 
 
-def create_test_app():
+def create_test_app() -> FlaskClient:
     """Create a test Flask app instance"""
     from main import app
     app.config['TESTING'] = True
@@ -98,17 +102,17 @@ TEST_ENV_VARS = {
 class MockEnvironment:
     """Context manager for mocking environment variables"""
     
-    def __init__(self, env_vars):
+    def __init__(self, env_vars: dict[str, str]) -> None:
         self.env_vars = env_vars
-        self.original_env = {}
+        self.original_env: dict[str, str | None] = {}
     
-    def __enter__(self):
+    def __enter__(self) -> "MockEnvironment":
         for key, value in self.env_vars.items():
             self.original_env[key] = os.environ.get(key)
             os.environ[key] = value
         return self
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: Any) -> None:
         for key in self.env_vars:
             if self.original_env[key] is None:
                 os.environ.pop(key, None)
