@@ -18,6 +18,8 @@ from ai_service import stream_ai_api
 
 def _prompt_temperature(metadata: Mapping[str, object]) -> float:
     value = metadata.get("temperature", 1.0)
+    if isinstance(value, bool):
+        return 1.0
     return float(value) if isinstance(value, (int, float)) else 1.0
 
 
@@ -183,8 +185,8 @@ def stream_calculate_full_chart(
         str: Text chunks from AI streaming response
     """
     # Setup chart
-    dt = Datetime(birth_date, cast(Any, birth_time), cast(Any, timezone_offset))
-    pos = GeoPos(cast(Any, latitude), cast(Any, longitude))
+    dt = Datetime(birth_date, birth_time, timezone_offset)
+    pos = GeoPos(latitude, longitude)
     chart = Chart(dt, pos, IDs=const.LIST_OBJECTS)
 
     # Calculate main positions

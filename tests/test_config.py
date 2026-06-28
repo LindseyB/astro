@@ -4,7 +4,6 @@ import os
 import sys
 import tempfile
 import unittest
-from collections.abc import Iterator
 from typing import Any
 from unittest.mock import patch, MagicMock
 
