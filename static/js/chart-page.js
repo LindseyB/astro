@@ -17,9 +17,11 @@
         return;
     }
 
-    var effectiveGenre = config.otherGenre && String(config.otherGenre).trim()
-        ? String(config.otherGenre)
-        : (String(config.musicGenre || '').trim() || 'any');
+    var otherGenre = String(config.otherGenre || '').trim();
+    var genreSelection = String(config.musicGenre || '').trim();
+    var effectiveGenre = (genreSelection === 'other' && otherGenre)
+        ? otherGenre
+        : (genreSelection || 'any');
 
     var chartData = {
         birthDate: String(config.birthDate || ''),
