@@ -142,8 +142,8 @@ def verify_song_exists(song_info: str) -> SongVerificationResult:
         api_client = get_client()
         response = api_client.messages.create(
             model=model,
-            max_tokens=verification_template.metadata.get('max_tokens', 500),
-            temperature=verification_template.metadata.get('temperature', 0.3),
+            max_tokens=int(verification_template.metadata.get('max_tokens', 500)),
+            temperature=float(verification_template.metadata.get('temperature', 0.3)),
             system=system_content,
             messages=[
                 {

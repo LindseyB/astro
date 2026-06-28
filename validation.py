@@ -2,11 +2,10 @@
 
 import re
 from datetime import date, datetime, timedelta
-from typing import Any
 from collections.abc import Mapping, Sequence
 
 
-def _decimal_to_astro_coord(value: Any, is_latitude: bool) -> Any:
+def _decimal_to_astro_coord(value: str, is_latitude: bool) -> str:
     """Convert decimal coordinates to flatlib astro format (e.g., 40n42, 74w00)."""
     try:
         numeric = float(value)
