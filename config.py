@@ -14,15 +14,6 @@ def is_development_mode():
 
 IS_DEVELOPMENT = is_development_mode()
 
-# In development, load variables from a local .env file if present.
-if IS_DEVELOPMENT:
-    try:
-        from dotenv import load_dotenv
-        load_dotenv()
-    except ImportError:
-        # python-dotenv is optional; env vars can still be set in the shell.
-        pass
-
 from flatlib import const
 
 # Configure logging

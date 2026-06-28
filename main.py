@@ -7,6 +7,14 @@ before any other astrological libraries are imported, then starts the Flask appl
 import os
 import logging
 
+try:
+    from dotenv import load_dotenv
+    PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+    load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, '.env'), override=False)
+except ImportError:
+    # python-dotenv is optional; env vars can still be set in the shell.
+    pass
+
 # Ensure direct script execution defaults to local development behavior.
 if __name__ == '__main__':
     os.environ.setdefault('FLASK_ENV', 'development')

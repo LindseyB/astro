@@ -56,6 +56,8 @@ pip install -r requirements-dev.txt
 
 2. Set required environment variables. The easiest way for local development is a `.env` file (loaded automatically on startup):
 
+The app loads `.env` from the project root during startup for both `python run.py` and import-based servers like `gunicorn main:app`.
+
 ```bash
 cp .env.example .env           # macOS/Linux
 # Copy-Item .env.example .env  # Windows PowerShell
