@@ -28,7 +28,52 @@
 
         // Fallback for legacy templates not yet migrated.
         if (legacyButton) {
-            legacyButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            var analysisElement = document.getElementById('analysisContent');
+            if (!analysisElement) {
+                return;
+            }
+
+            var analysisText = (analysisElement.innerText || analysisElement.textContent || '').trim();
+            var section = analysisElement.closest('.analysis-section');
+            var sun = section && section.dataset ? section.dataset.sun : '';
+            var moon = section && section.dataset ? section.dataset.moon : '';
+            var ascendant = section && section.dataset ? section.dataset.ascendant : '';
+            var chartInfo = (sun && moon && ascendant)
+                ? (sun + ' ☉ ' + moon + ' ☽ ' + ascendant + ' ⬆\n\n')
+                : '';
+            var fullText = chartInfo + analysisText + '\n\n✨ Get your cosmic vibe check at: ' + window.location.origin;
+
+            var attemptCopy = function () {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    return navigator.clipboard.writeText(fullText);
+                }
+                return Promise.reject(new Error('Clipboard API unavailable.'));
+            };
+
+            attemptCopy().then(function () {
+                var originalText = legacyButton.innerHTML;
+                legacyButton.innerHTML = '✓';
+                legacyButton.style.background = '#22c55e';
+                window.setTimeout(function () {
+                    legacyButton.innerHTML = originalText;
+                    legacyButton.style.background = '';
+                }, 2000);
+            }).catch(function () {
+                try {
+                    var textArea = document.createElement('textarea');
+                    textArea.value = fullText;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                } catch (err) {
+                    // Ignore legacy copy failures.
+                }
+            });
         }
     };
 })();

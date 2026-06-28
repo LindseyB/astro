@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
         window.console.warn('button-loading.js is deprecated. Use <astro-button> instead.');
     }
 
-    var legacyButtons = document.querySelectorAll('button[type="submit"][data-legacy-loading]');
+    var legacyButtons = document.querySelectorAll('button[type="submit"]');
     legacyButtons.forEach(function (button) {
         var form = button.closest('form');
         if (!form) {
