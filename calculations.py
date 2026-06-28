@@ -71,6 +71,7 @@ def stream_calculate_chart(
         latitude (float): Latitude
         longitude (float): Longitude
         music_genre (str): Music genre preference (default "any")
+        personality (str): Personality style ("default", "witchy", or "goth")
 
     Yields:
         str: Text chunks from AI streaming response
@@ -132,6 +133,7 @@ def stream_calculate_live_mas(
         timezone_offset (str): Timezone offset
         latitude (float): Latitude
         longitude (float): Longitude
+        personality (str): Personality style ("default", "witchy", or "goth")
 
     Yields:
         str: Text chunks from AI streaming response
@@ -190,6 +192,7 @@ def stream_calculate_full_chart(
         latitude (float): Latitude
         longitude (float): Longitude
         music_genre (str): Music genre preference (default "any")
+        personality (str): Personality style ("default", "witchy", or "goth")
 
     Yields:
         str: Text chunks from AI streaming response
@@ -286,6 +289,7 @@ def stream_calculate_ask_anything(
         timezone_offset (str): Timezone offset
         latitude (str): Latitude in flatlib format (e.g., 40n42)
         longitude (str): Longitude in flatlib format (e.g., 74w00)
+        personality (str): Personality style ("default", "witchy", or "goth")
 
     Yields:
         str: Text chunks from AI streaming response

@@ -13,13 +13,13 @@
 <script>
     window.chartDataForStreaming = {
         pageType: 'chart',
-        birthDate: "{{ form_data.birth_date }}",
-        birthTime: "{{ form_data.birth_time }}",
-        timezoneOffset: "{{ form_data.timezone_offset }}",
-        latitude: "{{ form_data.latitude }}",
-        longitude: "{{ form_data.longitude }}",
-        musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}",
-        personality: "{{ form_data.personality }}"
+        birthDate: {{ form_data.birth_date | tojson }},
+        birthTime: {{ form_data.birth_time | tojson }},
+        timezoneOffset: {{ form_data.timezone_offset | tojson }},
+        latitude: {{ form_data.latitude | tojson }},
+        longitude: {{ form_data.longitude | tojson }},
+        musicGenre: {{ (form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre) | tojson }},
+        personality: {{ form_data.personality | tojson }}
     };
     window.birthdayCelebration = {
         isBirthday: {{ is_birthday | tojson }}
@@ -69,12 +69,12 @@
 <script>
     // Pass chart data to JavaScript for the streamed song suggestion
     window.chartDataForMusic = {
-        birthDate: "{{ form_data.birth_date }}",
-        birthTime: "{{ form_data.birth_time }}",
-        timezoneOffset: "{{ form_data.timezone_offset }}",
-        latitude: "{{ form_data.latitude }}",
-        longitude: "{{ form_data.longitude }}",
-        musicGenre: "{{ form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre }}"
+        birthDate: {{ form_data.birth_date | tojson }},
+        birthTime: {{ form_data.birth_time | tojson }},
+        timezoneOffset: {{ form_data.timezone_offset | tojson }},
+        latitude: {{ form_data.latitude | tojson }},
+        longitude: {{ form_data.longitude | tojson }},
+        musicGenre: {{ (form_data.other_genre if form_data.music_genre == 'other' and form_data.other_genre else form_data.music_genre) | tojson }}
     };
 </script>
 <header class="site-header">
