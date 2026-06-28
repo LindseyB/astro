@@ -10,6 +10,10 @@ from config import logger
 # Last.fm API configuration
 LASTFM_API_KEY = os.environ.get("LAST_FM_API_KEY")
 LASTFM_API_URL = "https://ws.audioscrobbler.com/2.0/"
+TOP_TIER_RATIO = 0.33
+MID_TIER_RATIO = 0.66
+TOP_TARGET_RATIO = 0.40
+MID_TARGET_RATIO = 0.35
 
 
 def select_varied_tracks(tracks, limit=30, seed_key=None):
@@ -31,15 +35,15 @@ def select_varied_tracks(tracks, limit=30, seed_key=None):
     if len(tracks) <= limit:
         return tracks[:]
 
-    top_end = max(1, int(len(tracks) * 0.33))
-    mid_end = max(top_end + 1, int(len(tracks) * 0.66))
+    top_end = max(1, int(len(tracks) * TOP_TIER_RATIO))
+    mid_end = max(top_end + 1, int(len(tracks) * MID_TIER_RATIO))
 
     top_tier = tracks[:top_end]
     mid_tier = tracks[top_end:mid_end]
     tail_tier = tracks[mid_end:]
 
-    top_target = max(1, int(round(limit * 0.40)))
-    mid_target = max(1, int(round(limit * 0.35)))
+    top_target = max(1, int(round(limit * TOP_TARGET_RATIO)))
+    mid_target = max(1, int(round(limit * MID_TARGET_RATIO)))
     tail_target = max(0, limit - top_target - mid_target)
 
     if seed_key is None:
@@ -71,13 +75,13 @@ def select_varied_tracks(tracks, limit=30, seed_key=None):
     return selected[:limit]
 
 
-def get_top_tracks_by_genre(genre, limit=20):
+def get_top_tracks_by_genre(genre, limit=30):
     """
     Fetch top tracks for a given genre from Last.fm API
     
     Args:
         genre (str): Music genre tag to search for
-        limit (int): Number of tracks to return (default 20, max 50)
+        limit (int): Number of tracks to return (default 30, max 50)
     
     Returns:
         list: List of track dictionaries with 'name' and 'artist' keys
@@ -141,13 +145,13 @@ def get_top_tracks_by_genre(genre, limit=20):
         return []
 
 
-def format_tracks_for_prompt(tracks, limit=20):
+def format_tracks_for_prompt(tracks, limit=30):
     """
     Format track list for inclusion in AI prompt
     
     Args:
         tracks (list): List of track dictionaries from get_top_tracks_by_genre
-        limit (int): Maximum number of tracks to include (default 20)
+        limit (int): Maximum number of tracks to include (default 30)
     
     Returns:
         str: Formatted string of tracks for prompt, or empty string if no tracks
