@@ -27,7 +27,7 @@ class AstroTimezoneSelect extends HTMLElement {
         if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2 && this.select) {
             const $select = window.jQuery(this.select);
             if ($select.data('select2')) {
-                $select.off('change.astroTimezoneSelect');
+                $select.select2('destroy');
             }
         }
     }
@@ -74,11 +74,9 @@ class AstroTimezoneSelect extends HTMLElement {
             return;
         }
 
+        // Select2 triggers native `change` events on the underlying <select>, so a single
+        // DOM listener is sufficient and avoids double-calling onChange.
         this.select.addEventListener('change', this.boundChangeHandler);
-
-        if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
-            window.jQuery(this.select).on('change.astroTimezoneSelect', this.boundChangeHandler);
-        }
     }
 
     onChange() {

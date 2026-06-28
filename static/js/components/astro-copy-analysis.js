@@ -12,7 +12,12 @@ class AstroCopyAnalysis extends HTMLElement {
 
     connectedCallback() {
         this.button = this.querySelector('button');
-        if (!this.button) {
+        if (this.button) {
+            // Avoid accidental form submissions when a consumer forgets type="button".
+            if (!this.button.getAttribute('type')) {
+                this.button.type = 'button';
+            }
+        } else {
             this.button = document.createElement('button');
             this.button.type = 'button';
             this.button.className = this.getAttribute('button-class') || 'copy-chip';

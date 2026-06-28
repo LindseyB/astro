@@ -566,6 +566,10 @@ function initializeChartWheel(options) {
         return null;
     }
 
+    if (!chartCanvas.id) {
+        chartCanvas.id = 'chartWheel-' + Math.random().toString(36).slice(2);
+    }
+
     const wheel = new ChartWheel(chartCanvas.id, chartData);
     if (!wheel || !wheel.canvas) {
         return null;
