@@ -29,7 +29,19 @@
         input.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                if (input.value.trim()) input.form.submit();
+                if (!input.value.trim()) return;
+
+                var form = input.form;
+                if (!form) return;
+                var submitButton = form.querySelector('button[type="submit"]');
+
+                if (typeof form.requestSubmit === 'function') {
+                    form.requestSubmit(submitButton || undefined);
+                } else if (submitButton) {
+                    submitButton.click();
+                } else {
+                    form.submit();
+                }
             }
         });
     }
