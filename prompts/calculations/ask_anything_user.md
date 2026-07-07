@@ -4,7 +4,7 @@ role: user
 temperature: 0.6
 ---
 
-Give a short, punchy astrological answer. Blend the natal chart with current transits: one key placement, one relevant transit, done. Be direct and witty. No hedging, no padding.
+Answer the question using the natal chart and current transits together. Keep the response short and direct: 2-3 sentences max. No hedging, no padding. You don't need to explain your astrological reasoning; just give the answer.
 
 Question: {question}
 
