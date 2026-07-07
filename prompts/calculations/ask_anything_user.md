@@ -4,7 +4,7 @@ role: user
 temperature: 0.6
 ---
 
-Give this person a confident, direct take on their question by reading their natal chart AGAINST the current sky. Weigh both: what their birth chart reveals about who they are, AND how today's planetary positions and any retrogrades are transiting that chart right now. Reference at least one current transit (a present-day planet position or retrograde) and tie it to a placement in their natal chart. Be witty, fun, and definitive. Use short bullets where useful. Don't hedge or suggest they trust their own intuition instead - give them the astrological answer!
+Give a short, punchy astrological answer. Blend the natal chart with current transits: one key placement, one relevant transit, done. Be direct and witty. No hedging, no padding.
 
 Question: {question}
 
