@@ -10,7 +10,7 @@ from calculations import stream_calculate_chart, stream_calculate_full_chart, st
 from chart_data import create_charts, get_current_planets, get_full_chart_structure, get_main_positions
 from config import logger
 from personality import DEFAULT_PERSONALITY, get_personality_choices, normalize_personality
-from route_helpers import _require_ai_client
+from route_helpers import _missing_field_response, _require_ai_client
 from validation import _format_birth_date_for_calculations, _is_birthday_today, find_missing_fields
 
 
@@ -88,8 +88,7 @@ def chart() -> ResponseReturnValue:
             is_birthday=is_birthday,
         )
     except KeyError as e:
-        logger.error("ERROR in /chart route — missing field: %s", str(e))
-        return render_template('http_error.html', code=400, message='Bad Request', description="Please fill in all required fields and try again."), 400
+        return _missing_field_response('/chart', str(e))
     except Exception as e:
         logger.error("ERROR in /chart route: %s: %s", type(e).__name__, str(e))
         if current_app.debug:
@@ -194,8 +193,7 @@ def full_chart() -> ResponseReturnValue:
 
         return render_template('full_chart.html', chart_data=full_chart_data, form_data=form_data, streaming=True)
     except KeyError as e:
-        logger.error("ERROR in /full-chart route — missing field: %s", str(e))
-        return render_template('http_error.html', code=400, message='Bad Request', description="Please fill in all required fields and try again."), 400
+        return _missing_field_response('/full-chart', str(e))
     except Exception as e:
         logger.error("ERROR in /full-chart route: %s: %s", type(e).__name__, str(e))
         if current_app.debug:
@@ -304,8 +302,7 @@ def live_mas() -> ResponseReturnValue:
 
         return render_template('live_mas.html', chart_data=live_mas_data, form_data=form_data, streaming=True)
     except KeyError as e:
-        logger.error("ERROR in /live-mas route — missing field: %s", str(e))
-        return render_template('http_error.html', code=400, message='Bad Request', description="Please fill in all required fields and try again."), 400
+        return _missing_field_response('/live-mas', str(e))
     except Exception as e:
         logger.error("ERROR in /live-mas route: %s: %s", type(e).__name__, str(e))
         if current_app.debug:
