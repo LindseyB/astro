@@ -87,6 +87,9 @@ def chart() -> ResponseReturnValue:
             streaming=True,
             is_birthday=is_birthday,
         )
+    except KeyError as e:
+        logger.error("ERROR in /chart route — missing field: %s", str(e))
+        return render_template('http_error.html', code=400, message='Bad Request', description="Please fill in all required fields and try again."), 400
     except Exception as e:
         logger.error("ERROR in /chart route: %s: %s", type(e).__name__, str(e))
         if current_app.debug:
@@ -190,6 +193,9 @@ def full_chart() -> ResponseReturnValue:
         }
 
         return render_template('full_chart.html', chart_data=full_chart_data, form_data=form_data, streaming=True)
+    except KeyError as e:
+        logger.error("ERROR in /full-chart route — missing field: %s", str(e))
+        return render_template('http_error.html', code=400, message='Bad Request', description="Please fill in all required fields and try again."), 400
     except Exception as e:
         logger.error("ERROR in /full-chart route: %s: %s", type(e).__name__, str(e))
         if current_app.debug:
@@ -297,6 +303,9 @@ def live_mas() -> ResponseReturnValue:
         }
 
         return render_template('live_mas.html', chart_data=live_mas_data, form_data=form_data, streaming=True)
+    except KeyError as e:
+        logger.error("ERROR in /live-mas route — missing field: %s", str(e))
+        return render_template('http_error.html', code=400, message='Bad Request', description="Please fill in all required fields and try again."), 400
     except Exception as e:
         logger.error("ERROR in /live-mas route: %s: %s", type(e).__name__, str(e))
         if current_app.debug:

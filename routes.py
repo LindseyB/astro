@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from flask import Flask, render_template, request
+from flask import Flask, Response, render_template, request
 from werkzeug.exceptions import HTTPException
 
 
@@ -62,23 +62,32 @@ def get_user_ip() -> str:
 
 @app.errorhandler(404)
 def not_found(e):
-    return render_template(
-        'http_error.html',
-        code=404,
-        message=e.name,
-        h1='🔭 Lost in Space',
-        description="The stars have aligned... but not for this page. Mercury must be in retrograde, because whatever you were looking for has vanished into the cosmic void.",
-    ), 404
+    try:
+        return render_template(
+            'http_error.html',
+            code=404,
+            message=e.name,
+            h1='🔭 Lost in Space',
+            description="The stars have aligned... but not for this page. Mercury must be in retrograde, because whatever you were looking for has vanished into the cosmic void.",
+        ), 404
+    except Exception:
+        return Response('404 Not Found', status=404, mimetype='text/plain')
 
 
 @app.errorhandler(HTTPException)
 def http_error(e):
-    return render_template('http_error.html', code=e.code, message=e.name), e.code
+    try:
+        return render_template('http_error.html', code=e.code, message=e.name, description=e.description), e.code
+    except Exception:
+        return Response(f'{e.code} {e.name}', status=e.code, mimetype='text/plain')
 
 
 @app.errorhandler(Exception)
 def internal_error(e):
-    return render_template('http_error.html', code=500, message='Internal Server Error'), 500
+    try:
+        return render_template('http_error.html', code=500, message='Internal Server Error'), 500
+    except Exception:
+        return Response('500 Internal Server Error', status=500, mimetype='text/plain')
 
 
 __all__ = [

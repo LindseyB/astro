@@ -186,7 +186,7 @@ class TestErrorHandling(unittest.TestCase):
         }
 
         response = self.app.post('/chart', data=form_data)
-        self.assertIn(response.status_code, [400, 500])
+        self.assertEqual(response.status_code, 400)
 
     def test_chart_with_invalid_coordinates(self):
         """Test chart generation with invalid latitude/longitude"""
