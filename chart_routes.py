@@ -94,7 +94,7 @@ def chart() -> ResponseReturnValue:
 
             traceback.print_exc()
             return f"<h1>Error</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>", 500
-        return render_template('error.html', error="Something went wrong while calculating your chart. Please check your birth information and try again.")
+        return render_template('error.html', error="Something went wrong while calculating your chart. Please check your birth information and try again."), 500
 
 
 @chart_bp.route('/stream-chart-analysis', methods=['POST'])
@@ -197,7 +197,7 @@ def full_chart() -> ResponseReturnValue:
 
             traceback.print_exc()
             return f"<h1>Error</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>", 500
-        return render_template('error.html', error="Something went wrong while calculating your full chart. Please check your birth information and try again.")
+        return render_template('error.html', error="Something went wrong while calculating your full chart. Please check your birth information and try again."), 500
 
 
 @chart_bp.route('/stream-full-chart-analysis', methods=['POST'])
@@ -304,7 +304,7 @@ def live_mas() -> ResponseReturnValue:
 
             traceback.print_exc()
             return f"<h1>Error</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>", 500
-        return render_template('error.html', error="Something went wrong while calculating your Taco Bell order. Please check your birth information and try again.")
+        return render_template('error.html', error="Something went wrong while calculating your Taco Bell order. Please check your birth information and try again."), 500
 
 
 @chart_bp.route('/stream-live-mas-analysis', methods=['POST'])

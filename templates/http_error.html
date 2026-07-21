@@ -3,11 +3,11 @@
 {% block title %}{{ code }} - {{ message }} | Astro Horoscope{% endblock %}
 
 {% block content %}
-<h1>⚠️ Cosmic Interference</h1>
+<h1>{{ h1 | default('⚠️ Cosmic Interference') }}</h1>
 
 <div class="analysis-section">
     <h2 style="margin-top: 0;">{{ code }} - {{ message }}</h2>
-    <p>The universe is blocking your path. The cosmic forces have determined this request cannot proceed.</p>
+    <p>{{ description | default('The universe is blocking your path. The cosmic forces have determined this request cannot proceed.') }}</p>
 </div>
 
 <a href="/" class="back-link">← Return to Earth</a>

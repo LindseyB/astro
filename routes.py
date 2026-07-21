@@ -61,17 +61,28 @@ def get_user_ip() -> str:
 
 @app.errorhandler(404)
 def not_found(e):
-    return render_template('404.html'), 404
+    return render_template(
+        'http_error.html',
+        code=404,
+        message=e.name,
+        h1='🔭 Lost in Space',
+        description="The stars have aligned... but not for this page. Mercury must be in retrograde, because whatever you were looking for has vanished into the cosmic void.",
+    ), 404
 
 
 @app.errorhandler(403)
 def forbidden(e):
-    return render_template('http_error.html', code=403, message="Forbidden"), 403
+    return render_template('http_error.html', code=403, message=e.name), 403
 
 
 @app.errorhandler(405)
 def method_not_allowed(e):
-    return render_template('http_error.html', code=405, message="Method Not Allowed"), 405
+    return render_template('http_error.html', code=405, message=e.name), 405
+
+
+@app.errorhandler(500)
+def internal_error(e):
+    return render_template('http_error.html', code=500, message=e.name), 500
 
 
 __all__ = [
