@@ -172,10 +172,9 @@ class TestErrorHandling(unittest.TestCase):
         }
 
         response = self.app.post('/chart', data=form_data)
-        # Should handle error gracefully
-        # Check for error message in response
-        self.assertIn(b'error', response.data)
-        self.assertIn(b'Check your date format (should be YYYY-MM-DD)', response.data)
+        # Should handle error gracefully with http_error.html
+        self.assertIn(b'500', response.data)
+        self.assertIn(b'Internal Server Error', response.data)
         self.assertEqual(response.status_code, 500)
 
     def test_chart_with_missing_fields(self):
@@ -192,6 +191,32 @@ class TestErrorHandling(unittest.TestCase):
         self.assertIn(b'Bad Request', response.data)
         self.assertIn(b'Please complete your birth details', response.data)
 
+    def test_full_chart_with_missing_fields(self):
+        """Test full chart with missing required fields renders http_error.html with 400"""
+        form_data = {
+            'birth_date': '1990-01-01',
+            # Missing other required fields
+        }
+
+        response = self.app.post('/full-chart', data=form_data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'400', response.data)
+        self.assertIn(b'Bad Request', response.data)
+        self.assertIn(b'Please complete your birth details', response.data)
+
+    def test_live_mas_with_missing_fields(self):
+        """Test live-mas with missing required fields renders http_error.html with 400"""
+        form_data = {
+            'birth_date': '1990-01-01',
+            # Missing other required fields
+        }
+
+        response = self.app.post('/live-mas', data=form_data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'400', response.data)
+        self.assertIn(b'Bad Request', response.data)
+        self.assertIn(b'Please complete your birth details', response.data)
+
     def test_chart_with_invalid_coordinates(self):
         """Test chart generation with invalid latitude/longitude"""
         form_data = {
@@ -204,9 +229,8 @@ class TestErrorHandling(unittest.TestCase):
 
         response = self.app.post('/chart', data=form_data)
         self.assertEqual(response.status_code, 500)
-        self.assertIn(b'error', response.data)
-        self.assertIn(b'Confirm latitude format', response.data)
-        self.assertIn(b'Confirm longitude format', response.data)
+        self.assertIn(b'500', response.data)
+        self.assertIn(b'Internal Server Error', response.data)
 
 
 class TestJavaScriptFunctionality(unittest.TestCase):

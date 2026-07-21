@@ -76,10 +76,10 @@ class TestAstroApp(unittest.TestCase):
         self.assertIn(b'birth details', response.data)
 
     def test_chart_route_missing_data(self):
-        """Test chart route with missing form data"""
+        """Test chart route with missing form data returns 400 via _extract_chart_form_fields"""
         response = self.app.post('/chart', data={})
-        # Should return 400 or redirect to error page
-        self.assertIn(response.status_code, [400, 500])
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Bad Request', response.data)
 
     def test_chart_route_valid_data(self):
         """Test chart route with valid form data - should render placeholder immediately"""
@@ -114,10 +114,10 @@ class TestAstroApp(unittest.TestCase):
         self.assertIn(b'Happy Birthday!', response.data)
 
     def test_full_chart_route_missing_data(self):
-        """Test full chart route with missing form data"""
+        """Test full chart route with missing form data returns 400 via _extract_chart_form_fields"""
         response = self.app.post('/full-chart', data={})
-        # Should return 400 or redirect to error page
-        self.assertIn(response.status_code, [400, 500])
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Bad Request', response.data)
 
     def test_full_chart_route_valid_data(self):
         """Test full chart route with valid form data - should render placeholder immediately"""
@@ -135,12 +135,10 @@ class TestAstroApp(unittest.TestCase):
         self.assertIn(b'document.body.dataset.streaming', response.data)
 
     def test_live_mas_route_missing_data(self):
-        """Test live-mas route with missing form data"""
+        """Test live-mas route with missing form data returns 400 via _extract_chart_form_fields"""
         response = self.app.post('/live-mas', data={})
-        # Should return 400 or 500 for missing data, or 200 with error in response body
-        self.assertIn(response.status_code, [200, 400, 500])
-        if response.status_code == 200:
-            self.assertIn(b'Error', response.data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'Bad Request', response.data)
 
     def test_live_mas_route_valid_data(self):
         """Test live-mas route with valid form data - should render placeholder immediately"""

@@ -46,10 +46,17 @@ def ask_anything() -> ResponseReturnValue:
     if missing_fields:
         # Pass the first missing field name for the log; all missing fields are
         # listed in the user-facing description so the log stays unambiguous.
+        hints = (
+            " Format hints: date should be YYYY-MM-DD;"
+            " timezone as +/-HH:MM (e.g. -05:00);"
+            " latitude as e.g. 40n42 or 40s42;"
+            " longitude as e.g. 74w00 or 74e00."
+        )
         return _missing_field_response(
             '/ask-anything',
             missing_fields[0],
-            f"Please complete your birth details before using Ask Anything mode. Missing: {', '.join(missing_fields)}.",
+            f"Please complete your birth details before using Ask Anything mode."
+            f" Missing: {', '.join(missing_fields)}.{hints}",
         )
 
     form_data = {

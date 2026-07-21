@@ -17,10 +17,7 @@ from validation import _format_birth_date_for_calculations, _is_birthday_today, 
 
 chart_bp = Blueprint('chart', __name__)
 
-_BIRTH_DETAIL_FIELDS = ('birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude')
-
-
-def _extract_chart_form_fields(route: str) -> tuple[dict, ResponseReturnValue | None]:
+def _extract_chart_form_fields(route: str) -> tuple[dict, tuple[Response, int] | None]:
     """Extract required birth-detail fields from the current form POST.
 
     Returns a (fields_dict, None) tuple on success, or ({}, error_response) if a
@@ -36,6 +33,7 @@ def _extract_chart_form_fields(route: str) -> tuple[dict, ResponseReturnValue | 
         longitude = request.form['longitude']
         music_genre = request.form.get('music_genre', 'any')
         personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
+        other_genre = ''
 
         if music_genre == 'other':
             other_genre = request.form.get('other_genre', '').strip()
@@ -48,6 +46,13 @@ def _extract_chart_form_fields(route: str) -> tuple[dict, ResponseReturnValue | 
             "Please complete your birth details before continuing.",
         )
         return {}, error_response
+    except Exception as e:
+        error_response = _missing_field_response(
+            route,
+            str(e),
+            "Please complete your birth details before continuing.",
+        )
+        return {}, error_response
 
     return {
         'birth_date_html': birth_date_html,
@@ -56,7 +61,7 @@ def _extract_chart_form_fields(route: str) -> tuple[dict, ResponseReturnValue | 
         'latitude': latitude,
         'longitude': longitude,
         'music_genre': music_genre,
-        'other_genre': request.form.get('other_genre', ''),
+        'other_genre': other_genre,
         'personality': personality,
     }, None
 
@@ -140,7 +145,7 @@ def chart() -> ResponseReturnValue:
             safe_msg = html.escape(str(e))
             safe_tb = html.escape(traceback.format_exc())
             return f"<h1>Error</h1><pre>{safe_msg}</pre><pre>{safe_tb}</pre>", 500
-        return render_template('error.html', error="Something went wrong while calculating your chart. Please check your birth information and try again."), 500
+        return render_template('http_error.html', code=500, message="Internal Server Error", description="Something went wrong while calculating your chart. Please check your birth information and try again."), 500
 
 
 @chart_bp.route('/stream-chart-analysis', methods=['POST'])
@@ -245,7 +250,7 @@ def full_chart() -> ResponseReturnValue:
             safe_msg = html.escape(str(e))
             safe_tb = html.escape(traceback.format_exc())
             return f"<h1>Error</h1><pre>{safe_msg}</pre><pre>{safe_tb}</pre>", 500
-        return render_template('error.html', error="Something went wrong while calculating your full chart. Please check your birth information and try again."), 500
+        return render_template('http_error.html', code=500, message="Internal Server Error", description="Something went wrong while calculating your full chart. Please check your birth information and try again."), 500
 
 
 @chart_bp.route('/stream-full-chart-analysis', methods=['POST'])
@@ -358,7 +363,7 @@ def live_mas() -> ResponseReturnValue:
             safe_msg = html.escape(str(e))
             safe_tb = html.escape(traceback.format_exc())
             return f"<h1>Error</h1><pre>{safe_msg}</pre><pre>{safe_tb}</pre>", 500
-        return render_template('error.html', error="Something went wrong while calculating your Taco Bell order. Please check your birth information and try again."), 500
+        return render_template('http_error.html', code=500, message="Internal Server Error", description="Something went wrong while calculating your Taco Bell order. Please check your birth information and try again."), 500
 
 
 @chart_bp.route('/stream-live-mas-analysis', methods=['POST'])
