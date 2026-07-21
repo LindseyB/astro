@@ -179,7 +179,7 @@ class TestErrorHandling(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
 
     def test_chart_with_missing_fields(self):
-        """Test chart generation with missing required fields"""
+        """Test chart generation with missing required fields renders http_error.html with 400"""
         form_data = {
             'birth_date': '1990-01-01',
             # Missing other required fields
@@ -187,6 +187,10 @@ class TestErrorHandling(unittest.TestCase):
 
         response = self.app.post('/chart', data=form_data)
         self.assertEqual(response.status_code, 400)
+        # http_error.html must be rendered (not error.html); verify key template markers
+        self.assertIn(b'400', response.data)
+        self.assertIn(b'Bad Request', response.data)
+        self.assertIn(b'Please complete your birth details', response.data)
 
     def test_chart_with_invalid_coordinates(self):
         """Test chart generation with invalid latitude/longitude"""

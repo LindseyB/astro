@@ -1,5 +1,6 @@
 """Chart-related Flask routes and streaming endpoints."""
 
+import html
 import json
 from collections.abc import Iterator
 
@@ -16,6 +17,49 @@ from validation import _format_birth_date_for_calculations, _is_birthday_today, 
 
 chart_bp = Blueprint('chart', __name__)
 
+_BIRTH_DETAIL_FIELDS = ('birth_date', 'birth_time', 'timezone_offset', 'latitude', 'longitude')
+
+
+def _extract_chart_form_fields(route: str) -> tuple[dict, ResponseReturnValue | None]:
+    """Extract required birth-detail fields from the current form POST.
+
+    Returns a (fields_dict, None) tuple on success, or ({}, error_response) if a
+    required field is absent.  The fields_dict contains:
+        birth_date_html, birth_time, timezone_offset, latitude, longitude,
+        music_genre, other_genre, personality
+    """
+    try:
+        birth_date_html = request.form['birth_date']
+        birth_time = request.form['birth_time']
+        timezone_offset = request.form['timezone_offset']
+        latitude = request.form['latitude']
+        longitude = request.form['longitude']
+        music_genre = request.form.get('music_genre', 'any')
+        personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
+
+        if music_genre == 'other':
+            other_genre = request.form.get('other_genre', '').strip()
+            music_genre = other_genre if other_genre else 'any'
+    except KeyError as e:
+        field_name = e.args[0]  # bare key without the surrounding quotes str(e) adds
+        error_response = _missing_field_response(
+            route,
+            field_name,
+            "Please complete your birth details before continuing.",
+        )
+        return {}, error_response
+
+    return {
+        'birth_date_html': birth_date_html,
+        'birth_time': birth_time,
+        'timezone_offset': timezone_offset,
+        'latitude': latitude,
+        'longitude': longitude,
+        'music_genre': music_genre,
+        'other_genre': request.form.get('other_genre', ''),
+        'personality': personality,
+    }, None
+
 
 @chart_bp.route('/')
 def index() -> ResponseReturnValue:
@@ -30,20 +74,17 @@ def index() -> ResponseReturnValue:
 @chart_bp.route('/chart', methods=['POST'])
 def chart() -> ResponseReturnValue:
     """Handle daily horoscope request and render placeholder page immediately."""
-    try:
-        birth_date_html = request.form['birth_date']
-        birth_time = request.form['birth_time']
-        timezone_offset = request.form['timezone_offset']
-        latitude = request.form['latitude']
-        longitude = request.form['longitude']
-        music_genre = request.form.get('music_genre', 'any')
-        personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
+    fields, err = _extract_chart_form_fields('/chart')
+    if err is not None:
+        return err
 
-        if music_genre == 'other':
-            other_genre = request.form.get('other_genre', '').strip()
-            music_genre = other_genre if other_genre else 'any'
-    except KeyError as e:
-        return _missing_field_response('/chart', str(e))
+    birth_date_html = fields['birth_date_html']
+    birth_time = fields['birth_time']
+    timezone_offset = fields['timezone_offset']
+    latitude = fields['latitude']
+    longitude = fields['longitude']
+    music_genre = fields['music_genre']
+    personality = fields['personality']
 
     try:
         birth_date = _format_birth_date_for_calculations(birth_date_html)
@@ -75,7 +116,7 @@ def chart() -> ResponseReturnValue:
             'latitude': latitude,
             'longitude': longitude,
             'music_genre': music_genre,
-            'other_genre': request.form.get('other_genre', ''),
+            'other_genre': fields['other_genre'],
             'personality': personality,
         }
 
@@ -96,7 +137,9 @@ def chart() -> ResponseReturnValue:
             import traceback
 
             traceback.print_exc()
-            return f"<h1>Error</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>", 500
+            safe_msg = html.escape(str(e))
+            safe_tb = html.escape(traceback.format_exc())
+            return f"<h1>Error</h1><pre>{safe_msg}</pre><pre>{safe_tb}</pre>", 500
         return render_template('error.html', error="Something went wrong while calculating your chart. Please check your birth information and try again."), 500
 
 
@@ -155,20 +198,17 @@ def stream_chart_analysis() -> ResponseReturnValue:
 @chart_bp.route('/full-chart', methods=['POST'])
 def full_chart() -> ResponseReturnValue:
     """Handle full natal chart request and render placeholder page immediately."""
-    try:
-        birth_date_html = request.form['birth_date']
-        birth_time = request.form['birth_time']
-        timezone_offset = request.form['timezone_offset']
-        latitude = request.form['latitude']
-        longitude = request.form['longitude']
-        music_genre = request.form.get('music_genre', 'any')
-        personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
+    fields, err = _extract_chart_form_fields('/full-chart')
+    if err is not None:
+        return err
 
-        if music_genre == 'other':
-            other_genre = request.form.get('other_genre', '').strip()
-            music_genre = other_genre if other_genre else 'any'
-    except KeyError as e:
-        return _missing_field_response('/full-chart', str(e))
+    birth_date_html = fields['birth_date_html']
+    birth_time = fields['birth_time']
+    timezone_offset = fields['timezone_offset']
+    latitude = fields['latitude']
+    longitude = fields['longitude']
+    music_genre = fields['music_genre']
+    personality = fields['personality']
 
     try:
         birth_date = _format_birth_date_for_calculations(birth_date_html)
@@ -191,7 +231,7 @@ def full_chart() -> ResponseReturnValue:
             'latitude': latitude,
             'longitude': longitude,
             'music_genre': music_genre,
-            'other_genre': request.form.get('other_genre', ''),
+            'other_genre': fields['other_genre'],
             'personality': personality,
         }
 
@@ -202,7 +242,9 @@ def full_chart() -> ResponseReturnValue:
             import traceback
 
             traceback.print_exc()
-            return f"<h1>Error</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>", 500
+            safe_msg = html.escape(str(e))
+            safe_tb = html.escape(traceback.format_exc())
+            return f"<h1>Error</h1><pre>{safe_msg}</pre><pre>{safe_tb}</pre>", 500
         return render_template('error.html', error="Something went wrong while calculating your full chart. Please check your birth information and try again."), 500
 
 
@@ -261,15 +303,16 @@ def stream_full_chart_analysis() -> ResponseReturnValue:
 @chart_bp.route('/live-mas', methods=['POST'])
 def live_mas() -> ResponseReturnValue:
     """Handle Taco Bell order request and render placeholder page immediately."""
-    try:
-        birth_date_html = request.form['birth_date']
-        birth_time = request.form['birth_time']
-        timezone_offset = request.form['timezone_offset']
-        latitude = request.form['latitude']
-        longitude = request.form['longitude']
-        personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
-    except KeyError as e:
-        return _missing_field_response('/live-mas', str(e))
+    fields, err = _extract_chart_form_fields('/live-mas')
+    if err is not None:
+        return err
+
+    birth_date_html = fields['birth_date_html']
+    birth_time = fields['birth_time']
+    timezone_offset = fields['timezone_offset']
+    latitude = fields['latitude']
+    longitude = fields['longitude']
+    personality = fields['personality']
 
     try:
         birth_date = _format_birth_date_for_calculations(birth_date_html)
@@ -312,7 +355,9 @@ def live_mas() -> ResponseReturnValue:
             import traceback
 
             traceback.print_exc()
-            return f"<h1>Error</h1><pre>{str(e)}</pre><pre>{traceback.format_exc()}</pre>", 500
+            safe_msg = html.escape(str(e))
+            safe_tb = html.escape(traceback.format_exc())
+            return f"<h1>Error</h1><pre>{safe_msg}</pre><pre>{safe_tb}</pre>", 500
         return render_template('error.html', error="Something went wrong while calculating your Taco Bell order. Please check your birth information and try again."), 500
 
 

@@ -6,7 +6,7 @@ from werkzeug.exceptions import BadRequest
 import ai_service
 from config import logger
 
-_BAD_REQUEST = BadRequest.name
+_BAD_REQUEST = BadRequest().name
 
 
 def _missing_field_response(route: str, field: str, description: str | None = None) -> tuple[Response, int]:

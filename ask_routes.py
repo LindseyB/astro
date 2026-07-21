@@ -44,7 +44,13 @@ def ask_anything() -> ResponseReturnValue:
     }
     missing_fields = [name for name, value in required_fields.items() if not value]
     if missing_fields:
-        return _missing_field_response('/ask-anything', ', '.join(missing_fields), "Please complete your birth details before using Ask Anything mode.")
+        # Pass the first missing field name for the log; all missing fields are
+        # listed in the user-facing description so the log stays unambiguous.
+        return _missing_field_response(
+            '/ask-anything',
+            missing_fields[0],
+            f"Please complete your birth details before using Ask Anything mode. Missing: {', '.join(missing_fields)}.",
+        )
 
     form_data = {
         'birth_date': birth_date_html,
