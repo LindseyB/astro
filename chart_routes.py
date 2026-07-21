@@ -30,19 +30,19 @@ def index() -> ResponseReturnValue:
 @chart_bp.route('/chart', methods=['POST'])
 def chart() -> ResponseReturnValue:
     """Handle daily horoscope request and render placeholder page immediately."""
-    birth_date_html = request.form['birth_date']
-    birth_time = request.form['birth_time']
-    timezone_offset = request.form['timezone_offset']
-    latitude = request.form['latitude']
-    longitude = request.form['longitude']
-    music_genre = request.form.get('music_genre', 'any')
-    personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
-
-    if music_genre == 'other':
-        other_genre = request.form.get('other_genre', '').strip()
-        music_genre = other_genre if other_genre else 'any'
-
     try:
+        birth_date_html = request.form['birth_date']
+        birth_time = request.form['birth_time']
+        timezone_offset = request.form['timezone_offset']
+        latitude = request.form['latitude']
+        longitude = request.form['longitude']
+        music_genre = request.form.get('music_genre', 'any')
+        personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
+
+        if music_genre == 'other':
+            other_genre = request.form.get('other_genre', '').strip()
+            music_genre = other_genre if other_genre else 'any'
+
         birth_date = _format_birth_date_for_calculations(birth_date_html)
         logger.info(
             "Rendering chart placeholder for: %s %s %s %s %s",
@@ -152,19 +152,19 @@ def stream_chart_analysis() -> ResponseReturnValue:
 @chart_bp.route('/full-chart', methods=['POST'])
 def full_chart() -> ResponseReturnValue:
     """Handle full natal chart request and render placeholder page immediately."""
-    birth_date_html = request.form['birth_date']
-    birth_time = request.form['birth_time']
-    timezone_offset = request.form['timezone_offset']
-    latitude = request.form['latitude']
-    longitude = request.form['longitude']
-    music_genre = request.form.get('music_genre', 'any')
-    personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
-
-    if music_genre == 'other':
-        other_genre = request.form.get('other_genre', '').strip()
-        music_genre = other_genre if other_genre else 'any'
-
     try:
+        birth_date_html = request.form['birth_date']
+        birth_time = request.form['birth_time']
+        timezone_offset = request.form['timezone_offset']
+        latitude = request.form['latitude']
+        longitude = request.form['longitude']
+        music_genre = request.form.get('music_genre', 'any')
+        personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
+
+        if music_genre == 'other':
+            other_genre = request.form.get('other_genre', '').strip()
+            music_genre = other_genre if other_genre else 'any'
+
         birth_date = _format_birth_date_for_calculations(birth_date_html)
         logger.info(
             "Rendering full chart placeholder for: %s %s %s %s %s",
@@ -255,14 +255,14 @@ def stream_full_chart_analysis() -> ResponseReturnValue:
 @chart_bp.route('/live-mas', methods=['POST'])
 def live_mas() -> ResponseReturnValue:
     """Handle Taco Bell order request and render placeholder page immediately."""
-    birth_date_html = request.form['birth_date']
-    birth_time = request.form['birth_time']
-    timezone_offset = request.form['timezone_offset']
-    latitude = request.form['latitude']
-    longitude = request.form['longitude']
-    personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
-
     try:
+        birth_date_html = request.form['birth_date']
+        birth_time = request.form['birth_time']
+        timezone_offset = request.form['timezone_offset']
+        latitude = request.form['latitude']
+        longitude = request.form['longitude']
+        personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
+
         birth_date = _format_birth_date_for_calculations(birth_date_html)
         logger.info(
             "Rendering Live Mas placeholder for: %s %s %s %s %s",
