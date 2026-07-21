@@ -10,7 +10,7 @@ from flask.typing import ResponseReturnValue
 from calculations import stream_calculate_ask_anything
 from config import logger
 from personality import DEFAULT_PERSONALITY, normalize_personality
-from route_helpers import _require_ai_client
+from route_helpers import _missing_field_response, _require_ai_client
 from validation import _format_birth_date_for_calculations, _normalize_birth_inputs
 
 
@@ -33,7 +33,7 @@ def ask_anything() -> ResponseReturnValue:
     )
 
     if not question:
-        return render_template('http_error.html', code=400, message='Bad Request', description="Please enter a question before using Ask Anything mode."), 400
+        return _missing_field_response('/ask-anything', 'question_prompt', "Please enter a question before using Ask Anything mode.")
 
     required_fields = {
         'birth_date': birth_date_html,
@@ -44,7 +44,7 @@ def ask_anything() -> ResponseReturnValue:
     }
     missing_fields = [name for name, value in required_fields.items() if not value]
     if missing_fields:
-        return render_template('http_error.html', code=400, message='Bad Request', description="Please complete your birth details before using Ask Anything mode."), 400
+        return _missing_field_response('/ask-anything', ', '.join(missing_fields), "Please complete your birth details before using Ask Anything mode.")
 
     form_data = {
         'birth_date': birth_date_html,
