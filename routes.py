@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from flask import Flask, request
+from flask import Flask, render_template, request
 
 
 from ask_routes import ask_bp
@@ -57,6 +57,21 @@ def get_user_ip() -> str:
         return real_ip
 
     return request.remote_addr or '127.0.0.1'
+
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template('http_error.html', code=403, message="Forbidden"), 403
+
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return render_template('http_error.html', code=405, message="Method Not Allowed"), 405
 
 
 __all__ = [
