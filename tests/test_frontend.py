@@ -232,6 +232,46 @@ class TestErrorHandling(unittest.TestCase):
         self.assertIn(b'500', response.data)
         self.assertIn(b'Internal Server Error', response.data)
 
+    def test_ask_anything_route_missing_birth_details_lists_fields(self):
+        """Missing birth fields return 400 with each missing field name in the response body."""
+        response = self.app.post('/ask-anything', data={
+            'question_prompt': 'What is my destiny?',
+            # birth_date, birth_time, timezone_offset, latitude, longitude all absent
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'birth details', response.data)
+        self.assertIn(b'Missing:', response.data)
+        self.assertIn(b'birth_date', response.data)
+        self.assertIn(b'birth_time', response.data)
+        self.assertIn(b'timezone_offset', response.data)
+        self.assertIn(b'latitude', response.data)
+        self.assertIn(b'longitude', response.data)
+
+    def test_ask_anything_route_missing_birth_details_includes_format_hints(self):
+        """Missing birth fields 400 response includes coordinate and date format hints."""
+        response = self.app.post('/ask-anything', data={
+            'question_prompt': 'What is my destiny?',
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'YYYY-MM-DD', response.data)
+        self.assertIn(b'HH:MM', response.data)
+
+    def test_ask_anything_route_missing_subset_of_birth_details(self):
+        """When only some birth fields are missing, response lists exactly the absent ones."""
+        response = self.app.post('/ask-anything', data={
+            'question_prompt': 'Am I lucky today?',
+            'birth_date': '1990-07-15',
+            'birth_time': '08:00',
+            # timezone_offset, latitude, longitude absent
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'timezone_offset', response.data)
+        self.assertIn(b'latitude', response.data)
+        self.assertIn(b'longitude', response.data)
+        # Fields that were provided should NOT appear as missing
+        self.assertNotIn(b'Missing: birth_date', response.data)
+        self.assertNotIn(b'Missing: birth_time', response.data)
+
 
 class TestJavaScriptFunctionality(unittest.TestCase):
     """Test JavaScript file contents and structure"""

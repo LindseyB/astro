@@ -21,6 +21,10 @@ ask_bp = Blueprint('ask', __name__)
 def ask_anything() -> ResponseReturnValue:
     """Render Ask Anything placeholder page immediately."""
     question = request.form.get('question_prompt', '').strip()
+
+    if not question:
+        return _missing_field_response('/ask-anything', 'question_prompt', "Please enter a question before using Ask Anything mode.")
+
     birth_date_html = request.form.get('birth_date', '').strip()
     birth_time = request.form.get('birth_time', '').strip()
     timezone_offset = request.form.get('timezone_offset', '').strip()
@@ -31,9 +35,6 @@ def ask_anything() -> ResponseReturnValue:
     birth_date_html, timezone_offset, latitude, longitude = _normalize_birth_inputs(
         birth_date_html, timezone_offset, latitude, longitude
     )
-
-    if not question:
-        return _missing_field_response('/ask-anything', 'question_prompt', "Please enter a question before using Ask Anything mode.")
 
     required_fields = {
         'birth_date': birth_date_html,
@@ -55,7 +56,7 @@ def ask_anything() -> ResponseReturnValue:
         return _missing_field_response(
             '/ask-anything',
             missing_fields[0],
-            f"Please complete your birth details before using Ask Anything mode."
+            "Please complete your birth details before using Ask Anything mode."
             f" Missing: {', '.join(missing_fields)}.{hints}",
         )
 

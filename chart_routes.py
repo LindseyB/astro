@@ -12,10 +12,11 @@ from chart_data import create_charts, get_current_planets, get_full_chart_struct
 from config import logger
 from personality import DEFAULT_PERSONALITY, get_personality_choices, normalize_personality
 from route_helpers import _missing_field_response, _require_ai_client
-from validation import _format_birth_date_for_calculations, _is_birthday_today, find_missing_fields
+from validation import _format_birth_date_for_calculations, _is_birthday_today, _normalize_birth_inputs, find_missing_fields
 
 
 chart_bp = Blueprint('chart', __name__)
+
 
 def _extract_chart_form_fields(route: str) -> tuple[dict, tuple[Response, int] | None]:
     """Extract required birth-detail fields from the current form POST.
@@ -31,13 +32,6 @@ def _extract_chart_form_fields(route: str) -> tuple[dict, tuple[Response, int] |
         timezone_offset = request.form['timezone_offset']
         latitude = request.form['latitude']
         longitude = request.form['longitude']
-        music_genre = request.form.get('music_genre', 'any')
-        personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
-        other_genre = ''
-
-        if music_genre == 'other':
-            other_genre = request.form.get('other_genre', '').strip()
-            music_genre = other_genre if other_genre else 'any'
     except KeyError as e:
         field_name = e.args[0]  # bare key without the surrounding quotes str(e) adds
         error_response = _missing_field_response(
@@ -46,13 +40,18 @@ def _extract_chart_form_fields(route: str) -> tuple[dict, tuple[Response, int] |
             "Please complete your birth details before continuing.",
         )
         return {}, error_response
-    except Exception as e:
-        error_response = _missing_field_response(
-            route,
-            str(e),
-            "Please complete your birth details before continuing.",
-        )
-        return {}, error_response
+
+    birth_date_html, timezone_offset, latitude, longitude = _normalize_birth_inputs(
+        birth_date_html, timezone_offset, latitude, longitude
+    )
+
+    music_genre = request.form.get('music_genre', 'any')
+    personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
+    other_genre = ''
+
+    if music_genre == 'other':
+        other_genre = request.form.get('other_genre', '').strip()
+        music_genre = other_genre if other_genre else 'any'
 
     return {
         'birth_date_html': birth_date_html,
