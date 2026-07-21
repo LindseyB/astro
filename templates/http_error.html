@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}{{ code }} - {{ message }} | Astro Horoscope{% endblock %}
+
+{% block content %}
+<main id="main-content" class="container" tabindex="-1">
+<h1>{{ h1 | default('⚠️ Cosmic Interference') }}</h1>
+
+<div class="analysis-section">
+    <h2 style="margin-top: 0;">{{ code }} - {{ message }}</h2>
+    <p>{{ description | default('The universe is blocking your path. The cosmic forces have determined this request cannot proceed.') }}</p>
+</div>
+
+<a href="/" class="back-link">← Return to Earth</a>
+</main>
+{% endblock %}

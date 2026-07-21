@@ -2,7 +2,8 @@
 
 from typing import Any
 
-from flask import Flask, request
+from flask import Flask, Response, render_template, request
+from werkzeug.exceptions import HTTPException
 
 
 from ask_routes import ask_bp
@@ -57,6 +58,41 @@ def get_user_ip() -> str:
         return real_ip
 
     return request.remote_addr or '127.0.0.1'
+
+
+@app.errorhandler(404)
+def not_found(e):
+    try:
+        return render_template(
+            'http_error.html',
+            code=404,
+            message=e.name,
+            h1='🔭 Lost in Space',
+            description="The stars have aligned... but not for this page. Mercury must be in retrograde, because whatever you were looking for has vanished into the cosmic void.",
+        ), 404
+    except Exception:
+        return Response('404 Not Found', status=404, mimetype='text/plain')
+
+
+@app.errorhandler(HTTPException)
+def http_error(e):
+    try:
+        return render_template('http_error.html', code=e.code, message=e.name, description=e.description), e.code
+    except Exception:
+        return Response(f'{e.code} {e.name}', status=e.code, mimetype='text/plain')
+
+
+@app.errorhandler(Exception)
+def internal_error(e):
+    try:
+        return render_template(
+            'http_error.html',
+            code=500,
+            message='Internal Server Error',
+            description="Something went wrong on our end. Please try again in a moment.",
+        ), 500
+    except Exception:
+        return Response('500 Internal Server Error', status=500, mimetype='text/plain')
 
 
 __all__ = [

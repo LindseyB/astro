@@ -172,21 +172,50 @@ class TestErrorHandling(unittest.TestCase):
         }
 
         response = self.app.post('/chart', data=form_data)
-        # Should handle error gracefully
-        # Check for error message in response
-        self.assertIn(b'error', response.data)
-        self.assertIn(b'Check your date format (should be YYYY-MM-DD)', response.data)
-        self.assertEqual(response.status_code, 200)
+        # Should handle error gracefully with http_error.html
+        self.assertIn(b'500', response.data)
+        self.assertIn(b'Internal Server Error', response.data)
+        self.assertEqual(response.status_code, 500)
 
     def test_chart_with_missing_fields(self):
-        """Test chart generation with missing required fields"""
+        """Test chart generation with missing required fields renders http_error.html with 400"""
         form_data = {
             'birth_date': '1990-01-01',
             # Missing other required fields
         }
 
         response = self.app.post('/chart', data=form_data)
-        self.assertIn(response.status_code, [400, 500])
+        self.assertEqual(response.status_code, 400)
+        # http_error.html must be rendered (not error.html); verify key template markers
+        self.assertIn(b'400', response.data)
+        self.assertIn(b'Bad Request', response.data)
+        self.assertIn(b'Please complete your birth details', response.data)
+
+    def test_full_chart_with_missing_fields(self):
+        """Test full chart with missing required fields renders http_error.html with 400"""
+        form_data = {
+            'birth_date': '1990-01-01',
+            # Missing other required fields
+        }
+
+        response = self.app.post('/full-chart', data=form_data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'400', response.data)
+        self.assertIn(b'Bad Request', response.data)
+        self.assertIn(b'Please complete your birth details', response.data)
+
+    def test_live_mas_with_missing_fields(self):
+        """Test live-mas with missing required fields renders http_error.html with 400"""
+        form_data = {
+            'birth_date': '1990-01-01',
+            # Missing other required fields
+        }
+
+        response = self.app.post('/live-mas', data=form_data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'400', response.data)
+        self.assertIn(b'Bad Request', response.data)
+        self.assertIn(b'Please complete your birth details', response.data)
 
     def test_chart_with_invalid_coordinates(self):
         """Test chart generation with invalid latitude/longitude"""
@@ -199,10 +228,49 @@ class TestErrorHandling(unittest.TestCase):
         }
 
         response = self.app.post('/chart', data=form_data)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'error', response.data)
-        self.assertIn(b'Confirm latitude format', response.data)
-        self.assertIn(b'Confirm longitude format', response.data)
+        self.assertEqual(response.status_code, 500)
+        self.assertIn(b'500', response.data)
+        self.assertIn(b'Internal Server Error', response.data)
+
+    def test_ask_anything_route_missing_birth_details_lists_fields(self):
+        """Missing birth fields return 400 with each missing field name in the response body."""
+        response = self.app.post('/ask-anything', data={
+            'question_prompt': 'What is my destiny?',
+            # birth_date, birth_time, timezone_offset, latitude, longitude all absent
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'birth details', response.data)
+        self.assertIn(b'Missing:', response.data)
+        self.assertIn(b'birth_date', response.data)
+        self.assertIn(b'birth_time', response.data)
+        self.assertIn(b'timezone_offset', response.data)
+        self.assertIn(b'latitude', response.data)
+        self.assertIn(b'longitude', response.data)
+
+    def test_ask_anything_route_missing_birth_details_includes_format_hints(self):
+        """Missing birth fields 400 response includes coordinate and date format hints."""
+        response = self.app.post('/ask-anything', data={
+            'question_prompt': 'What is my destiny?',
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'YYYY-MM-DD', response.data)
+        self.assertIn(b'HH:MM', response.data)
+
+    def test_ask_anything_route_missing_subset_of_birth_details(self):
+        """When only some birth fields are missing, response lists exactly the absent ones."""
+        response = self.app.post('/ask-anything', data={
+            'question_prompt': 'Am I lucky today?',
+            'birth_date': '1990-07-15',
+            'birth_time': '08:00',
+            # timezone_offset, latitude, longitude absent
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b'timezone_offset', response.data)
+        self.assertIn(b'latitude', response.data)
+        self.assertIn(b'longitude', response.data)
+        # Fields that were provided should NOT appear as missing
+        self.assertNotIn(b'Missing: birth_date', response.data)
+        self.assertNotIn(b'Missing: birth_time', response.data)
 
 
 class TestJavaScriptFunctionality(unittest.TestCase):

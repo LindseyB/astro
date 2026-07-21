@@ -10,7 +10,7 @@ from flask.typing import ResponseReturnValue
 from calculations import stream_calculate_ask_anything
 from config import logger
 from personality import DEFAULT_PERSONALITY, normalize_personality
-from route_helpers import _require_ai_client
+from route_helpers import _missing_field_response, _require_ai_client
 from validation import _format_birth_date_for_calculations, _normalize_birth_inputs
 
 
@@ -21,6 +21,10 @@ ask_bp = Blueprint('ask', __name__)
 def ask_anything() -> ResponseReturnValue:
     """Render Ask Anything placeholder page immediately."""
     question = request.form.get('question_prompt', '').strip()
+
+    if not question:
+        return _missing_field_response('/ask-anything', 'question_prompt', "Please enter a question before using Ask Anything mode.")
+
     birth_date_html = request.form.get('birth_date', '').strip()
     birth_time = request.form.get('birth_time', '').strip()
     timezone_offset = request.form.get('timezone_offset', '').strip()
@@ -32,9 +36,6 @@ def ask_anything() -> ResponseReturnValue:
         birth_date_html, timezone_offset, latitude, longitude
     )
 
-    if not question:
-        return render_template('error.html', error="Please enter a question before using Ask Anything mode."), 400
-
     required_fields = {
         'birth_date': birth_date_html,
         'birth_time': birth_time,
@@ -44,7 +45,20 @@ def ask_anything() -> ResponseReturnValue:
     }
     missing_fields = [name for name, value in required_fields.items() if not value]
     if missing_fields:
-        return render_template('error.html', error="Please complete your birth details before using Ask Anything mode."), 400
+        # Pass the first missing field name for the log; all missing fields are
+        # listed in the user-facing description so the log stays unambiguous.
+        hints = (
+            " Format hints: date should be YYYY-MM-DD;"
+            " timezone as +/-HH:MM (e.g. -05:00);"
+            " latitude as e.g. 40n42 or 40s42;"
+            " longitude as e.g. 74w00 or 74e00."
+        )
+        return _missing_field_response(
+            '/ask-anything',
+            missing_fields[0],
+            "Please complete your birth details before using Ask Anything mode."
+            f" Missing: {', '.join(missing_fields)}.{hints}",
+        )
 
     form_data = {
         'birth_date': birth_date_html,
