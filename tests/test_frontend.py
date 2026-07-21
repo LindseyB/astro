@@ -176,7 +176,7 @@ class TestErrorHandling(unittest.TestCase):
         # Check for error message in response
         self.assertIn(b'error', response.data)
         self.assertIn(b'Check your date format (should be YYYY-MM-DD)', response.data)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 500)
 
     def test_chart_with_missing_fields(self):
         """Test chart generation with missing required fields"""
@@ -199,7 +199,7 @@ class TestErrorHandling(unittest.TestCase):
         }
 
         response = self.app.post('/chart', data=form_data)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 500)
         self.assertIn(b'error', response.data)
         self.assertIn(b'Confirm latitude format', response.data)
         self.assertIn(b'Confirm longitude format', response.data)

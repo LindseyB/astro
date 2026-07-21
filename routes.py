@@ -3,6 +3,7 @@
 from typing import Any
 
 from flask import Flask, render_template, request
+from werkzeug.exceptions import HTTPException
 
 
 from ask_routes import ask_bp
@@ -70,19 +71,14 @@ def not_found(e):
     ), 404
 
 
-@app.errorhandler(403)
-def forbidden(e):
-    return render_template('http_error.html', code=403, message=e.name), 403
+@app.errorhandler(HTTPException)
+def http_error(e):
+    return render_template('http_error.html', code=e.code, message=e.name), e.code
 
 
-@app.errorhandler(405)
-def method_not_allowed(e):
-    return render_template('http_error.html', code=405, message=e.name), 405
-
-
-@app.errorhandler(500)
+@app.errorhandler(Exception)
 def internal_error(e):
-    return render_template('http_error.html', code=500, message=e.name), 500
+    return render_template('http_error.html', code=500, message='Internal Server Error'), 500
 
 
 __all__ = [

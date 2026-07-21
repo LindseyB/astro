@@ -33,7 +33,7 @@ def ask_anything() -> ResponseReturnValue:
     )
 
     if not question:
-        return render_template('error.html', error="Please enter a question before using Ask Anything mode."), 400
+        return render_template('http_error.html', code=400, message='Bad Request', description="Please enter a question before using Ask Anything mode."), 400
 
     required_fields = {
         'birth_date': birth_date_html,
@@ -44,7 +44,7 @@ def ask_anything() -> ResponseReturnValue:
     }
     missing_fields = [name for name, value in required_fields.items() if not value]
     if missing_fields:
-        return render_template('error.html', error="Please complete your birth details before using Ask Anything mode."), 400
+        return render_template('http_error.html', code=400, message='Bad Request', description="Please complete your birth details before using Ask Anything mode."), 400
 
     form_data = {
         'birth_date': birth_date_html,
