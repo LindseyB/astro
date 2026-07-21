@@ -42,7 +42,10 @@ def chart() -> ResponseReturnValue:
         if music_genre == 'other':
             other_genre = request.form.get('other_genre', '').strip()
             music_genre = other_genre if other_genre else 'any'
+    except KeyError as e:
+        return _missing_field_response('/chart', str(e))
 
+    try:
         birth_date = _format_birth_date_for_calculations(birth_date_html)
         logger.info(
             "Rendering chart placeholder for: %s %s %s %s %s",
@@ -87,8 +90,6 @@ def chart() -> ResponseReturnValue:
             streaming=True,
             is_birthday=is_birthday,
         )
-    except KeyError as e:
-        return _missing_field_response('/chart', str(e))
     except Exception as e:
         logger.error("ERROR in /chart route: %s: %s", type(e).__name__, str(e))
         if current_app.debug:
@@ -166,7 +167,10 @@ def full_chart() -> ResponseReturnValue:
         if music_genre == 'other':
             other_genre = request.form.get('other_genre', '').strip()
             music_genre = other_genre if other_genre else 'any'
+    except KeyError as e:
+        return _missing_field_response('/full-chart', str(e))
 
+    try:
         birth_date = _format_birth_date_for_calculations(birth_date_html)
         logger.info(
             "Rendering full chart placeholder for: %s %s %s %s %s",
@@ -192,8 +196,6 @@ def full_chart() -> ResponseReturnValue:
         }
 
         return render_template('full_chart.html', chart_data=full_chart_data, form_data=form_data, streaming=True)
-    except KeyError as e:
-        return _missing_field_response('/full-chart', str(e))
     except Exception as e:
         logger.error("ERROR in /full-chart route: %s: %s", type(e).__name__, str(e))
         if current_app.debug:
@@ -266,7 +268,10 @@ def live_mas() -> ResponseReturnValue:
         latitude = request.form['latitude']
         longitude = request.form['longitude']
         personality = normalize_personality(request.form.get('personality', DEFAULT_PERSONALITY))
+    except KeyError as e:
+        return _missing_field_response('/live-mas', str(e))
 
+    try:
         birth_date = _format_birth_date_for_calculations(birth_date_html)
         logger.info(
             "Rendering Live Mas placeholder for: %s %s %s %s %s",
@@ -301,8 +306,6 @@ def live_mas() -> ResponseReturnValue:
         }
 
         return render_template('live_mas.html', chart_data=live_mas_data, form_data=form_data, streaming=True)
-    except KeyError as e:
-        return _missing_field_response('/live-mas', str(e))
     except Exception as e:
         logger.error("ERROR in /live-mas route: %s: %s", type(e).__name__, str(e))
         if current_app.debug:

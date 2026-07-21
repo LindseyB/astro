@@ -85,7 +85,12 @@ def http_error(e):
 @app.errorhandler(Exception)
 def internal_error(e):
     try:
-        return render_template('http_error.html', code=500, message='Internal Server Error'), 500
+        return render_template(
+            'http_error.html',
+            code=500,
+            message='Internal Server Error',
+            description="Something went wrong on our end. Please try again in a moment.",
+        ), 500
     except Exception:
         return Response('500 Internal Server Error', status=500, mimetype='text/plain')
 
