@@ -985,6 +985,14 @@ html.dark .tile::after,
   border: 1px solid var(--border);
 }
 
+/* Dark mode map: invert OSM tiles (markers and controls are unaffected) */
+#locationMap.map-dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}
+#locationMap.map-dark {
+  background: #1a1a1a;
+}
+
 .location-coords {
   display: flex; gap: 0.5rem;
 }

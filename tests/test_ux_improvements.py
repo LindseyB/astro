@@ -156,12 +156,13 @@ class TestMapDarkMode(unittest.TestCase):
         self.assertIn(b'MutationObserver', response.data)
 
     def test_location_map_js_has_dark_tiles(self):
-        """Test that location-map.js includes dark tile provider"""
+        """Test that dark mode uses keyless OSM tiles with a CSS filter"""
         response = self.app.get('/static/js/location-map.js')
         self.assertEqual(response.status_code, 200)
-        
-        # Check for CartoDB dark tiles
-        self.assertIn(b'cartocdn.com/dark_all', response.data)
+
+        # CARTO tiles require an API key; dark mode is a CSS class instead
+        self.assertNotIn(b'cartocdn.com', response.data)
+        self.assertIn(b'map-dark', response.data)
 
     def test_location_map_js_has_light_tiles(self):
         """Test that location-map.js includes light tile provider"""

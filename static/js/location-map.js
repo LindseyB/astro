@@ -270,29 +270,21 @@ function setTimezoneSelectValue(offset) {
 
 function updateMapTiles() {
     if (!map) return;
-    
-    // Remove existing tile layer if present
-    if (currentTileLayer) {
-        map.removeLayer(currentTileLayer);
+
+    // Standard OpenStreetMap tiles in both modes (no API key required).
+    // CARTO's dark tiles now require an API key, so dark mode is applied
+    // with a CSS filter on the tile pane instead (see .map-dark in cosmic.css).
+    if (!currentTileLayer) {
+        currentTileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
     }
-    
+
     const isDarkMode = document.documentElement.classList.contains('dark') ||
         document.documentElement.classList.contains('dark-mode');
-    
-    if (isDarkMode) {
-        // Dark mode: Use CartoDB Dark Matter tiles
-        currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap contributors © CARTO',
-            subdomains: 'abcd',
-            maxZoom: 19
-        }).addTo(map);
-    } else {
-        // Light mode: Use standard OpenStreetMap tiles
-        currentTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19
-        }).addTo(map);
-    }
+
+    map.getContainer().classList.toggle('map-dark', isDarkMode);
 }
 
 // Search for locations using Nominatim (OpenStreetMap's geocoding service)
