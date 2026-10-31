@@ -12,7 +12,7 @@ class TestPromptFormatting(unittest.TestCase):
         self.assertIn("✅ Do:\n\n* item 1\n* item 2\n* item 3", content)
         self.assertIn("❌ Don't:\n\n* item 1\n* item 2\n* item 3", content)
         self.assertEqual(prompt_template.metadata["role"], "user")
-        self.assertEqual(prompt_template.metadata["temperature"], 1.0)
+        self.assertEqual(prompt_template.metadata["temperature"], 0.7)
         self.assertIn("✅ Do:\n\n* item 1\n* item 2\n* item 3", prompt_template.content)
 
     def test_music_suggestion_prompt_metadata_is_available(self):
