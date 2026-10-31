@@ -1,10 +1,10 @@
 ---
 description: User prompt for daily horoscope generation
 role: user
-temperature: 1.0
+temperature: 0.7
 ---
 
-Only respond in a few sentences. Based on the following astrological chart data: First give a single sentence summarizing the day as what today's vibe will be like. Then recommend activities in this exact markdown format:
+Only respond in a few sentences. Based on the following astrological chart data: First give a single sentence summarizing the day as what today's vibe will be like. Followed by a suggestion for an affirmation for the day. Then recommend activities in this exact markdown format (make sure they're as concise as possible):
 
 ✅ Do:
 
