@@ -172,10 +172,9 @@ class TestErrorHandling(unittest.TestCase):
         }
 
         response = self.app.post('/chart', data=form_data)
-        # Should handle error gracefully with http_error.html
-        self.assertIn(b'500', response.data)
-        self.assertIn(b'Internal Server Error', response.data)
-        self.assertEqual(response.status_code, 500)
+        self.assertIn(b'400', response.data)
+        self.assertIn(b'Invalid Birth Date', response.data)
+        self.assertEqual(response.status_code, 400)
 
     def test_chart_with_missing_fields(self):
         """Test chart generation with missing required fields renders http_error.html with 400"""

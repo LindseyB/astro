@@ -2,6 +2,7 @@ import unittest
 import json
 import os
 import sys
+from datetime import date, datetime, timedelta
 from unittest.mock import patch, MagicMock
 
 # Add the parent directory to the path
@@ -83,6 +84,98 @@ class TestFormatBirthDateForCalculations(unittest.TestCase):
             self.format_birth_date(None)
         self.assertIn('YYYY-MM-DD', str(ctx.exception))
         self.assertIn('YYYY/MM/DD', str(ctx.exception))
+
+
+class TestBirthDateRangeValidation(unittest.TestCase):
+    """Out-of-range birth years and future dates are rejected"""
+
+    def setUp(self):
+        from validation import _format_birth_date_for_calculations, MAX_BIRTH_AGE_YEARS
+        self.format_birth_date = _format_birth_date_for_calculations
+        self.max_age = MAX_BIRTH_AGE_YEARS
+
+    def test_typo_year_1086_raises_value_error(self):
+        with self.assertRaises(ValueError) as ctx:
+            self.format_birth_date('1086-08-08')
+        self.assertIn('1086', str(ctx.exception))
+
+    def test_year_older_than_max_age_raises_value_error(self):
+        too_old = date.today().year - self.max_age - 1
+        with self.assertRaises(ValueError):
+            self.format_birth_date(f'{too_old}-12-31')
+
+    def test_earliest_allowed_year_is_accepted(self):
+        earliest = date.today().year - self.max_age
+        self.assertEqual(self.format_birth_date(f'{earliest}-01-01'), f'{earliest}/01/01')
+
+    def test_today_is_accepted(self):
+        today = datetime.utcnow().date()
+        self.assertEqual(self.format_birth_date(today.isoformat()), today.strftime('%Y/%m/%d'))
+
+    def test_future_date_raises_value_error(self):
+        future = datetime.utcnow().date() + timedelta(days=30)
+        with self.assertRaises(ValueError) as ctx:
+            self.format_birth_date(future.isoformat())
+        self.assertIn('future', str(ctx.exception))
+
+    def test_far_future_year_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.format_birth_date('2986-08-08')
+
+
+class TestChartFormBirthDateRangeValidation(unittest.TestCase):
+    """Form routes return a 400 page for out-of-range birth years"""
+
+    def setUp(self):
+        self.app = app.test_client()
+        self.app.testing = True
+        self.form_data = {
+            'birth_date': '1086-08-08',
+            'birth_time': '10:30',
+            'timezone_offset': '+00:00',
+            'latitude': '51.5',
+            'longitude': '-0.1',
+        }
+
+    def test_form_routes_return_400_for_implausible_year(self):
+        for route in ('/chart', '/full-chart', '/live-mas'):
+            with self.subTest(route=route):
+                response = self.app.post(route, data=self.form_data)
+                self.assertEqual(response.status_code, 400)
+                self.assertIn(b'Invalid Birth Date', response.data)
+                self.assertIn(b'1086', response.data)
+
+
+class TestStreamingBirthDateRangeValidation(unittest.TestCase):
+    """Streaming/JSON routes return 400 for out-of-range birth years"""
+
+    def setUp(self):
+        self.app = app.test_client()
+        self.app.testing = True
+
+    @patch('ai_service.get_client')
+    def test_streaming_routes_return_400_for_implausible_year(self, mock_get_client):
+        mock_get_client.return_value = MagicMock()
+        data = {
+            'birth_date': '1086-08-08',
+            'birth_time': '10:30',
+            'timezone_offset': '0',
+            'latitude': '51.5',
+            'longitude': '-0.1',
+            'question': 'What does my chart say?',
+        }
+        routes = (
+            '/stream-chart-analysis',
+            '/stream-full-chart-analysis',
+            '/stream-live-mas-analysis',
+            '/stream-ask-anything',
+            '/music-suggestion',
+        )
+        for route in routes:
+            with self.subTest(route=route):
+                response = self.app.post(route, data=json.dumps(data), content_type='application/json')
+                self.assertEqual(response.status_code, 400)
+                self.assertIn('error', json.loads(response.data))
 
 
 class TestStreamChartAnalysisBirthDateValidation(unittest.TestCase):

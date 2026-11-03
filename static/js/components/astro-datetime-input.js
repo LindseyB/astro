@@ -1,4 +1,5 @@
 const ELEMENT_NAME = 'astro-datetime-input';
+const MAX_BIRTH_AGE_YEARS = 150;
 
 function pad(n) {
     return String(n).padStart(2, '0');
@@ -52,6 +53,24 @@ function normalizeDate(value) {
     return buildDate(digits.slice(0, 4), digits.slice(4, 6), digits.slice(6, 8));
 }
 
+function dateRangeError(normalizedDate) {
+    const year = parseInt(normalizedDate.slice(0, 4), 10);
+    const now = new Date();
+    const earliestYear = now.getFullYear() - MAX_BIRTH_AGE_YEARS;
+
+    if (year < earliestYear) {
+        return 'Birth year must be ' + earliestYear + ' or later — double-check the year.';
+    }
+
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const tomorrowIso = tomorrow.getFullYear() + '-' + pad(tomorrow.getMonth() + 1) + '-' + pad(tomorrow.getDate());
+    if (normalizedDate > tomorrowIso) {
+        return 'Birth date cannot be in the future.';
+    }
+
+    return '';
+}
+
 function normalizeTime(value) {
     const digits = digitsOnly(value);
     if (digits.length !== 4) {
@@ -74,6 +93,8 @@ class AstroDatetimeInput extends HTMLElement {
         this.textInput = null;
         this.nativeInput = null;
         this.triggerButton = null;
+        this.hintElement = null;
+        this.defaultHint = '';
         this.kind = 'date';
         this.onFocus = this.onFocus.bind(this);
         this.onKeydown = this.onKeydown.bind(this);
@@ -97,6 +118,10 @@ class AstroDatetimeInput extends HTMLElement {
         if (!this.textInput) {
             return;
         }
+
+        const hintId = this.textInput.getAttribute('aria-describedby');
+        this.hintElement = hintId ? document.getElementById(hintId) : null;
+        this.defaultHint = this.hintElement ? this.hintElement.textContent : '';
 
         this.textInput.addEventListener('focus', this.onFocus);
         this.textInput.addEventListener('keydown', this.onKeydown);
@@ -133,6 +158,33 @@ class AstroDatetimeInput extends HTMLElement {
         return this.kind === 'time' ? normalizeTime : normalizeDate;
     }
 
+    showError(message) {
+        this.textInput.setAttribute('aria-invalid', 'true');
+        if (this.hintElement) {
+            this.hintElement.textContent = message;
+            this.hintElement.classList.add('field-error');
+            this.hintElement.setAttribute('role', 'alert');
+        }
+    }
+
+    clearError() {
+        this.textInput.removeAttribute('aria-invalid');
+        if (this.hintElement) {
+            this.hintElement.textContent = this.defaultHint;
+            this.hintElement.classList.remove('field-error');
+            this.hintElement.removeAttribute('role');
+        }
+    }
+
+    validate(value) {
+        const normalized = this.normalizer()(value);
+        if (!normalized || this.kind !== 'date') {
+            return { normalized, error: '' };
+        }
+        const error = dateRangeError(normalized);
+        return { normalized: error ? '' : normalized, error };
+    }
+
     onFocus() {
         this.textInput.value = '';
     }
@@ -164,8 +216,14 @@ class AstroDatetimeInput extends HTMLElement {
     }
 
     onBlur() {
-        const normalized = this.normalizer()(this.textInput.value);
+        const { normalized, error } = this.validate(this.textInput.value);
         const rawValue = (this.textInput.value || '').trim();
+
+        if (error) {
+            this.showError(error);
+        } else {
+            this.clearError();
+        }
 
         if (rawValue && !normalized) {
             this.textInput.value = '';
@@ -180,7 +238,7 @@ class AstroDatetimeInput extends HTMLElement {
     }
 
     onTriggerClick() {
-        const normalized = this.normalizer()(this.textInput.value);
+        const { normalized } = this.validate(this.textInput.value);
         this.nativeInput.value = normalized || this.nativeInput.value;
 
         try {
@@ -196,7 +254,16 @@ class AstroDatetimeInput extends HTMLElement {
             return;
         }
 
-        this.textInput.value = this.nativeInput.value;
+        const { normalized, error } = this.validate(this.nativeInput.value);
+        if (error) {
+            this.showError(error);
+            this.textInput.value = '';
+            this.textInput.dispatchEvent(new Event('change', { bubbles: true }));
+            return;
+        }
+
+        this.clearError();
+        this.textInput.value = normalized;
         this.textInput.dispatchEvent(new Event('change', { bubbles: true }));
     }
 }
