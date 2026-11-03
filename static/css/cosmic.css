@@ -950,6 +950,7 @@ html.dark .tile::after,
   display: block; margin-top: 0.3rem;
   font-size: 0.7rem; color: var(--muted-foreground);
 }
+.field-hint.field-error { color: var(--destructive, oklch(0.62 0.22 25)); }
 
 .field-row {
   display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;

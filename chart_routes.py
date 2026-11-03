@@ -65,6 +65,16 @@ def _extract_chart_form_fields(route: str) -> tuple[dict, tuple[Response, int] |
     }, None
 
 
+def _invalid_birth_date_response(error: ValueError) -> ResponseReturnValue:
+    """Render a 400 page for an invalid birth date."""
+    return render_template(
+        'http_error.html',
+        code=400,
+        message="Invalid Birth Date",
+        description=f"{error}. Please update your birth info and try again.",
+    ), 400
+
+
 @chart_bp.route('/')
 def index() -> ResponseReturnValue:
     """Render home page."""
@@ -92,6 +102,10 @@ def chart() -> ResponseReturnValue:
 
     try:
         birth_date = _format_birth_date_for_calculations(birth_date_html)
+    except ValueError as e:
+        return _invalid_birth_date_response(e)
+
+    try:
         logger.info(
             "Rendering chart placeholder for: %s %s %s %s %s",
             birth_date,
@@ -216,6 +230,10 @@ def full_chart() -> ResponseReturnValue:
 
     try:
         birth_date = _format_birth_date_for_calculations(birth_date_html)
+    except ValueError as e:
+        return _invalid_birth_date_response(e)
+
+    try:
         logger.info(
             "Rendering full chart placeholder for: %s %s %s %s %s",
             birth_date,
@@ -320,6 +338,10 @@ def live_mas() -> ResponseReturnValue:
 
     try:
         birth_date = _format_birth_date_for_calculations(birth_date_html)
+    except ValueError as e:
+        return _invalid_birth_date_response(e)
+
+    try:
         logger.info(
             "Rendering Live Mas placeholder for: %s %s %s %s %s",
             birth_date,

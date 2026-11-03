@@ -4,6 +4,8 @@ import re
 from datetime import date, datetime, timedelta
 from collections.abc import Mapping, Sequence
 
+MAX_BIRTH_AGE_YEARS = 150
+
 
 def _decimal_to_astro_coord(value: str, is_latitude: bool) -> str:
     """Convert decimal coordinates to flatlib astro format (e.g., 40n42, 74w00)."""
@@ -104,14 +106,34 @@ def _format_birth_date_for_calculations(birth_date_text: object) -> str:
         raise ValueError('Birth date must be a string in YYYY-MM-DD or YYYY/MM/DD format')
 
     normalized = birth_date_text.strip()
+    parsed = None
     for date_format in ('%Y-%m-%d', '%Y/%m/%d'):
         try:
-            parsed = datetime.strptime(normalized, date_format)
-            return parsed.strftime('%Y/%m/%d')
+            parsed = datetime.strptime(normalized, date_format).date()
+            break
         except ValueError:
             continue
 
-    raise ValueError('Birth date must be in YYYY-MM-DD or YYYY/MM/DD format')
+    if parsed is None:
+        raise ValueError('Birth date must be in YYYY-MM-DD or YYYY/MM/DD format')
+
+    _validate_birth_date_range(parsed)
+    return parsed.strftime('%Y/%m/%d')
+
+
+def _validate_birth_date_range(birth_date: date) -> None:
+    """Reject future dates and years older than MAX_BIRTH_AGE_YEARS."""
+    # +1 day covers timezones ahead of UTC.
+    today = datetime.utcnow().date()
+    if birth_date > today + timedelta(days=1):
+        raise ValueError('Birth date cannot be in the future')
+
+    earliest = today.replace(year=today.year - MAX_BIRTH_AGE_YEARS, month=1, day=1)
+    if birth_date < earliest:
+        raise ValueError(
+            f'Birth date must be within the last {MAX_BIRTH_AGE_YEARS} years '
+            f'— double-check the year ({birth_date.year} looks off)'
+        )
 
 
 def find_missing_fields(data: Mapping[str, object] | None, required_fields: Sequence[str]) -> list[str]:
